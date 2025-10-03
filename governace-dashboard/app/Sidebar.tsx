@@ -1,9 +1,18 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronRightIcon,
+  ChevronDownIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpanded = (itemName: string) => {
@@ -99,51 +108,92 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-slate-700 text-white h-screen overflow-y-auto">
-      <nav className="p-4">
-        {menuItems.map((item) => (
-          <div key={item.name}>
-            <div className="flex items-center justify-between">
-              <Link
-                href={item.href}
-                className="flex items-center gap-3 p-3 rounded hover:bg-slate-600 text-sm flex-1"
-              >
-                <span>{item.icon}</span>
-                {item.name}
-              </Link>
-              {item.hasSubmenu && (
-                <button
-                  onClick={() => toggleExpanded(item.name)}
-                  className="p-2 hover:bg-slate-600 rounded"
-                >
-                  {expandedItems.includes(item.name) ? (
-                    <ChevronDownIcon className="w-4 h-4" />
-                  ) : (
-                    <ChevronRightIcon className="w-4 h-4" />
-                  )}
-                </button>
-              )}
-            </div>
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0  bg-opacity-50 z-20 md:hidden"
+          onClick={onClose}
+        />
+      )}
 
-            {/* Submenu */}
-            {item.hasSubmenu &&
-              expandedItems.includes(item.name) &&
-              item.submenu && (
-                <div className="ml-6 border-l border-slate-500">
-                  {item.submenu.map((subItem) => (
-                    <Link
-                      key={subItem.name}
-                      href={subItem.href}
-                      className="block p-2 pl-4 text-sm text-slate-300 hover:text-white hover:bg-slate-600 rounded"
-                    >
-                      {subItem.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-          </div>
-        ))}
-      </nav>
-    </div>
+      {/* Sidebar */}
+      <div
+        className={`
+        fixed md:static inset-y-0 left-0 z-30
+        w-64 bg-slate-700 text-white h-screen overflow-y-auto
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0
+      `}
+      >
+        {/* Mobile close button */}
+        <div className="md:hidden flex justify-end p-4">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-md hover:bg-slate-600"
+            aria-label="Close sidebar"
+          >
+            <XMarkIcon className="w-6 h-6" />
+          </button>
+        </div>
+
+        <nav className="p-4">
+          {menuItems.map((item) => (
+            <div key={item.name}>
+              <div className="flex items-center justify-between">
+                <Link
+                  href={item.href}
+                  className="flex items-center gap-3 p-3 rounded hover:bg-slate-600 text-sm flex-1"
+                  onClick={() => {
+                    // Close sidebar on mobile when clicking a link
+                    if (window.innerWidth < 768) {
+                      onClose();
+                    }
+                  }}
+                >
+                  <span>{item.icon}</span>
+                  {item.name}
+                </Link>
+                {item.hasSubmenu && (
+                  <button
+                    onClick={() => toggleExpanded(item.name)}
+                    className="p-2 hover:bg-slate-600 rounded"
+                  >
+                    {expandedItems.includes(item.name) ? (
+                      <ChevronDownIcon className="w-4 h-4" />
+                    ) : (
+                      <ChevronRightIcon className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {/* Submenu */}
+              {item.hasSubmenu &&
+                expandedItems.includes(item.name) &&
+                item.submenu && (
+                  <div className="ml-6 border-l border-slate-500">
+                    {item.submenu.map((subItem) => (
+                      <Link
+                        key={subItem.name}
+                        href={subItem.href}
+                        className="block p-2 pl-4 text-sm text-slate-300 hover:text-white hover:bg-slate-600 rounded"
+                        onClick={() => {
+                          if (window.innerWidth < 768) {
+                            onClose();
+                          }
+                        }}
+                      >
+                        {subItem.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+            </div>
+          ))}
+        </nav>
+      </div>
+    </>
   );
 }

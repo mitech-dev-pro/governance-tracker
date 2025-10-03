@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+"use client";
+import { useState } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Navbar";
@@ -14,24 +15,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "MiLife Insurance Dashboard",
-  description: "Governance tracking dashboard for MiLife Insurance",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
+        <Navbar onToggleSidebar={toggleSidebar} />
         <div className="flex">
-          <Sidebar />
+          <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
           <main className="flex-1 p-6 bg-gray-50">{children}</main>
         </div>
       </body>
