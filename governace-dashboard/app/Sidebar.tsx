@@ -121,7 +121,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div
         className={`
         fixed md:static inset-y-0 left-0 z-30
-        w-64 bg-slate-700 text-white h-screen overflow-y-auto
+        w-full md:w-64 bg-slate-700 text-white h-screen overflow-y-auto
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0

@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { FaUserCircle } from "react-icons/fa";
 
 //interface
 interface NavbarProps {
@@ -10,7 +11,7 @@ interface NavbarProps {
 
 const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   return (
-    <nav className="flex space-x-6 border-b px-5 md:ml-4 items-center h-14">
+    <nav className="flex space-x-6  px-5 md:ml-4 items-center h-14">
       {/* Hamburger Menu Button - Only visible on mobile */}
       <button
         onClick={onToggleSidebar}
@@ -38,11 +39,25 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
         </Link>
       </span>
 
-      <ul className="flex space-x-6  ">
-        <li>Components</li>
-        <li>Dashboard</li>
+      <ul className="hidden md:flex space-x-6">
+        <li>
+          <Link
+            className="text-zinc-500 hover:text-zinc-800"
+            href="/components"
+          >
+            Components
+          </Link>
+        </li>
+        <li>
+          <Link className="text-zinc-500 hover:text-zinc-800" href="/dashboard">
+            Dashboard
+          </Link>
+        </li>
       </ul>
-      <div className="ml-auto">Andrew Laryea</div>
+      <div className="ml-auto flex items-center space-x-2">
+        <FaUserCircle className="w-6 h-6 text-gray-500" />
+        <span className="hidden md:block">Andrew Laryea</span>
+      </div>
     </nav>
   );
 };
