@@ -1,7 +1,10 @@
 "use client";
+import "@radix-ui/themes/styles.css";
 import { useState } from "react";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Geist, Geist_Mono } from "next/font/google";
+
+import { Theme, ThemePanel } from "@radix-ui/themes";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
@@ -34,11 +37,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar onToggleSidebar={toggleSidebar} />
-        <div className="flex">
-          <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
-          <main className="flex-1 p-6 bg-gray-50">{children}</main>
-        </div>
+        <Theme>
+          <Navbar onToggleSidebar={toggleSidebar} />
+          <div className="flex">
+            <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
+            <main className="flex-1 p-6 bg-gray-50">{children}</main>
+          </div>
+          <ThemePanel />
+        </Theme>
       </body>
     </html>
   );

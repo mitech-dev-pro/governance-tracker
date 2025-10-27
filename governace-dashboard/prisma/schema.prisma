@@ -14,49 +14,257 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/**
+ * * ------------- Enums -------------
+ */
+enum Status {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  AT_RISK
+  COMPLETED
+  DEFERRED
+}
+
+enum RaciRole {
+  R
+  A
+  C
+  I
+}
+
+/**
+ * * --------- Identity & RBAC ---------
+ */
+
 model User {
-  id              Int              @id @default(autoincrement())
-  email           String           @unique
-  password        String
-  fullname        String?
-  departments     Department[]
-  governanceItems GovernanceList[]
-  roles           Role[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                   Int              @id @default(autoincrement())
+  email                String           @unique @db.VarChar(191)
+  password             String           @db.VarChar(191)
+  name                 String?          @db.VarChar(191)
+  image                String?          @db.VarChar(512)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  memberships          UserDepartment[]
+  userRoles            UserRole[]
+  assignments          Assignment[]
+  comments             Comment[]
+  attachments          Attachment[]     @relation("AttachmentAddedBy")
+  auditEvents          AuditEvent[]     @relation("AuditEventActor")
+  ownedGovernanceItems GovernanceItem[] @relation("ownedGovernanceItems")
+  assignedSubtasks     Subtask[]        @relation("assignedSubtasks")
+  raciRoles            Raci[]           @relation("raciRoles")
+  ownedActionItems     ActionItem[]     @relation("ownedActionItems")
+  ownedRisks           Risk[]           @relation("ownedRisks")
+  ownedAuditPlans      AuditPlan[]      @relation("ownedAuditPlans")
 }
 
 model Department {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  users     User[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int              @id @default(autoincrement())
+  name      String           @unique @db.VarChar(191)
+  code      String?          @unique @db.VarChar(64)
+  createdAt DateTime         @default(now())
+  users     UserDepartment[]
+  items     GovernanceItem[]
+  risks     Risk[]
 }
 
 model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique @db.VarChar(64)
+  createdAt   DateTime         @default(now())
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id        Int              @id @default(autoincrement())
+  key       String           @unique @db.VarChar(128)
+  label     String           @db.VarChar(191)
+  createdAt DateTime         @default(now())
+  roles     RolePermission[]
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  role         Role       @relation(fields: [roleId], references: [id])
+  roleId       Int
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId Int
+  createdAt    DateTime   @default(now())
+
+  @@unique([roleId, permissionId])
+}
+
+model UserRole {
   id        Int      @id @default(autoincrement())
-  name      String   @unique
-  users     User[]
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  role      Role     @relation(fields: [roleId], references: [id])
+  roleId    Int
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@unique([userId, roleId])
 }
 
-model GovernanceList {
-  id          Int      @id @default(autoincrement())
-  item        String   @unique @db.VarChar(255)
-  description String?  @db.Text
-  owner       User?    @relation(fields: [ownerId], references: [id])
-  ownerId     Int? // This is the foreign key field
-  action      String?  @db.Text
-  status      Status   @default(OPEN)
-  Notes       String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model UserDepartment {
+  id           Int        @id @default(autoincrement())
+  user         User       @relation(fields: [userId], references: [id])
+  userId       Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId Int
+  createdAt    DateTime   @default(now())
+
+  @@unique([userId, departmentId])
 }
 
-enum Status {
-  OPEN
-  IN_PROGRESS
-  CLOSED
+/**
+ * * ------------- Governance -------------
+ */
+model GovernanceItem {
+  id                 Int          @id @default(autoincrement())
+  number             Int?         @unique
+  title              String       @db.VarChar(255)
+  description        String       @db.Text
+  status             Status       @default(NOT_STARTED)
+  ownerId            Int?
+  owner              User?        @relation("ownedGovernanceItems", fields: [ownerId], references: [id])
+  departmentId       Int?
+  department         Department?  @relation(fields: [departmentId], references: [id])
+  dueDate            DateTime?
+  clauseRefs         Json?
+  progress           Int          @default(0)
+  tags               Json
+  visibility         String       @default("department")
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  subtasks           Subtask[]
+  raci               Raci[]
+  attachments        Attachment[]
+  comments           Comment[]
+  auditEvents        AuditEvent[]
+  assignments        Assignment[]
+  relatedActionItems ActionItem[]
+  relatedRisks       Risk[]
+  AuditPlan          AuditPlan[]
+}
+
+model Subtask {
+  id         Int            @id @default(autoincrement())
+  itemId     Int
+  item       GovernanceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  title      String         @db.VarChar(255)
+  done       Boolean        @default(false)
+  dueDate    DateTime?
+  assigneeId Int?
+  assignee   User?          @relation("assignedSubtasks", fields: [assigneeId], references: [id])
+}
+
+model Raci {
+  id     Int            @id @default(autoincrement())
+  itemId Int
+  item   GovernanceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User           @relation("raciRoles", fields: [userId], references: [id])
+  role   RaciRole
+
+  @@unique([itemId, userId, role])
+}
+
+model Attachment {
+  id        Int            @id @default(autoincrement())
+  itemId    Int
+  item      GovernanceItem @relation(fields: [itemId], references: [id])
+  label     String         @db.VarChar(191)
+  url       String         @db.VarChar(512)
+  addedById Int
+  addedBy   User           @relation("AttachmentAddedBy", fields: [addedById], references: [id])
+  createdAt DateTime       @default(now())
+}
+
+model Comment {
+  id        Int            @id @default(autoincrement())
+  itemId    Int
+  item      GovernanceItem @relation(fields: [itemId], references: [id])
+  body      String         @db.Text
+  authorId  Int
+  author    User           @relation(fields: [authorId], references: [id])
+  createdAt DateTime       @default(now())
+}
+
+model Meeting {
+  id        Int          @id @default(autoincrement())
+  date      DateTime
+  type      String       @db.VarChar(128)
+  agenda    String       @db.Text
+  minutes   String?      @db.Text
+  attendees Json
+  actions   ActionItem[]
+  createdAt DateTime     @default(now())
+}
+
+model ActionItem {
+  id        Int             @id @default(autoincrement())
+  meetingId Int?
+  meeting   Meeting?        @relation(fields: [meetingId], references: [id])
+  itemId    Int?
+  item      GovernanceItem? @relation(fields: [itemId], references: [id])
+  title     String          @db.VarChar(255)
+  ownerId   Int?
+  owner     User?           @relation("ownedActionItems", fields: [ownerId], references: [id])
+  status    Status          @default(NOT_STARTED)
+  dueDate   DateTime?
+}
+
+model Risk {
+  id            Int             @id @default(autoincrement())
+  title         String          @db.VarChar(255)
+  ownerId       Int?
+  owner         User?           @relation("ownedRisks", fields: [ownerId], references: [id])
+  impact        Int
+  likelihood    Int
+  rating        Int
+  status        Status          @default(IN_PROGRESS)
+  notes         String?         @db.Text
+  relatedItemId Int?
+  relatedItem   GovernanceItem? @relation(fields: [relatedItemId], references: [id])
+  departmentId  Int?
+  department    Department?     @relation(fields: [departmentId], references: [id])
+  createdAt     DateTime        @default(now())
+}
+
+model AuditPlan {
+  id               Int             @id @default(autoincrement())
+  title            String          @db.VarChar(255)
+  quarter          String          @db.VarChar(16)
+  scope            String          @db.Text
+  ownerId          Int?
+  owner            User?           @relation("ownedAuditPlans", fields: [ownerId], references: [id])
+  events           AuditEvent[]
+  GovernanceItem   GovernanceItem? @relation(fields: [governanceItemId], references: [id])
+  governanceItemId Int?
+}
+
+model AuditEvent {
+  id        Int             @id @default(autoincrement())
+  itemId    Int?
+  item      GovernanceItem? @relation(fields: [itemId], references: [id])
+  planId    Int?
+  plan      AuditPlan?      @relation(fields: [planId], references: [id])
+  kind      String          @db.VarChar(64)
+  message   String          @db.Text
+  actorId   Int?
+  actor     User?           @relation("AuditEventActor", fields: [actorId], references: [id])
+  createdAt DateTime        @default(now())
+}
+
+model Assignment {
+  id     Int            @id @default(autoincrement())
+  itemId Int
+  item   GovernanceItem @relation(fields: [itemId], references: [id])
+  userId Int
+  user   User           @relation(fields: [userId], references: [id])
+  kind   String         @db.VarChar(32)
+
+  @@unique([itemId, userId, kind])
 }
