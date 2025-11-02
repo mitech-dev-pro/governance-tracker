@@ -97,6 +97,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: "/setup",
       hasSubmenu: true,
       submenu: [
+        { name: "Users", href: "/users" },
+        { name: "Roles", href: "/roles" },
+        { name: "Departments", href: "/departments" },
         { name: "User Account", href: "/setup/user-account" },
         { name: "User Role", href: "/setup/user-role" },
       ],
