@@ -5,7 +5,6 @@ import {
   type CreateGovernanceData,
 } from "../validationSchema";
 import prisma from "../../../prisma/client";
-import { Prisma } from "../../generated/prisma";
 
 // GET - Fetch governance items with pagination and filtering
 export async function GET(request: NextRequest) {
@@ -27,7 +26,8 @@ export async function GET(request: NextRequest) {
       validationResult.data;
 
     // Build where clause
-    const where: Prisma.GovernanceItemWhereInput = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: Record<string, any> = {};
 
     if (status) where.status = status;
     if (departmentId) where.departmentId = departmentId;
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         skip,
         take: limit,
         include: {
-          owner: {
+          user: {
             select: { id: true, name: true, email: true },
           },
           department: {
@@ -57,9 +57,9 @@ export async function GET(request: NextRequest) {
           },
           _count: {
             select: {
-              subtasks: true,
-              comments: true,
-              attachments: true,
+              subtask: true,
+              comment: true,
+              attachment: true,
             },
           },
         },
@@ -110,22 +110,36 @@ export async function POST(request: NextRequest) {
 
     const data: CreateGovernanceData = validation.data;
 
-    // Convert dueDate string to Date if provided
-    const createData: Prisma.GovernanceItemCreateInput = {
+    // Prepare create data with optional relations
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const createData: any = {
       title: data.title,
       description: data.description,
       status: data.status,
       progress: data.progress,
       tags: data.tags,
+      clauseRefs: data.clauseRefs,
       visibility: data.visibility,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      actionitemType: data.actionitemType || (data as any).actionitem, // Support both field names
+      updatedAt: new Date(),
     };
 
-    if (data.ownerId) {
-      createData.owner = { connect: { id: data.ownerId } };
+    // Add optional number field
+    if (data.number) {
+      createData.number = parseInt(data.number);
     }
-    if (data.departmentId) {
+
+    // Handle optional owner connection
+    if (data.ownerId && data.ownerId > 0) {
+      createData.user = { connect: { id: data.ownerId } };
+    }
+
+    // Handle optional department connection
+    if (data.departmentId && data.departmentId > 0) {
       createData.department = { connect: { id: data.departmentId } };
     }
+
     if (data.dueDate) {
       createData.dueDate = new Date(data.dueDate);
     }
@@ -134,7 +148,7 @@ export async function POST(request: NextRequest) {
     const governanceItem = await prisma.governanceItem.create({
       data: createData,
       include: {
-        owner: {
+        user: {
           select: { id: true, name: true, email: true },
         },
         department: {

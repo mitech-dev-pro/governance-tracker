@@ -44,6 +44,7 @@ export default function CreateGovernanceModal({
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [tagInput, setTagInput] = useState("");
+  const [clauseRefInput, setClauseRefInput] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +52,7 @@ export default function CreateGovernanceModal({
     setErrors({});
 
     try {
+      console.log("Frontend payload being sent to backend:", formData);
       await onSubmit(formData);
       onClose();
       // Reset form
@@ -61,7 +63,10 @@ export default function CreateGovernanceModal({
         progress: 0,
         tags: [],
         visibility: "department",
+        clauseRefs: [],
       });
+      setTagInput("");
+      setClauseRefInput("");
     } catch (error) {
       if (error instanceof Error) {
         setErrors({ general: error.message });
@@ -94,6 +99,28 @@ export default function CreateGovernanceModal({
     handleInputChange("tags", newTags);
   };
 
+  const addClauseRef = () => {
+    if (
+      clauseRefInput.trim() &&
+      !formData.clauseRefs?.includes(clauseRefInput.trim())
+    ) {
+      const newClauseRefs = [
+        ...(formData.clauseRefs || []),
+        clauseRefInput.trim(),
+      ];
+      handleInputChange("clauseRefs", newClauseRefs);
+      setClauseRefInput("");
+    }
+  };
+
+  const removeClauseRef = (clauseRefToRemove: string) => {
+    const newClauseRefs =
+      formData.clauseRefs?.filter(
+        (clauseRef) => clauseRef !== clauseRefToRemove
+      ) || [];
+    handleInputChange("clauseRefs", newClauseRefs);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -121,23 +148,41 @@ export default function CreateGovernanceModal({
             </div>
           )}
 
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title *
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Enter governance item title"
-              disabled={loading}
-              required
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-            )}
+          {/* Number and Title */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Number
+              </label>
+              <input
+                type="text"
+                value={formData.number || ""}
+                onChange={(e) =>
+                  handleInputChange("number", e.target.value || undefined)
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="001"
+                disabled={loading}
+              />
+            </div>
+
+            <div className="md:col-span-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Title *
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Enter governance item title"
+                disabled={loading}
+                required
+              />
+              {errors.title && (
+                <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+              )}
+            </div>
           </div>
 
           {/* Description */}
@@ -255,6 +300,23 @@ export default function CreateGovernanceModal({
             </div>
           </div>
 
+          {/* Row 3: Action Item */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Action Item
+            </label>
+            <input
+              type="text"
+              value={formData.actionitem || ""}
+              onChange={(e) =>
+                handleInputChange("actionitem", e.target.value || undefined)
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="e.g., rebuild, review, implement"
+              disabled={loading}
+            />
+          </div>
+
           {/* Due Date and Visibility */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -289,6 +351,52 @@ export default function CreateGovernanceModal({
                 <option value="department">Department</option>
                 <option value="private">Private</option>
               </select>
+            </div>
+          </div>
+
+          {/* Clause References */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Clause References
+            </label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={clauseRefInput}
+                onChange={(e) => setClauseRefInput(e.target.value)}
+                onKeyPress={(e) =>
+                  e.key === "Enter" && (e.preventDefault(), addClauseRef())
+                }
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="e.g., ISO27001 A.5.1"
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={addClauseRef}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={loading || !clauseRefInput.trim()}
+              >
+                Add
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {formData.clauseRefs?.map((clauseRef) => (
+                <span
+                  key={clauseRef}
+                  className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full"
+                >
+                  {clauseRef}
+                  <button
+                    type="button"
+                    onClick={() => removeClauseRef(clauseRef)}
+                    className="ml-2 text-green-600 hover:text-green-800"
+                    disabled={loading}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
             </div>
           </div>
 

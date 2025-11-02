@@ -1,11 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import {
-  ChevronRightIcon,
-  ChevronDownIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronRight, ChevronDown, X } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -134,7 +130,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             className="p-2 rounded-md hover:bg-slate-600"
             aria-label="Close sidebar"
           >
-            <XMarkIcon className="w-6 h-6" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
@@ -161,9 +157,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     className="p-2 hover:bg-slate-600 rounded"
                   >
                     {expandedItems.includes(item.name) ? (
-                      <ChevronDownIcon className="w-4 h-4" />
+                      <ChevronDown className="w-4 h-4" />
                     ) : (
-                      <ChevronRightIcon className="w-4 h-4" />
+                      <ChevronRight className="w-4 h-4" />
                     )}
                   </button>
                 )}

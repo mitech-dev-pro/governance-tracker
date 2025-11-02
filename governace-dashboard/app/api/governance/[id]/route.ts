@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateGovernanceSchema } from "../../validationSchema";
 import prisma from "../../../../prisma/client";
-import { Prisma } from "../../../generated/prisma";
+
 
 // GET - Fetch single governance item by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id, 10);
+    const { id: paramId } = await params;
+    const id = parseInt(paramId, 10);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -21,15 +22,15 @@ export async function GET(
     const governanceItem = await prisma.governanceItem.findUnique({
       where: { id },
       include: {
-        owner: {
+        user: {
           select: { id: true, name: true, email: true }
         },
         department: {
           select: { id: true, name: true, code: true }
         },
-        subtasks: {
+        subtask: {
           include: {
-            assignee: {
+            user: {
               select: { id: true, name: true, email: true }
             }
           }
@@ -41,16 +42,16 @@ export async function GET(
             }
           }
         },
-        attachments: {
+        attachment: {
           include: {
-            addedBy: {
+            user: {
               select: { id: true, name: true, email: true }
             }
           }
         },
-        comments: {
+        comment: {
           include: {
-            author: {
+            user: {
               select: { id: true, name: true, email: true }
             }
           },
@@ -58,9 +59,9 @@ export async function GET(
         },
         _count: {
           select: {
-            subtasks: true,
-            comments: true,
-            attachments: true
+            subtask: true,
+            comment: true,
+            attachment: true
           }
         }
       }
@@ -73,7 +74,30 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(governanceItem);
+    // Map field names to match expected interface
+    const responseItem = {
+      ...governanceItem,
+      subtasks: governanceItem.subtask?.map(subtask => ({
+        ...subtask,
+        assignee: subtask.user
+      })),
+      attachments: governanceItem.attachment?.map(attachment => ({
+        ...attachment,
+        addedBy: attachment.user
+      })),
+      comments: governanceItem.comment?.map(comment => ({
+        ...comment,
+        author: comment.user
+      })),
+      owner: governanceItem.user, // Map user to owner for consistency
+    };
+
+    // Remove the original fields to avoid confusion
+    delete (responseItem as any).subtask;
+    delete (responseItem as any).attachment;
+    delete (responseItem as any).comment;
+
+    return NextResponse.json(responseItem);
 
   } catch (error) {
     console.error('Error fetching governance item:', error);
@@ -87,10 +111,11 @@ export async function GET(
 // PUT - Update governance item
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id, 10);
+    const { id: paramId } = await params;
+    const id = parseInt(paramId, 10);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -126,7 +151,8 @@ export async function PUT(
     }
 
     // Build update data
-    const updateData: Prisma.GovernanceItemUpdateInput = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateData: any = {};
 
     if (data.title !== undefined) updateData.title = data.title;
     if (data.description !== undefined) updateData.description = data.description;
@@ -141,9 +167,9 @@ export async function PUT(
     // Handle owner assignment
     if (data.ownerId !== undefined) {
       if (data.ownerId === null) {
-        updateData.owner = { disconnect: true };
+        updateData.user = { disconnect: true };
       } else {
-        updateData.owner = { connect: { id: data.ownerId } };
+        updateData.user = { connect: { id: data.ownerId } };
       }
     }
 
@@ -161,7 +187,7 @@ export async function PUT(
       where: { id },
       data: updateData,
       include: {
-        owner: {
+        user: {
           select: { id: true, name: true, email: true }
         },
         department: {
@@ -184,10 +210,11 @@ export async function PUT(
 // DELETE - Delete governance item
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id, 10);
+    const { id: paramId } = await params;
+    const id = parseInt(paramId, 10);
     
     if (isNaN(id)) {
       return NextResponse.json(

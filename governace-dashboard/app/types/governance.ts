@@ -65,6 +65,7 @@ export interface GovernanceItem {
   status: GovernanceStatus;
   ownerId?: number;
   owner?: User;
+  user?: User; // API returns user instead of owner
   departmentId?: number;
   department?: Department;
   dueDate?: Date;
@@ -72,6 +73,7 @@ export interface GovernanceItem {
   progress: number;
   tags: string[];
   visibility: string;
+  actionitemType?: string;
   createdAt: Date;
   updatedAt: Date;
   subtasks?: Subtask[];
@@ -79,9 +81,9 @@ export interface GovernanceItem {
   attachments?: Attachment[];
   comments?: Comment[];
   _count?: {
-    subtasks: number;
-    comments: number;
-    attachments: number;
+    subtask: number;
+    comment: number;
+    attachment: number;
   };
 }
 
@@ -109,6 +111,9 @@ export interface CreateGovernanceItemData {
   progress?: number;
   tags?: string[];
   visibility?: string;
+  number?: string;
+  clauseRefs?: string[];
+  actionitem?: string;
 }
 
 export interface UpdateGovernanceItemData {

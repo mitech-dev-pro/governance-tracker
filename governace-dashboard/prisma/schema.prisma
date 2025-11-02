@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../app/generated/prisma"
@@ -14,10 +8,276 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/**
- * * ------------- Enums -------------
- */
-enum Status {
+model actionitem {
+  id             Int               @id @default(autoincrement())
+  meetingId      Int?
+  itemId         Int?
+  title          String            @db.VarChar(255)
+  ownerId        Int?
+  status         actionitem_status @default(NOT_STARTED)
+  dueDate        DateTime?
+  governanceitem GovernanceItem?   @relation(fields: [itemId], references: [id], map: "ActionItem_itemId_fkey")
+  meeting        meeting?          @relation(fields: [meetingId], references: [id], map: "ActionItem_meetingId_fkey")
+  user           user?             @relation(fields: [ownerId], references: [id], map: "ActionItem_ownerId_fkey")
+
+  @@index([itemId], map: "ActionItem_itemId_fkey")
+  @@index([meetingId], map: "ActionItem_meetingId_fkey")
+  @@index([ownerId], map: "ActionItem_ownerId_fkey")
+}
+
+model assignment {
+  id             Int            @id @default(autoincrement())
+  itemId         Int
+  userId         Int
+  kind           String         @db.VarChar(32)
+  governanceitem GovernanceItem @relation(fields: [itemId], references: [id], map: "Assignment_itemId_fkey")
+  user           user           @relation(fields: [userId], references: [id], map: "Assignment_userId_fkey")
+
+  @@unique([itemId, userId, kind], map: "Assignment_itemId_userId_kind_key")
+  @@index([userId], map: "Assignment_userId_fkey")
+}
+
+model attachment {
+  id             Int            @id @default(autoincrement())
+  itemId         Int
+  label          String
+  url            String         @db.VarChar(512)
+  addedById      Int
+  createdAt      DateTime       @default(now())
+  user           user           @relation(fields: [addedById], references: [id], map: "Attachment_addedById_fkey")
+  governanceitem GovernanceItem @relation(fields: [itemId], references: [id], map: "Attachment_itemId_fkey")
+
+  @@index([addedById], map: "Attachment_addedById_fkey")
+  @@index([itemId], map: "Attachment_itemId_fkey")
+}
+
+model auditevent {
+  id             Int             @id @default(autoincrement())
+  itemId         Int?
+  planId         Int?
+  kind           String          @db.VarChar(64)
+  message        String          @db.Text
+  actorId        Int?
+  createdAt      DateTime        @default(now())
+  user           user?           @relation(fields: [actorId], references: [id], map: "AuditEvent_actorId_fkey")
+  governanceitem GovernanceItem? @relation(fields: [itemId], references: [id], map: "AuditEvent_itemId_fkey")
+  auditplan      auditplan?      @relation(fields: [planId], references: [id], map: "AuditEvent_planId_fkey")
+
+  @@index([actorId], map: "AuditEvent_actorId_fkey")
+  @@index([itemId], map: "AuditEvent_itemId_fkey")
+  @@index([planId], map: "AuditEvent_planId_fkey")
+}
+
+model auditplan {
+  id               Int             @id @default(autoincrement())
+  title            String          @db.VarChar(255)
+  quarter          String          @db.VarChar(16)
+  scope            String          @db.Text
+  ownerId          Int?
+  governanceItemId Int?
+  auditevent       auditevent[]
+  governanceItem   GovernanceItem? @relation(fields: [governanceItemId], references: [id], map: "AuditPlan_governanceItemId_fkey")
+  user             user?           @relation(fields: [ownerId], references: [id], map: "AuditPlan_ownerId_fkey")
+
+  @@index([governanceItemId], map: "AuditPlan_governanceItemId_fkey")
+  @@index([ownerId], map: "AuditPlan_ownerId_fkey")
+}
+
+model comment {
+  id             Int            @id @default(autoincrement())
+  itemId         Int
+  body           String         @db.Text
+  authorId       Int
+  createdAt      DateTime       @default(now())
+  user           user           @relation(fields: [authorId], references: [id], map: "Comment_authorId_fkey")
+  governanceitem GovernanceItem @relation(fields: [itemId], references: [id], map: "Comment_itemId_fkey")
+
+  @@index([authorId], map: "Comment_authorId_fkey")
+  @@index([itemId], map: "Comment_itemId_fkey")
+}
+
+model department {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique(map: "Department_name_key")
+  createdAt      DateTime         @default(now())
+  code           String?          @unique(map: "Department_code_key") @db.VarChar(64)
+  governanceitem GovernanceItem[]
+  risk           risk[]
+  userdepartment userdepartment[]
+}
+
+model GovernanceItem {
+  id             Int                   @id @default(autoincrement())
+  number         Int?                  @unique(map: "GovernanceItem_number_key")
+  title          String                @db.VarChar(255)
+  description    String                @db.Text
+  status         governanceitem_status @default(NOT_STARTED)
+  ownerId        Int?
+  departmentId   Int?
+  dueDate        DateTime?
+  clauseRefs     Json?
+  progress       Int                   @default(0)
+  tags           Json
+  visibility     String                @default("department")
+  actionitemType String?               @db.VarChar(255)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime
+  actionitem     actionitem[]
+  assignment     assignment[]
+  attachment     attachment[]
+  auditevent     auditevent[]
+  auditplan      auditplan[]
+  comment        comment[]
+  department     department?           @relation(fields: [departmentId], references: [id], map: "GovernanceItem_departmentId_fkey")
+  user           user?                 @relation(fields: [ownerId], references: [id], map: "GovernanceItem_ownerId_fkey")
+  raci           raci[]
+  risk           risk[]
+  subtask        subtask[]
+
+  @@index([departmentId], map: "GovernanceItem_departmentId_fkey")
+  @@index([ownerId], map: "GovernanceItem_ownerId_fkey")
+}
+
+model meeting {
+  id         Int          @id @default(autoincrement())
+  date       DateTime
+  type       String       @db.VarChar(128)
+  agenda     String       @db.Text
+  minutes    String?      @db.Text
+  attendees  Json
+  createdAt  DateTime     @default(now())
+  actionitem actionitem[]
+}
+
+model permission {
+  id             Int              @id @default(autoincrement())
+  key            String           @unique(map: "Permission_key_key") @db.VarChar(128)
+  label          String
+  createdAt      DateTime         @default(now())
+  rolepermission rolepermission[]
+}
+
+model raci {
+  id             Int            @id @default(autoincrement())
+  itemId         Int
+  userId         Int
+  role           raci_role
+  governanceitem GovernanceItem @relation(fields: [itemId], references: [id], onDelete: Cascade, map: "Raci_itemId_fkey")
+  user           user           @relation(fields: [userId], references: [id], map: "Raci_userId_fkey")
+
+  @@unique([itemId, userId, role], map: "Raci_itemId_userId_role_key")
+  @@index([userId], map: "Raci_userId_fkey")
+}
+
+model risk {
+  id             Int             @id @default(autoincrement())
+  title          String          @db.VarChar(255)
+  ownerId        Int?
+  impact         Int
+  likelihood     Int
+  rating         Int
+  status         risk_status     @default(IN_PROGRESS)
+  notes          String?         @db.Text
+  relatedItemId  Int?
+  departmentId   Int?
+  createdAt      DateTime        @default(now())
+  department     department?     @relation(fields: [departmentId], references: [id], map: "Risk_departmentId_fkey")
+  user           user?           @relation(fields: [ownerId], references: [id], map: "Risk_ownerId_fkey")
+  governanceitem GovernanceItem? @relation(fields: [relatedItemId], references: [id], map: "Risk_relatedItemId_fkey")
+
+  @@index([departmentId], map: "Risk_departmentId_fkey")
+  @@index([ownerId], map: "Risk_ownerId_fkey")
+  @@index([relatedItemId], map: "Risk_relatedItemId_fkey")
+}
+
+model role {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique(map: "Role_name_key") @db.VarChar(64)
+  createdAt      DateTime         @default(now())
+  rolepermission rolepermission[]
+  userrole       userrole[]
+}
+
+model rolepermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  createdAt    DateTime   @default(now())
+  permission   permission @relation(fields: [permissionId], references: [id], map: "RolePermission_permissionId_fkey")
+  role         role       @relation(fields: [roleId], references: [id], map: "RolePermission_roleId_fkey")
+
+  @@unique([roleId, permissionId], map: "RolePermission_roleId_permissionId_key")
+  @@index([permissionId], map: "RolePermission_permissionId_fkey")
+}
+
+model subtask {
+  id             Int            @id @default(autoincrement())
+  itemId         Int
+  title          String         @db.VarChar(255)
+  done           Boolean        @default(false)
+  dueDate        DateTime?
+  assigneeId     Int?
+  user           user?          @relation(fields: [assigneeId], references: [id], map: "Subtask_assigneeId_fkey")
+  governanceitem GovernanceItem @relation(fields: [itemId], references: [id], onDelete: Cascade, map: "Subtask_itemId_fkey")
+
+  @@index([assigneeId], map: "Subtask_assigneeId_fkey")
+  @@index([itemId], map: "Subtask_itemId_fkey")
+}
+
+model user {
+  id             Int              @id @default(autoincrement())
+  email          String           @unique(map: "User_email_key")
+  password       String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  image          String?          @db.VarChar(512)
+  name           String?
+  actionitem     actionitem[]
+  assignment     assignment[]
+  attachment     attachment[]
+  auditevent     auditevent[]
+  auditplan      auditplan[]
+  comment        comment[]
+  governanceitem GovernanceItem[]
+  raci           raci[]
+  risk           risk[]
+  subtask        subtask[]
+  userdepartment userdepartment[]
+  userrole       userrole[]
+}
+
+model userdepartment {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  departmentId Int
+  createdAt    DateTime   @default(now())
+  department   department @relation(fields: [departmentId], references: [id], map: "UserDepartment_departmentId_fkey")
+  user         user       @relation(fields: [userId], references: [id], map: "UserDepartment_userId_fkey")
+
+  @@unique([userId, departmentId], map: "UserDepartment_userId_departmentId_key")
+  @@index([departmentId], map: "UserDepartment_departmentId_fkey")
+}
+
+model userrole {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  roleId    Int
+  createdAt DateTime @default(now())
+  role      role     @relation(fields: [roleId], references: [id], map: "UserRole_roleId_fkey")
+  user      user     @relation(fields: [userId], references: [id], map: "UserRole_userId_fkey")
+
+  @@unique([userId, roleId], map: "UserRole_userId_roleId_key")
+  @@index([roleId], map: "UserRole_roleId_fkey")
+}
+
+enum raci_role {
+  R
+  A
+  C
+  I
+}
+
+enum governanceitem_status {
   NOT_STARTED
   IN_PROGRESS
   BLOCKED
@@ -26,245 +286,20 @@ enum Status {
   DEFERRED
 }
 
-enum RaciRole {
-  R
-  A
-  C
-  I
+enum actionitem_status {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  AT_RISK
+  COMPLETED
+  DEFERRED
 }
 
-/**
- * * --------- Identity & RBAC ---------
- */
-
-model User {
-  id                   Int              @id @default(autoincrement())
-  email                String           @unique @db.VarChar(191)
-  password             String           @db.VarChar(191)
-  name                 String?          @db.VarChar(191)
-  image                String?          @db.VarChar(512)
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
-  memberships          UserDepartment[]
-  userRoles            UserRole[]
-  assignments          Assignment[]
-  comments             Comment[]
-  attachments          Attachment[]     @relation("AttachmentAddedBy")
-  auditEvents          AuditEvent[]     @relation("AuditEventActor")
-  ownedGovernanceItems GovernanceItem[] @relation("ownedGovernanceItems")
-  assignedSubtasks     Subtask[]        @relation("assignedSubtasks")
-  raciRoles            Raci[]           @relation("raciRoles")
-  ownedActionItems     ActionItem[]     @relation("ownedActionItems")
-  ownedRisks           Risk[]           @relation("ownedRisks")
-  ownedAuditPlans      AuditPlan[]      @relation("ownedAuditPlans")
-}
-
-model Department {
-  id        Int              @id @default(autoincrement())
-  name      String           @unique @db.VarChar(191)
-  code      String?          @unique @db.VarChar(64)
-  createdAt DateTime         @default(now())
-  users     UserDepartment[]
-  items     GovernanceItem[]
-  risks     Risk[]
-}
-
-model Role {
-  id          Int              @id @default(autoincrement())
-  name        String           @unique @db.VarChar(64)
-  createdAt   DateTime         @default(now())
-  users       UserRole[]
-  permissions RolePermission[]
-}
-
-model Permission {
-  id        Int              @id @default(autoincrement())
-  key       String           @unique @db.VarChar(128)
-  label     String           @db.VarChar(191)
-  createdAt DateTime         @default(now())
-  roles     RolePermission[]
-}
-
-model RolePermission {
-  id           Int        @id @default(autoincrement())
-  role         Role       @relation(fields: [roleId], references: [id])
-  roleId       Int
-  permission   Permission @relation(fields: [permissionId], references: [id])
-  permissionId Int
-  createdAt    DateTime   @default(now())
-
-  @@unique([roleId, permissionId])
-}
-
-model UserRole {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  role      Role     @relation(fields: [roleId], references: [id])
-  roleId    Int
-  createdAt DateTime @default(now())
-
-  @@unique([userId, roleId])
-}
-
-model UserDepartment {
-  id           Int        @id @default(autoincrement())
-  user         User       @relation(fields: [userId], references: [id])
-  userId       Int
-  department   Department @relation(fields: [departmentId], references: [id])
-  departmentId Int
-  createdAt    DateTime   @default(now())
-
-  @@unique([userId, departmentId])
-}
-
-/**
- * * ------------- Governance -------------
- */
-model GovernanceItem {
-  id                 Int          @id @default(autoincrement())
-  number             Int?         @unique
-  title              String       @db.VarChar(255)
-  description        String       @db.Text
-  status             Status       @default(NOT_STARTED)
-  ownerId            Int?
-  owner              User?        @relation("ownedGovernanceItems", fields: [ownerId], references: [id])
-  departmentId       Int?
-  department         Department?  @relation(fields: [departmentId], references: [id])
-  dueDate            DateTime?
-  clauseRefs         Json?
-  progress           Int          @default(0)
-  tags               Json
-  visibility         String       @default("department")
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-  subtasks           Subtask[]
-  raci               Raci[]
-  attachments        Attachment[]
-  comments           Comment[]
-  auditEvents        AuditEvent[]
-  assignments        Assignment[]
-  relatedActionItems ActionItem[]
-  relatedRisks       Risk[]
-  AuditPlan          AuditPlan[]
-}
-
-model Subtask {
-  id         Int            @id @default(autoincrement())
-  itemId     Int
-  item       GovernanceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  title      String         @db.VarChar(255)
-  done       Boolean        @default(false)
-  dueDate    DateTime?
-  assigneeId Int?
-  assignee   User?          @relation("assignedSubtasks", fields: [assigneeId], references: [id])
-}
-
-model Raci {
-  id     Int            @id @default(autoincrement())
-  itemId Int
-  item   GovernanceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  userId Int
-  user   User           @relation("raciRoles", fields: [userId], references: [id])
-  role   RaciRole
-
-  @@unique([itemId, userId, role])
-}
-
-model Attachment {
-  id        Int            @id @default(autoincrement())
-  itemId    Int
-  item      GovernanceItem @relation(fields: [itemId], references: [id])
-  label     String         @db.VarChar(191)
-  url       String         @db.VarChar(512)
-  addedById Int
-  addedBy   User           @relation("AttachmentAddedBy", fields: [addedById], references: [id])
-  createdAt DateTime       @default(now())
-}
-
-model Comment {
-  id        Int            @id @default(autoincrement())
-  itemId    Int
-  item      GovernanceItem @relation(fields: [itemId], references: [id])
-  body      String         @db.Text
-  authorId  Int
-  author    User           @relation(fields: [authorId], references: [id])
-  createdAt DateTime       @default(now())
-}
-
-model Meeting {
-  id        Int          @id @default(autoincrement())
-  date      DateTime
-  type      String       @db.VarChar(128)
-  agenda    String       @db.Text
-  minutes   String?      @db.Text
-  attendees Json
-  actions   ActionItem[]
-  createdAt DateTime     @default(now())
-}
-
-model ActionItem {
-  id        Int             @id @default(autoincrement())
-  meetingId Int?
-  meeting   Meeting?        @relation(fields: [meetingId], references: [id])
-  itemId    Int?
-  item      GovernanceItem? @relation(fields: [itemId], references: [id])
-  title     String          @db.VarChar(255)
-  ownerId   Int?
-  owner     User?           @relation("ownedActionItems", fields: [ownerId], references: [id])
-  status    Status          @default(NOT_STARTED)
-  dueDate   DateTime?
-}
-
-model Risk {
-  id            Int             @id @default(autoincrement())
-  title         String          @db.VarChar(255)
-  ownerId       Int?
-  owner         User?           @relation("ownedRisks", fields: [ownerId], references: [id])
-  impact        Int
-  likelihood    Int
-  rating        Int
-  status        Status          @default(IN_PROGRESS)
-  notes         String?         @db.Text
-  relatedItemId Int?
-  relatedItem   GovernanceItem? @relation(fields: [relatedItemId], references: [id])
-  departmentId  Int?
-  department    Department?     @relation(fields: [departmentId], references: [id])
-  createdAt     DateTime        @default(now())
-}
-
-model AuditPlan {
-  id               Int             @id @default(autoincrement())
-  title            String          @db.VarChar(255)
-  quarter          String          @db.VarChar(16)
-  scope            String          @db.Text
-  ownerId          Int?
-  owner            User?           @relation("ownedAuditPlans", fields: [ownerId], references: [id])
-  events           AuditEvent[]
-  GovernanceItem   GovernanceItem? @relation(fields: [governanceItemId], references: [id])
-  governanceItemId Int?
-}
-
-model AuditEvent {
-  id        Int             @id @default(autoincrement())
-  itemId    Int?
-  item      GovernanceItem? @relation(fields: [itemId], references: [id])
-  planId    Int?
-  plan      AuditPlan?      @relation(fields: [planId], references: [id])
-  kind      String          @db.VarChar(64)
-  message   String          @db.Text
-  actorId   Int?
-  actor     User?           @relation("AuditEventActor", fields: [actorId], references: [id])
-  createdAt DateTime        @default(now())
-}
-
-model Assignment {
-  id     Int            @id @default(autoincrement())
-  itemId Int
-  item   GovernanceItem @relation(fields: [itemId], references: [id])
-  userId Int
-  user   User           @relation(fields: [userId], references: [id])
-  kind   String         @db.VarChar(32)
-
-  @@unique([itemId, userId, kind])
+enum risk_status {
+  NOT_STARTED
+  IN_PROGRESS
+  BLOCKED
+  AT_RISK
+  COMPLETED
+  DEFERRED
 }
