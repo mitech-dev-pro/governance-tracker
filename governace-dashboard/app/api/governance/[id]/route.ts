@@ -33,21 +33,24 @@ export async function GET(
             user: {
               select: { id: true, name: true, email: true }
             }
-          }
+          },
+          orderBy: { id: 'asc' }
         },
         raci: {
           include: {
             user: {
               select: { id: true, name: true, email: true }
             }
-          }
+          },
+          orderBy: { role: 'asc' }
         },
         attachment: {
           include: {
             user: {
               select: { id: true, name: true, email: true }
             }
-          }
+          },
+          orderBy: { createdAt: 'desc' }
         },
         comment: {
           include: {
@@ -57,11 +60,63 @@ export async function GET(
           },
           orderBy: { createdAt: 'desc' }
         },
+        actionitem: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true }
+            },
+            meeting: {
+              select: { id: true, date: true, type: true }
+            }
+          },
+          orderBy: { id: 'asc' }
+        },
+        assignment: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true }
+            }
+          },
+          orderBy: { kind: 'asc' }
+        },
+        auditevent: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        },
+        auditplan: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true }
+            }
+          },
+          orderBy: { id: 'asc' }
+        },
+        risk: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true }
+            },
+            department: {
+              select: { id: true, name: true, code: true }
+            }
+          },
+          orderBy: { rating: 'desc' }
+        },
         _count: {
           select: {
             subtask: true,
             comment: true,
-            attachment: true
+            attachment: true,
+            actionitem: true,
+            assignment: true,
+            auditevent: true,
+            auditplan: true,
+            raci: true,
+            risk: true
           }
         }
       }
@@ -89,6 +144,26 @@ export async function GET(
         ...comment,
         author: comment.user
       })),
+      actionItems: governanceItem.actionitem?.map(actionItem => ({
+        ...actionItem,
+        owner: actionItem.user
+      })),
+      assignments: governanceItem.assignment?.map(assignment => ({
+        ...assignment,
+        assignedUser: assignment.user
+      })),
+      auditEvents: governanceItem.auditevent?.map(event => ({
+        ...event,
+        actor: event.user
+      })),
+      auditPlans: governanceItem.auditplan?.map(plan => ({
+        ...plan,
+        owner: plan.user
+      })),
+      risks: governanceItem.risk?.map(risk => ({
+        ...risk,
+        owner: risk.user
+      })),
       owner: governanceItem.user, // Map user to owner for consistency
     };
 
@@ -96,6 +171,11 @@ export async function GET(
     delete (responseItem as Record<string, unknown>).subtask;
     delete (responseItem as Record<string, unknown>).attachment;
     delete (responseItem as Record<string, unknown>).comment;
+    delete (responseItem as Record<string, unknown>).actionitem;
+    delete (responseItem as Record<string, unknown>).assignment;
+    delete (responseItem as Record<string, unknown>).auditevent;
+    delete (responseItem as Record<string, unknown>).auditplan;
+    delete (responseItem as Record<string, unknown>).risk;
 
     return NextResponse.json(responseItem);
 

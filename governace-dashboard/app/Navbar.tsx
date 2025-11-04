@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaUserCircle } from "react-icons/fa";
+import { UserCircle } from "lucide-react";
 
 //interface
 interface NavbarProps {
@@ -55,7 +55,7 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
         </li>
       </ul>
       <div className="ml-auto flex items-center space-x-2">
-        <FaUserCircle className="w-6 h-6 text-gray-500" />
+        <UserCircle className="w-6 h-6 text-gray-500" />
         <span className="hidden md:block">Andrew Laryea</span>
       </div>
     </nav>
