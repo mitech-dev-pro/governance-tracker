@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileText, Image, Trash2, Download, Upload } from "lucide-react";
+import Image from "next/image";
+import { FileText, Trash2, Download, Upload } from "lucide-react";
 
 interface UploadedFile {
   name: string;
@@ -13,7 +14,6 @@ interface UploadedFile {
 
 export default function FileManager() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const formatFileSize = (bytes: number) => {
@@ -108,9 +108,11 @@ export default function FileManager() {
               <div className="flex items-center space-x-3">
                 <div className="flex-shrink-0">
                   {file.type.startsWith("image/") ? (
-                    <img
+                    <Image
                       src={file.url}
                       alt={file.name}
+                      width={40}
+                      height={40}
                       className="w-10 h-10 rounded-lg object-cover"
                     />
                   ) : (

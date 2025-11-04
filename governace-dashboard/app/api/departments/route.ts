@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build where clause for search
-    const where: any = {};
+    const where: { OR?: Array<{ name?: { contains: string } } | { code?: { contains: string } }> } = {};
     if (search) {
       where.OR = [
         { name: { contains: search } },

@@ -13,7 +13,11 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Build where clause
-    const where: any = {};
+    const where: {
+      OR?: Array<{ name?: { contains: string; mode: string } } | { email?: { contains: string; mode: string } }>;
+      userdepartment?: { some: { departmentId: number } };
+      userrole?: { some: { roleId: number } };
+    } = {};
     
     if (search) {
       where.OR = [
@@ -152,11 +156,12 @@ export async function POST(request: NextRequest) {
 
     // For now, we'll store the password as plain text (in production, use bcrypt)
     // TODO: Add bcrypt hashing in production
-    const userData: any = {
+    const userData = {
       name,
       email,
       password,
       image,
+      updatedAt: new Date(),
     };
 
     // Create user with relationships

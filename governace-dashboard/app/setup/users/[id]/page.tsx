@@ -16,8 +16,8 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
-import type { User, Role } from "../../types/user";
-import type { Department } from "../../types/governance";
+import type { User, Role } from "../../../types/user";
+import type { Department } from "../../../types/governance";
 import EditUserModal from "../EditUserModal";
 
 interface RouteParams {

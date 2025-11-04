@@ -20,7 +20,7 @@ import {
   ClipboardList,
   TrendingUp,
 } from "lucide-react";
-import type { Department, PaginationInfo } from "../types/governance";
+import type { Department, PaginationInfo } from "../../types/governance";
 import CreateDepartmentModal from "./CreateDepartmentModal";
 
 interface DepartmentWithStats extends Department {
@@ -440,8 +440,8 @@ export default function DepartmentsPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedDepartment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 max-w-md w-full p-6">
             <div className="flex items-center mb-4">
               <div className="p-3 bg-red-100 rounded-full mr-4">
                 <AlertCircle className="w-6 h-6 text-red-600" />
@@ -451,8 +451,8 @@ export default function DepartmentsPage() {
               </h2>
             </div>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete the department "
-              {selectedDepartment.name}"? This action cannot be undone.
+              Are you sure you want to delete the department &quot;
+              {selectedDepartment.name}&quot;? This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button

@@ -19,8 +19,13 @@ import {
   AlertCircle,
   User as UserIcon,
 } from "lucide-react";
-import type { User, UserResponse, UserQueryParams, Role } from "../types/user";
-import type { Department, PaginationInfo } from "../types/governance";
+import type {
+  User,
+  UserResponse,
+  UserQueryParams,
+  Role,
+} from "../../types/user";
+import type { Department, PaginationInfo } from "../../types/governance";
 import CreateUserModal from "./CreateUserModal";
 import EditUserModal from "./EditUserModal";
 

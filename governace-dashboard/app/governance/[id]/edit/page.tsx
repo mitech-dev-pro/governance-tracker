@@ -178,7 +178,7 @@ export default function EditGovernancePage() {
   // Handle form field changes
   const handleInputChange = (
     field: keyof UpdateGovernanceItemData,
-    value: any
+    value: string | number | string[] | Date | null
   ) => {
     setFormData((prev: UpdateGovernanceItemData) => ({
       ...prev,

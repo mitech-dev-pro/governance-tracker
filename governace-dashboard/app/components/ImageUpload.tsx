@@ -1,14 +1,8 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import {
-  Upload,
-  X,
-  Camera,
-  AlertCircle,
-  CheckCircle,
-  Loader2,
-} from "lucide-react";
+import Image from "next/image";
+import { X, Camera, AlertCircle, Loader2 } from "lucide-react";
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -137,10 +131,11 @@ export default function ImageUpload({
           <div
             className={`relative ${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-lg`}
           >
-            <img
+            <Image
               src={currentImage}
               alt="Profile preview"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
             <button
               type="button"

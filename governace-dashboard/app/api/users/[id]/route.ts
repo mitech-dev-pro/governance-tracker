@@ -122,7 +122,13 @@ export async function PUT(
     }
 
     // Prepare update data
-    const updateData: any = {};
+    const updateData: {
+      name?: string;
+      email?: string;
+      password?: string;
+      image?: string;
+      updatedAt: Date;
+    } = { updatedAt: new Date() };
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
     if (password !== undefined) updateData.password = password; // TODO: Hash in production
@@ -131,7 +137,7 @@ export async function PUT(
     // Update user in transaction to handle relationships
     const updatedUser = await prisma.$transaction(async (tx) => {
       // Update basic user info
-      const user = await tx.user.update({
+      await tx.user.update({
         where: { id: userId },
         data: updateData,
       });

@@ -5,12 +5,10 @@ import Link from "next/link";
 import {
   Plus,
   Search,
-  Filter,
   MoreVertical,
   Edit2,
   Trash2,
   Calendar,
-  User,
   Building2,
   CheckCircle2,
   Clock,
@@ -22,13 +20,8 @@ import {
   Eye,
   Download,
   RefreshCw,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
   Grid3X3,
   List,
-  SortAsc,
-  X,
   Tag,
   FileText,
   Check,
@@ -89,25 +82,6 @@ type SortField =
   | "createdAt"
   | "updatedAt";
 type SortDirection = "asc" | "desc";
-
-interface Column {
-  key: string;
-  label: string;
-  sortable: boolean;
-  width?: string;
-}
-
-const COLUMNS: Column[] = [
-  { key: "select", label: "", sortable: false, width: "w-12" },
-  { key: "number", label: "ID", sortable: true, width: "w-20" },
-  { key: "title", label: "Title", sortable: true, width: "w-80" },
-  { key: "status", label: "Status", sortable: true, width: "w-36" },
-  { key: "progress", label: "Progress", sortable: true, width: "w-32" },
-  { key: "owner", label: "Owner", sortable: false, width: "w-40" },
-  { key: "department", label: "Department", sortable: false, width: "w-40" },
-  { key: "dueDate", label: "Due Date", sortable: true, width: "w-32" },
-  { key: "actions", label: "Actions", sortable: false, width: "w-24" },
-];
 
 // Components
 const StatusBadge = ({ status }: { status: string }) => {
@@ -257,6 +231,205 @@ const SortButton = ({
   );
 };
 
+const ActionDropdown = ({ item }: { item: GovernanceResponse["items"][0] }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+      >
+        <MoreVertical className="w-4 h-4" />
+      </button>
+
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute right-0 z-20 w-44 mt-1 bg-white border border-gray-200 rounded-md shadow-lg py-1">
+            <Link
+              href={`/governance/${item.id}`}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <Eye className="w-4 h-4" />
+              View Details
+            </Link>
+            <Link
+              href={`/governance/${item.id}/edit`}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <Edit2 className="w-4 h-4" />
+              Edit
+            </Link>
+            <button
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <FileText className="w-4 h-4" />
+              Duplicate
+            </button>
+            <div className="border-t border-gray-100 my-1" />
+            <button
+              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+const TableRow = ({
+  item,
+  selectedItems,
+  handleSelectItem,
+  formatDate,
+  isOverdue,
+}: {
+  item: GovernanceResponse["items"][0];
+  selectedItems: Set<number>;
+  handleSelectItem: (id: number, checked: boolean) => void;
+  formatDate: (date: Date | string) => string;
+  isOverdue: (date?: Date | string) => boolean;
+}) => (
+  <tr
+    className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
+      selectedItems.has(item.id) ? "bg-blue-50" : ""
+    }`}
+  >
+    {/* Checkbox */}
+    <td className="px-4 py-3 whitespace-nowrap">
+      <Checkbox
+        checked={selectedItems.has(item.id)}
+        onChange={(checked) => handleSelectItem(item.id, checked)}
+      />
+    </td>
+
+    {/* ID */}
+    <td className="px-4 py-3 whitespace-nowrap">
+      <span className="text-sm font-medium text-gray-900">
+        {item.number || `#${item.id}`}
+      </span>
+    </td>
+
+    {/* Title */}
+    <td className="px-4 py-3">
+      <div className="text-sm font-medium text-gray-900 truncate">
+        <Link
+          href={`/governance/${item.id}`}
+          className="hover:text-blue-600 transition-colors"
+        >
+          {item.title}
+        </Link>
+      </div>
+    </td>
+
+    {/* Component (Description) */}
+    <td className="px-4 py-3">
+      <div className="text-sm text-gray-600 line-clamp-2 max-w-xs">
+        {item.description}
+      </div>
+    </td>
+
+    {/* Status */}
+    <td className="px-4 py-3 whitespace-nowrap">
+      <StatusBadge status={item.status} />
+      {item.dueDate && isOverdue(item.dueDate) && (
+        <div className="mt-1">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
+            Overdue
+          </span>
+        </div>
+      )}
+    </td>
+
+    {/* Progress */}
+    <td className="px-4 py-3 whitespace-nowrap">
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-[60px]">
+          <ProgressBar progress={item.progress} />
+        </div>
+        <span className="text-sm font-medium text-gray-700 min-w-[35px]">
+          {item.progress}%
+        </span>
+      </div>
+    </td>
+
+    {/* Assignee */}
+    <td className="px-4 py-3 whitespace-nowrap">
+      {item.user ? (
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
+            {item.user.name?.charAt(0) || item.user.email.charAt(0)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-medium text-gray-900 truncate">
+              {item.user.name || item.user.email.split("@")[0]}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <span className="text-sm text-gray-400">Unassigned</span>
+      )}
+    </td>
+
+    {/* Department */}
+    <td className="px-4 py-3 whitespace-nowrap">
+      {item.department ? (
+        <div className="flex items-center gap-1">
+          <Building2 className="w-4 h-4 text-gray-400" />
+          <span className="text-sm text-gray-900 truncate">
+            {item.department.name}
+          </span>
+        </div>
+      ) : (
+        <span className="text-sm text-gray-400">-</span>
+      )}
+    </td>
+
+    {/* Due Date */}
+    <td className="px-4 py-3 whitespace-nowrap">
+      {item.dueDate ? (
+        <div className="text-sm">
+          <div
+            className={`font-medium ${
+              isOverdue(item.dueDate) ? "text-red-600" : "text-gray-900"
+            }`}
+          >
+            {formatDate(item.dueDate)}
+          </div>
+        </div>
+      ) : (
+        <span className="text-sm text-gray-400">-</span>
+      )}
+    </td>
+
+    {/* View Details */}
+    <td className="px-4 py-3 whitespace-nowrap text-center">
+      <Link
+        href={`/governance/${item.id}`}
+        className="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition-colors"
+      >
+        Details
+      </Link>
+    </td>
+
+    {/* Action */}
+    <td className="px-4 py-3 whitespace-nowrap text-center">
+      <ActionDropdown item={item} />
+    </td>
+  </tr>
+);
+
 export default function GovernancePage() {
   const [data, setData] = useState<GovernanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -312,7 +485,7 @@ export default function GovernancePage() {
 
     return [...data.items].sort((a, b) => {
       const { field, direction } = sortConfig;
-      let aValue: any, bValue: any;
+      let aValue: string | number | Date, bValue: string | number | Date;
 
       switch (field) {
         case "title":
@@ -594,50 +767,61 @@ export default function GovernancePage() {
             ) : (
               <>
                 {viewMode === "table" ? (
-                  /* Modern Table */
-                  <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                  /* Clean Enterprise Table */
+                  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                     {/* Table Header */}
-                    <div className="bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                          <span className="hidden sm:inline">
-                            Governance Items
+                    <div className="bg-white px-4 py-3 border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm text-gray-600">
+                            Showing:{" "}
+                            <span className="font-medium">
+                              1 to{" "}
+                              {Math.min(itemsPerPage, data.pagination.total)}
+                            </span>{" "}
+                            of{" "}
+                            <span className="font-medium">
+                              {data.pagination.total}
+                            </span>{" "}
+                            records
                           </span>
-                          <span className="sm:hidden">Items</span>
-                          <span className="ml-1">
-                            ({data.pagination.total})
-                          </span>
-                        </h3>
+                          {selectedItems.size > 0 && (
+                            <span className="text-sm text-blue-600 font-medium">
+                              {selectedItems.size} selected
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-3">
                           <select
                             value={itemsPerPage}
                             onChange={(e) =>
                               setItemsPerPage(Number(e.target.value))
                             }
-                            className="text-xs sm:text-sm border border-gray-200 rounded-lg px-2 sm:px-3 py-1 sm:py-1.5 bg-white"
+                            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                           >
-                            <option value={10}>10 per page</option>
-                            <option value={25}>25 per page</option>
-                            <option value={50}>50 per page</option>
+                            <option value={10}>10</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
                           </select>
                         </div>
                       </div>
                     </div>
 
                     {/* Desktop Table View */}
-                    <div className="hidden md:block overflow-x-auto">
+                    <div className="hidden lg:block overflow-x-auto">
                       <table className="w-full">
                         <thead className="bg-gray-50">
-                          <tr>
-                            <th className="w-8 md:w-12 px-3 md:px-6 py-3 md:py-4">
+                          <tr className="border-b border-gray-200">
+                            <th className="w-12 px-4 py-3 text-left">
                               <Checkbox
                                 checked={allSelected}
                                 indeterminate={someSelected}
                                 onChange={handleSelectAll}
                               />
                             </th>
-                            <th className="hidden lg:table-cell px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
+                            <th className="w-20 px-4 py-3 text-left">
+                              <div className="flex items-center gap-1 text-xs font-medium text-gray-600 uppercase tracking-wide">
                                 ID
                                 <SortButton
                                   field="createdAt"
@@ -646,8 +830,8 @@ export default function GovernancePage() {
                                 />
                               </div>
                             </th>
-                            <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
+                            <th className="w-48 px-4 py-3 text-left">
+                              <div className="flex items-center gap-1 text-xs font-medium text-gray-600 uppercase tracking-wide">
                                 Title
                                 <SortButton
                                   field="title"
@@ -656,8 +840,13 @@ export default function GovernancePage() {
                                 />
                               </div>
                             </th>
-                            <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
+                            <th className="w-64 px-4 py-3 text-left">
+                              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                Component
+                              </div>
+                            </th>
+                            <th className="w-28 px-4 py-3 text-left">
+                              <div className="flex items-center gap-1 text-xs font-medium text-gray-600 uppercase tracking-wide">
                                 Status
                                 <SortButton
                                   field="status"
@@ -666,8 +855,8 @@ export default function GovernancePage() {
                                 />
                               </div>
                             </th>
-                            <th className="hidden xl:table-cell px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
+                            <th className="w-24 px-4 py-3 text-left">
+                              <div className="flex items-center gap-1 text-xs font-medium text-gray-600 uppercase tracking-wide">
                                 Progress
                                 <SortButton
                                   field="progress"
@@ -676,14 +865,18 @@ export default function GovernancePage() {
                                 />
                               </div>
                             </th>
-                            <th className="hidden xl:table-cell px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Owner
+                            <th className="w-40 px-4 py-3 text-left">
+                              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                Assignee
+                              </div>
                             </th>
-                            <th className="hidden lg:table-cell px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Department
+                            <th className="w-32 px-4 py-3 text-left">
+                              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                Department
+                              </div>
                             </th>
-                            <th className="hidden lg:table-cell px-3 md:px-6 py-3 md:py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              <div className="flex items-center gap-2">
+                            <th className="w-28 px-4 py-3 text-left">
+                              <div className="flex items-center gap-1 text-xs font-medium text-gray-600 uppercase tracking-wide">
                                 Due Date
                                 <SortButton
                                   field="dueDate"
@@ -692,415 +885,188 @@ export default function GovernancePage() {
                                 />
                               </div>
                             </th>
-                            <th className="px-3 md:px-6 py-3 md:py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Actions
+                            <th className="w-24 px-4 py-3 text-center">
+                              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                View
+                              </div>
+                            </th>
+                            <th className="w-20 px-4 py-3 text-center">
+                              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                                Action
+                              </div>
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {sortedItems.map((item, index) => (
-                            <tr
+                        <tbody className="bg-white divide-y divide-gray-100">
+                          {sortedItems.map((item) => (
+                            <TableRow
                               key={item.id}
-                              className={`hover:bg-gray-50 transition-colors ${
-                                selectedItems.has(item.id) ? "bg-blue-50" : ""
-                              }`}
-                            >
-                              <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                <Checkbox
-                                  checked={selectedItems.has(item.id)}
-                                  onChange={(checked) =>
-                                    handleSelectItem(item.id, checked)
-                                  }
-                                />
-                              </td>
-                              <td className="hidden lg:table-cell px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {item.number || `#${item.id}`}
-                                </div>
-                              </td>
-                              <td className="px-3 md:px-6 py-3 md:py-4">
-                                <div className="flex flex-col">
-                                  <div className="flex items-center gap-2 mb-1 lg:hidden">
-                                    <span className="text-xs font-medium text-gray-500">
-                                      {item.number || `#${item.id}`}
-                                    </span>
-                                  </div>
-                                  <div className="text-sm font-medium mb-1">
-                                    <Link
-                                      href={`/governance/${item.id}`}
-                                      className="text-gray-900 hover:text-blue-600 transition-colors cursor-pointer"
-                                    >
-                                      {item.title}
-                                    </Link>
-                                  </div>
-                                  <div className="text-xs text-gray-500 line-clamp-2 lg:line-clamp-1">
-                                    {item.description}
-                                  </div>
-                                  {item.tags && item.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-2 lg:hidden">
-                                      {item.tags.slice(0, 2).map((tag) => (
-                                        <span
-                                          key={tag}
-                                          className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700"
-                                        >
-                                          <Tag className="w-2.5 h-2.5 mr-1" />
-                                          {tag}
-                                        </span>
-                                      ))}
-                                      {item.tags.length > 2 && (
-                                        <span className="text-xs text-gray-500">
-                                          +{item.tags.length - 2} more
-                                        </span>
-                                      )}
-                                    </div>
-                                  )}
-                                  {/* Mobile meta info */}
-                                  <div className="flex flex-wrap gap-3 mt-2 lg:hidden text-xs text-gray-500">
-                                    {item.user && (
-                                      <div className="flex items-center gap-1">
-                                        <User className="w-3 h-3" />
-                                        <span>
-                                          {item.user.name ||
-                                            item.user.email.split("@")[0]}
-                                        </span>
-                                      </div>
-                                    )}
-                                    {item.dueDate && (
-                                      <div className="flex items-center gap-1">
-                                        <Calendar className="w-3 h-3" />
-                                        <span
-                                          className={
-                                            isOverdue(item.dueDate)
-                                              ? "text-red-600 font-medium"
-                                              : ""
-                                          }
-                                        >
-                                          {formatDate(item.dueDate)}
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                <StatusBadge status={item.status} />
-                                {item.dueDate && isOverdue(item.dueDate) && (
-                                  <div className="mt-1">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                                      <AlertCircle className="w-3 h-3 mr-1" />
-                                      Overdue
-                                    </span>
-                                  </div>
-                                )}
-                              </td>
-                              <td className="hidden xl:table-cell px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                <div className="w-16 lg:w-24">
-                                  <ProgressBar progress={item.progress} />
-                                </div>
-                              </td>
-                              <td className="hidden xl:table-cell px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                {item.user ? (
-                                  <div className="flex items-center">
-                                    <div className="w-6 lg:w-8 h-6 lg:h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2 lg:mr-3">
-                                      {item.user.name?.charAt(0) ||
-                                        item.user.email.charAt(0)}
-                                    </div>
-                                    <div className="min-w-0">
-                                      <div className="text-sm font-medium text-gray-900 truncate">
-                                        {item.user.name ||
-                                          item.user.email.split("@")[0]}
-                                      </div>
-                                      <div className="text-xs text-gray-500 truncate hidden lg:block">
-                                        {item.user.email}
-                                      </div>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm text-gray-400">
-                                    Unassigned
-                                  </span>
-                                )}
-                              </td>
-                              <td className="hidden lg:table-cell px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                {item.department ? (
-                                  <div className="flex items-center min-w-0">
-                                    <Building2 className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
-                                    <span className="text-sm text-gray-900 truncate">
-                                      {item.department.name}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm text-gray-400">
-                                    No department
-                                  </span>
-                                )}
-                              </td>
-                              <td className="hidden lg:table-cell px-3 md:px-6 py-3 md:py-4 whitespace-nowrap">
-                                {item.dueDate ? (
-                                  <div className="flex items-center">
-                                    <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                                    <span
-                                      className={`text-sm ${
-                                        isOverdue(item.dueDate)
-                                          ? "text-red-600 font-medium"
-                                          : "text-gray-900"
-                                      }`}
-                                    >
-                                      {formatDate(item.dueDate)}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <span className="text-sm text-gray-400">
-                                    No due date
-                                  </span>
-                                )}
-                              </td>
-                              <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right">
-                                <div className="flex items-center justify-end gap-1">
-                                  <Link
-                                    href={`/governance/${item.id}`}
-                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                    title="View Details"
-                                  >
-                                    <Eye className="w-4 h-4" />
-                                  </Link>
-                                  <Link
-                                    href={`/governance/${item.id}/edit`}
-                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                                    title="Edit Item"
-                                  >
-                                    <Edit2 className="w-4 h-4" />
-                                  </Link>
-                                  <button
-                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                    title="Delete Item"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                                    title="More Options"
-                                  >
-                                    <MoreVertical className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
+                              item={item}
+                              selectedItems={selectedItems}
+                              handleSelectItem={handleSelectItem}
+                              formatDate={formatDate}
+                              isOverdue={isOverdue}
+                            />
                           ))}
                         </tbody>
                       </table>
                     </div>
 
                     {/* Mobile Card View */}
-                    <div className="md:hidden divide-y divide-gray-200">
-                      {sortedItems.map((item) => (
-                        <div
-                          key={item.id}
-                          className={`p-4 transition-colors ${
-                            selectedItems.has(item.id)
-                              ? "bg-blue-50"
-                              : "hover:bg-gray-50"
-                          }`}
-                        >
-                          {/* Card Header */}
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-start gap-3 flex-1 min-w-0">
-                              <Checkbox
-                                checked={selectedItems.has(item.id)}
-                                onChange={(checked) =>
-                                  handleSelectItem(item.id, checked)
-                                }
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-xs font-medium text-gray-500">
-                                    {item.number || `#${item.id}`}
-                                  </span>
-                                  <StatusBadge status={item.status} />
-                                  {item.dueDate && isOverdue(item.dueDate) && (
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
-                                      <AlertCircle className="w-3 h-3 mr-1" />
-                                      Overdue
+                    <div className="lg:hidden">
+                      <div className="space-y-4 p-4">
+                        {sortedItems.map((item) => (
+                          <div
+                            key={item.id}
+                            className={`bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200 ${
+                              selectedItems.has(item.id)
+                                ? "border-blue-500 bg-blue-50/50"
+                                : "hover:border-gray-300 hover:shadow-sm"
+                            }`}
+                          >
+                            {/* Mobile Card Header */}
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex items-start gap-3 flex-1 min-w-0">
+                                <Checkbox
+                                  checked={selectedItems.has(item.id)}
+                                  onChange={(checked) =>
+                                    handleSelectItem(item.id, checked)
+                                  }
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-semibold bg-gray-100 text-gray-900">
+                                      #{item.number || item.id}
                                     </span>
-                                  )}
+                                    <StatusBadge status={item.status} />
+                                  </div>
+                                  <h4 className="font-semibold text-gray-900 leading-5 mb-2">
+                                    <Link
+                                      href={`/governance/${item.id}`}
+                                      className="hover:text-blue-600 transition-colors"
+                                    >
+                                      {item.title}
+                                    </Link>
+                                  </h4>
+                                  <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                                    {item.description}
+                                  </p>
                                 </div>
-                                <h4 className="font-medium text-sm leading-5 mb-1">
-                                  <Link
-                                    href={`/governance/${item.id}`}
-                                    className="text-gray-900 hover:text-blue-600 transition-colors"
-                                  >
-                                    {item.title}
-                                  </Link>
-                                </h4>
-                                <p className="text-xs text-gray-600 line-clamp-2 mb-2">
-                                  {item.description}
-                                </p>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1 ml-2">
-                              <Link
-                                href={`/governance/${item.id}`}
-                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Link>
-                              <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-md transition-colors">
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
 
-                          {/* Progress */}
-                          <div className="mb-3">
-                            <div className="w-20">
+                            {/* Progress Bar */}
+                            <div className="mb-4">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium text-gray-700">
+                                  Progress
+                                </span>
+                                <span className="text-sm font-semibold text-gray-900">
+                                  {item.progress}%
+                                </span>
+                              </div>
                               <ProgressBar progress={item.progress} />
                             </div>
-                          </div>
 
-                          {/* Tags */}
-                          {item.tags && item.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {item.tags.slice(0, 3).map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700"
-                                >
-                                  <Tag className="w-2.5 h-2.5 mr-1" />
-                                  {tag}
-                                </span>
-                              ))}
-                              {item.tags.length > 3 && (
-                                <span className="text-xs text-gray-500">
-                                  +{item.tags.length - 3}
-                                </span>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Meta Information */}
-                          <div className="grid grid-cols-2 gap-3 text-xs text-gray-500">
-                            {item.user && (
-                              <div className="flex items-center gap-2">
-                                <div className="w-5 h-5 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                                  {item.user.name?.charAt(0) ||
-                                    item.user.email.charAt(0)}
-                                </div>
-                                <span className="truncate">
-                                  {item.user.name ||
-                                    item.user.email.split("@")[0]}
-                                </span>
-                              </div>
-                            )}
-                            {item.department && (
-                              <div className="flex items-center gap-1">
-                                <Building2 className="w-3 h-3" />
-                                <span className="truncate">
-                                  {item.department.name}
-                                </span>
-                              </div>
-                            )}
-                            {item.dueDate && (
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                <span
-                                  className={
-                                    isOverdue(item.dueDate)
-                                      ? "text-red-600 font-medium"
-                                      : ""
-                                  }
-                                >
-                                  {formatDate(item.dueDate)}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Enhanced Pagination */}
-                    {data.pagination.totalPages > 1 && (
-                      <div className="bg-gray-50 px-4 sm:px-6 py-4 border-t border-gray-200">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                          <div className="flex items-center text-xs sm:text-sm text-gray-600 order-2 sm:order-1">
-                            <span className="hidden sm:inline">
-                              Showing{" "}
-                              <span className="font-medium">
-                                {(data.pagination.page - 1) *
-                                  data.pagination.limit +
-                                  1}
-                              </span>{" "}
-                              to{" "}
-                              <span className="font-medium">
-                                {Math.min(
-                                  data.pagination.page * data.pagination.limit,
-                                  data.pagination.total
+                            {/* Tags */}
+                            {item.tags && item.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mb-4">
+                                {item.tags.slice(0, 3).map((tag) => (
+                                  <span
+                                    key={tag}
+                                    className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700"
+                                  >
+                                    <Tag className="w-3 h-3 mr-1" />
+                                    {tag}
+                                  </span>
+                                ))}
+                                {item.tags.length > 3 && (
+                                  <span className="text-xs text-gray-500">
+                                    +{item.tags.length - 3} more
+                                  </span>
                                 )}
-                              </span>{" "}
-                              of{" "}
-                              <span className="font-medium">
-                                {data.pagination.total}
-                              </span>{" "}
-                              results
-                            </span>
-                            <span className="sm:hidden">
-                              Page {data.pagination.page} of{" "}
-                              {data.pagination.totalPages}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
-                            <button
-                              onClick={() =>
-                                setCurrentPage(data.pagination.page - 1)
-                              }
-                              disabled={!data.pagination.hasPrev}
-                              className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-3 sm:w-4 h-3 sm:h-4 sm:mr-1" />
-                              <span className="hidden sm:inline">Previous</span>
-                            </button>
+                              </div>
+                            )}
 
-                            <div className="hidden sm:flex items-center gap-1">
-                              {Array.from(
-                                {
-                                  length: Math.min(
-                                    5,
-                                    data.pagination.totalPages
-                                  ),
-                                },
-                                (_, i) => {
-                                  const page = i + 1;
-                                  return (
-                                    <button
-                                      key={page}
-                                      onClick={() => setCurrentPage(page)}
-                                      className={`px-3 py-2 text-sm font-medium rounded-lg ${
-                                        page === data.pagination.page
-                                          ? "bg-blue-600 text-white"
-                                          : "text-gray-500 hover:bg-gray-50"
+                            {/* Meta Information Grid */}
+                            <div className="grid grid-cols-1 gap-3 mb-4">
+                              {item.user && (
+                                <div className="flex items-center gap-3">
+                                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                    {item.user.name?.charAt(0) ||
+                                      item.user.email.charAt(0)}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-medium text-gray-900 text-sm">
+                                      {item.user.name ||
+                                        item.user.email.split("@")[0]}
+                                    </div>
+                                    <div className="text-xs text-gray-500 truncate">
+                                      {item.user.email}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                {item.department && (
+                                  <div className="flex items-center gap-2 text-gray-600">
+                                    <Building2 className="w-4 h-4 text-gray-400" />
+                                    <span className="truncate">
+                                      {item.department.name}
+                                    </span>
+                                  </div>
+                                )}
+                                {item.dueDate && (
+                                  <div className="flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-gray-400" />
+                                    <span
+                                      className={`text-sm ${
+                                        isOverdue(item.dueDate)
+                                          ? "text-red-600 font-medium"
+                                          : "text-gray-600"
                                       }`}
                                     >
-                                      {page}
-                                    </button>
-                                  );
-                                }
-                              )}
+                                      {formatDate(item.dueDate)}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
 
-                            <button
-                              onClick={() =>
-                                setCurrentPage(data.pagination.page + 1)
-                              }
-                              disabled={!data.pagination.hasNext}
-                              className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <span className="hidden sm:inline">Next</span>
-                              <ChevronRight className="w-3 sm:w-4 h-3 sm:h-4 sm:ml-1" />
-                            </button>
+                            {/* Overdue Warning */}
+                            {item.dueDate && isOverdue(item.dueDate) && (
+                              <div className="mb-4">
+                                <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-red-50 border border-red-200">
+                                  <AlertCircle className="w-4 h-4 text-red-500" />
+                                  <span className="text-sm font-medium text-red-700">
+                                    This item is overdue
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 pt-3 border-t border-gray-100">
+                              <Link
+                                href={`/governance/${item.id}`}
+                                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                                Details
+                              </Link>
+                              <Link
+                                href={`/governance/${item.id}/edit`}
+                                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                                Edit
+                              </Link>
+                            </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 ) : (
                   /* Grid View */
@@ -1259,90 +1225,102 @@ export default function GovernancePage() {
                     ))}
                   </div>
                 )}
-
-                {/* Pagination for Both Views */}
-                {data.pagination.totalPages > 1 && (
-                  <div className="mt-6">
-                    <div className="bg-gray-50 px-4 sm:px-6 py-4 border border-gray-200 rounded-xl">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div className="flex items-center text-xs sm:text-sm text-gray-600 order-2 sm:order-1">
-                          <span className="hidden sm:inline">
-                            Showing{" "}
-                            <span className="font-medium">
-                              {(data.pagination.page - 1) *
-                                data.pagination.limit +
-                                1}
-                            </span>{" "}
-                            to{" "}
-                            <span className="font-medium">
-                              {Math.min(
-                                data.pagination.page * data.pagination.limit,
-                                data.pagination.total
-                              )}
-                            </span>{" "}
-                            of{" "}
-                            <span className="font-medium">
-                              {data.pagination.total}
-                            </span>{" "}
-                            results
-                          </span>
-                          <span className="sm:hidden">
-                            Page {data.pagination.page} of{" "}
-                            {data.pagination.totalPages}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
-                          <button
-                            onClick={() =>
-                              setCurrentPage(data.pagination.page - 1)
-                            }
-                            disabled={!data.pagination.hasPrev}
-                            className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <ChevronLeft className="w-3 sm:w-4 h-3 sm:h-4 sm:mr-1" />
-                            <span className="hidden sm:inline">Previous</span>
-                          </button>
-
-                          <div className="hidden sm:flex items-center gap-1">
-                            {Array.from(
-                              {
-                                length: Math.min(5, data.pagination.totalPages),
-                              },
-                              (_, i) => {
-                                const page = i + 1;
-                                return (
-                                  <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`px-3 py-2 text-sm font-medium rounded-lg ${
-                                      page === data.pagination.page
-                                        ? "bg-blue-600 text-white"
-                                        : "text-gray-500 hover:bg-gray-50"
-                                    }`}
-                                  >
-                                    {page}
-                                  </button>
-                                );
-                              }
-                            )}
-                          </div>
-
-                          <button
-                            onClick={() =>
-                              setCurrentPage(data.pagination.page + 1)
-                            }
-                            disabled={!data.pagination.hasNext}
-                            className="inline-flex items-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <span className="hidden sm:inline">Next</span>
-                            <ChevronRight className="w-3 sm:w-4 h-3 sm:h-4 sm:ml-1" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </>
+            )}
+
+            {/* Pagination - Only show when there are records */}
+            {data.items.length > 0 && (
+              <div className="flex items-center justify-between py-3 px-6 bg-white border-t border-gray-200">
+                {/* Left side - Showing records info */}
+                <div className="text-sm text-gray-700">
+                  <span>
+                    Showing:{" "}
+                    <span className="font-medium">
+                      {(data.pagination.page - 1) * data.pagination.limit + 1}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-medium">
+                      {Math.min(
+                        data.pagination.page * data.pagination.limit,
+                        data.pagination.total
+                      )}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-medium">
+                      {data.pagination.total.toLocaleString()}
+                    </span>{" "}
+                    records
+                  </span>
+                </div>
+
+                {/* Right side - Pagination controls */}
+                <div className="flex items-center space-x-0">
+                  {/* Previous button */}
+                  <button
+                    onClick={() => setCurrentPage(data.pagination.page - 1)}
+                    disabled={!data.pagination.hasPrev}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-l hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    « Previous
+                  </button>
+
+                  {/* Page numbers */}
+                  {(() => {
+                    const currentPage = data.pagination.page;
+                    const totalPages = data.pagination.totalPages;
+                    const maxVisiblePages = 7;
+
+                    let startPage = Math.max(
+                      1,
+                      currentPage - Math.floor(maxVisiblePages / 2)
+                    );
+                    const endPage = Math.min(
+                      totalPages,
+                      startPage + maxVisiblePages - 1
+                    );
+
+                    if (endPage - startPage + 1 < maxVisiblePages) {
+                      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                    }
+
+                    const pages = [];
+                    for (let i = startPage; i <= endPage; i++) {
+                      pages.push(i);
+                    }
+
+                    return pages.map((page, index) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`
+                          px-3 py-2 text-sm font-medium border-t border-b border-r transition-colors
+                          ${
+                            page === currentPage
+                              ? "bg-blue-600 border-blue-600 text-white"
+                              : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }
+                          ${
+                            index === pages.length - 1 && totalPages === 1
+                              ? "rounded-r"
+                              : ""
+                          }
+                        `}
+                      >
+                        {page}
+                      </button>
+                    ));
+                  })()}
+
+                  {/* Next button */}
+                  <button
+                    onClick={() => setCurrentPage(data.pagination.page + 1)}
+                    disabled={!data.pagination.hasNext}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-r hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next »
+                  </button>
+                </div>
+              </div>
             )}
           </>
         )}

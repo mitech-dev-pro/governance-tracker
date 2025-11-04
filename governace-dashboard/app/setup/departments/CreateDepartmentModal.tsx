@@ -21,9 +21,17 @@ const departmentSchema = z.object({
 
 type DepartmentFormData = z.infer<typeof departmentSchema>;
 
+interface Department {
+  id: string;
+  name: string;
+  code: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface CreateDepartmentModalProps {
   onClose: () => void;
-  onDepartmentCreated: (department: any) => void;
+  onDepartmentCreated: (department: Department) => void;
 }
 
 export default function CreateDepartmentModal({
@@ -60,7 +68,7 @@ export default function CreateDepartmentModal({
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
-        error.issues.forEach((err: any) => {
+        error.issues.forEach((err) => {
           if (err.path[0]) {
             newErrors[err.path[0] as string] = err.message;
           }
@@ -123,10 +131,10 @@ export default function CreateDepartmentModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center">

@@ -75,17 +75,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       ],
     },
     {
-      name: "Commission",
-      icon: "💹",
-      href: "/commission",
-      hasSubmenu: true,
-      submenu: [
-        { name: "Calculations", href: "/commission/calculations" },
-        { name: "Payments", href: "/commission/payments" },
-        { name: "Reports", href: "/commission/reports" },
-      ],
-    },
-    {
       name: "Reports",
       icon: "👤",
       href: "/reports",

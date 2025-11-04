@@ -458,8 +458,8 @@ export default function RolesPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && roleToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 max-w-md w-full p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="bg-red-100 p-2 rounded-lg">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
@@ -470,8 +470,8 @@ export default function RolesPage() {
             </div>
 
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete the role "{roleToDelete.name}"?
-              This action cannot be undone.
+              Are you sure you want to delete the role &quot;{roleToDelete.name}
+              &quot;? This action cannot be undone.
             </p>
 
             {roleToDelete.userCount > 0 && (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   X,
   User,
@@ -12,59 +12,54 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
+  User as UserIcon,
 } from "lucide-react";
-import type { Department } from "../types/governance";
-import ImageUpload from "../components/ImageUpload";
+import type { User as UserType, UpdateUserData } from "../../types/user";
+import type { Department } from "../../types/governance";
+import ImageUpload from "../../components/ImageUpload";
 
 interface Role {
   id: number;
   name: string;
 }
 
-interface CreateUserData {
-  name: string;
-  email: string;
-  password: string;
-  image?: string;
-  departmentIds?: number[];
-  roleIds?: number[];
-}
-
-interface CreateUserModalProps {
+interface EditUserModalProps {
+  user: UserType;
   onClose: () => void;
-  onUserCreated: () => void;
+  onUserUpdated: () => void;
   departments: Department[];
   roles: Role[];
 }
 
-export default function CreateUserModal({
+export default function EditUserModal({
+  user,
   onClose,
-  onUserCreated,
+  onUserUpdated,
   departments,
   roles,
-}: CreateUserModalProps) {
-  const [formData, setFormData] = useState<CreateUserData>({
-    name: "",
-    email: "",
-    password: "",
-    image: undefined,
-    departmentIds: [],
-    roleIds: [],
+}: EditUserModalProps) {
+  const [formData, setFormData] = useState<UpdateUserData>({
+    name: user.name || "",
+    email: user.email,
+    password: "", // Leave empty - user can choose to update
+    image: user.image || "",
+    departmentIds: user.departments?.map((d) => d.departmentId) || [],
+    roleIds: user.roles?.map((r) => r.roleId) || [],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleInputChange = (field: keyof CreateUserData, value: string) => {
-    setFormData((prev: CreateUserData) => ({
+  const handleInputChange = (field: keyof UpdateUserData, value: string) => {
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
 
     // Clear error when user starts typing
     if (errors[field as string]) {
-      setErrors((prev: Record<string, string>) => ({
+      setErrors((prev) => ({
         ...prev,
         [field as string]: "",
       }));
@@ -74,14 +69,14 @@ export default function CreateUserModal({
   const handleDepartmentChange = (departmentId: number, checked: boolean) => {
     const currentIds = formData.departmentIds || [];
     if (checked) {
-      setFormData((prev: CreateUserData) => ({
+      setFormData((prev) => ({
         ...prev,
         departmentIds: [...currentIds, departmentId],
       }));
     } else {
-      setFormData((prev: CreateUserData) => ({
+      setFormData((prev) => ({
         ...prev,
-        departmentIds: currentIds.filter((id: number) => id !== departmentId),
+        departmentIds: currentIds.filter((id) => id !== departmentId),
       }));
     }
   };
@@ -89,14 +84,14 @@ export default function CreateUserModal({
   const handleRoleChange = (roleId: number, checked: boolean) => {
     const currentIds = formData.roleIds || [];
     if (checked) {
-      setFormData((prev: CreateUserData) => ({
+      setFormData((prev) => ({
         ...prev,
         roleIds: [...currentIds, roleId],
       }));
     } else {
-      setFormData((prev: CreateUserData) => ({
+      setFormData((prev) => ({
         ...prev,
-        roleIds: currentIds.filter((id: number) => id !== roleId),
+        roleIds: currentIds.filter((id) => id !== roleId),
       }));
     }
   };
@@ -104,19 +99,18 @@ export default function CreateUserModal({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
+    if (!formData.name?.trim()) {
       newErrors.name = "Name is required";
     }
 
-    if (!formData.email.trim()) {
+    if (!formData.email?.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Invalid email format";
     }
 
-    if (!formData.password.trim()) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
+    // Password is optional for updates
+    if (formData.password && formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
 
@@ -135,51 +129,55 @@ export default function CreateUserModal({
     setErrors({});
 
     try {
-      // Clean the form data - remove undefined values
-      const cleanFormData = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        password: formData.password,
-        ...(formData.image && { image: formData.image }),
-        departmentIds: formData.departmentIds || [],
-        roleIds: formData.roleIds || [],
+      // Prepare update data - exclude empty password
+      const updateData: UpdateUserData = {
+        name: formData.name,
+        email: formData.email,
+        image: formData.image || undefined,
+        departmentIds: formData.departmentIds,
+        roleIds: formData.roleIds,
       };
 
-      const response = await fetch("/api/users", {
-        method: "POST",
+      // Only include password if it's provided
+      if (formData.password?.trim()) {
+        updateData.password = formData.password;
+      }
+
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(cleanFormData),
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-
         if (response.status === 409) {
           setErrors({ email: "User with this email already exists" });
         } else {
-          setErrors({ general: errorData.error || "Failed to create user" });
+          setErrors({ general: errorData.error || "Failed to update user" });
         }
         return;
       }
 
-      onUserCreated();
+      onUserUpdated();
     } catch (error) {
-      console.error("Error creating user:", error);
-      setErrors({ general: "Failed to create user. Please try again." });
+      console.error("Error updating user:", error);
+      setErrors({ general: "Failed to update user. Please try again." });
     } finally {
       setLoading(false);
     }
   };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 max-w-2xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-            <User className="w-6 h-6 mr-2 text-blue-600" />
-            Create New User
+            <UserIcon className="w-6 h-6 mr-2 text-blue-600" />
+            Edit User: {user.name || user.email}
           </h2>
           <button
             onClick={onClose}
@@ -216,7 +214,7 @@ export default function CreateUserModal({
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    value={formData.name}
+                    value={formData.name || ""}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.name ? "border-red-500" : "border-gray-300"
@@ -237,7 +235,7 @@ export default function CreateUserModal({
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="email"
-                    value={formData.email}
+                    value={formData.email || ""}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                       errors.email ? "border-red-500" : "border-gray-300"
@@ -253,20 +251,23 @@ export default function CreateUserModal({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password <span className="text-red-500">*</span>
+                New Password{" "}
+                <span className="text-gray-400">
+                  (Optional - leave blank to keep current)
+                </span>
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type={showPassword ? "text" : "password"}
-                  value={formData.password}
+                  value={formData.password || ""}
                   onChange={(e) =>
                     handleInputChange("password", e.target.value)
                   }
                   className={`w-full pl-10 pr-12 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                     errors.password ? "border-red-500" : "border-gray-300"
                   }`}
-                  placeholder="Enter password"
+                  placeholder="Enter new password (optional)"
                 />
                 <button
                   type="button"
@@ -290,13 +291,11 @@ export default function CreateUserModal({
                 Profile Image (Optional)
               </label>
               <ImageUpload
-                currentImage={formData.image}
+                currentImage={formData.image || user.image || ""}
                 onImageChange={(imageUrl) =>
                   handleInputChange("image", imageUrl)
                 }
-                onImageRemove={() =>
-                  setFormData((prev) => ({ ...prev, image: undefined }))
-                }
+                onImageRemove={() => handleInputChange("image", "")}
                 size="md"
               />
             </div>
@@ -373,12 +372,12 @@ export default function CreateUserModal({
               {loading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating...
+                  Updating...
                 </>
               ) : (
                 <>
                   <Save className="w-5 h-5 mr-2" />
-                  Create User
+                  Update User
                 </>
               )}
             </button>

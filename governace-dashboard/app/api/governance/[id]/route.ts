@@ -93,9 +93,9 @@ export async function GET(
     };
 
     // Remove the original fields to avoid confusion
-    delete (responseItem as any).subtask;
-    delete (responseItem as any).attachment;
-    delete (responseItem as any).comment;
+    delete (responseItem as Record<string, unknown>).subtask;
+    delete (responseItem as Record<string, unknown>).attachment;
+    delete (responseItem as Record<string, unknown>).comment;
 
     return NextResponse.json(responseItem);
 

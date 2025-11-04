@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit;
 
     // Build where clause for search
-    const where: any = {};
+    const where: { name?: { contains: string; mode: string } } = {};
     if (search) {
       where.name = {
         contains: search,
