@@ -567,12 +567,24 @@ export default function GovernancePage() {
 
   const handleCreateGovernanceItem = async (data: CreateGovernanceItemData) => {
     try {
+      // Format the data to ensure proper datetime format
+      const formattedData = {
+        ...data,
+        // Convert datetime-local format to full ISO datetime string
+        dueDate: data.dueDate
+          ? new Date(data.dueDate).toISOString()
+          : undefined,
+      };
+
+      console.log("Original dueDate:", data.dueDate);
+      console.log("Formatted dueDate:", formattedData.dueDate);
+
       const response = await fetch("/api/governance", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
       });
 
       if (!response.ok) {

@@ -139,7 +139,7 @@ export default function EditGovernancePage() {
           ownerId: itemData.ownerId,
           departmentId: itemData.departmentId,
           dueDate: itemData.dueDate
-            ? new Date(itemData.dueDate).toISOString().split("T")[0]
+            ? new Date(itemData.dueDate).toISOString().slice(0, 16)
             : undefined,
           progress: itemData.progress,
           tags: itemData.tags || [],
@@ -271,13 +271,25 @@ export default function EditGovernancePage() {
     setErrors({});
 
     try {
+      // Format the data to ensure proper datetime format
+      const formattedData = {
+        ...formData,
+        // Convert datetime-local format to full ISO datetime string
+        dueDate: formData.dueDate
+          ? new Date(formData.dueDate).toISOString()
+          : null,
+      };
+
+      console.log("Original dueDate:", formData.dueDate);
+      console.log("Formatted dueDate:", formattedData.dueDate);
+
       const response = await fetch(`/api/governance/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...formData,
+          ...formattedData,
           subtasks,
           raciRoles,
         }),
@@ -504,7 +516,7 @@ export default function EditGovernancePage() {
                     Due Date
                   </label>
                   <input
-                    type="date"
+                    type="datetime-local"
                     value={formData.dueDate || ""}
                     onChange={(e) =>
                       handleInputChange("dueDate", e.target.value || null)
