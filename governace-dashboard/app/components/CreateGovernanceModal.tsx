@@ -27,7 +27,7 @@ const STATUS_OPTIONS: { value: GovernanceStatus; label: string }[] = [
 ];
 
 const formInputClass =
-  "w-full px-3 py-2 border border-gray-300 shadow-sm rounded-lg outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent disabled:bg-gray-100";
+  "w-full px-3 py-2 border border-gray-300 shadow-sm rounded-lg outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent disabled:bg-gray-100  min-h-12";
 
 export default function CreateGovernanceModal({
   isOpen,
@@ -265,7 +265,7 @@ export default function CreateGovernanceModal({
                     e.target.value ? parseInt(e.target.value) : undefined
                   )
                 }
-                className={formInputClass}
+                className={`text-gray-500 ${formInputClass}`}
                 disabled={loading}
               >
                 <option value="">Select owner (optional)</option>
@@ -290,7 +290,7 @@ export default function CreateGovernanceModal({
                     e.target.value ? parseInt(e.target.value) : undefined
                   )
                 }
-                className={formInputClass}
+                className={`text-gray-500 ${formInputClass}`}
                 disabled={loading}
               >
                 <option value="">Select department (optional)</option>
