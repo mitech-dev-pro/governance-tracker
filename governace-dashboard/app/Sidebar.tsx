@@ -1,5 +1,7 @@
 "use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ChevronRight, ChevronDown, X } from "lucide-react";
 
@@ -10,6 +12,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const pathname = usePathname();
 
   const toggleExpanded = (itemName: string) => {
     setExpandedItems((prev) =>
@@ -76,7 +79,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     },
     {
       name: "Reports",
-      icon: "👤",
+      icon: "📄",
       href: "/reports",
       hasSubmenu: false,
     },
@@ -86,9 +89,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       href: "/setup",
       hasSubmenu: true,
       submenu: [
-        { name: "Users", href: "/users" },
-        { name: "Roles", href: "/roles" },
-        { name: "Departments", href: "/departments" },
+        { name: "Users", href: "/setup/users" },
+        { name: "Roles", href: "/setup/roles" },
+        { name: "Departments", href: "/setup/departments" },
         { name: "User Account", href: "/setup/user-account" },
         { name: "User Role", href: "/setup/user-role" },
       ],
@@ -100,7 +103,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0  bg-opacity-50 z-20 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
           onClick={onClose}
         />
       )}
@@ -108,12 +111,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <div
         className={`
-        fixed md:static inset-y-0 left-0 z-30
-        w-full md:w-64 bg-slate-700 text-white h-screen overflow-y-auto
-        transform transition-transform duration-300 ease-in-out
-        ${isOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0
-      `}
+          fixed md:static inset-y-0 left-0 z-30
+          w-full md:w-72 bg-gradient-to-b from-slate-800 via-slate-700 to-slate-800 text-white h-screen overflow-y-auto
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0
+          rounded-r-xl shadow-xl backdrop-blur-md border-r border-slate-600
+        `}
       >
         {/* Mobile close button */}
         <div className="md:hidden flex justify-end p-4">
@@ -126,60 +130,78 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        <nav className="p-4">
-          {menuItems.map((item) => (
-            <div key={item.name}>
-              <div className="flex items-center justify-between">
-                <Link
-                  href={item.href}
-                  className="flex items-center gap-3 p-3 rounded hover:bg-slate-600 text-sm flex-1"
-                  onClick={() => {
-                    // Close sidebar on mobile when clicking a link
-                    if (window.innerWidth < 768) {
-                      onClose();
-                    }
-                  }}
-                >
-                  <span>{item.icon}</span>
-                  {item.name}
-                </Link>
-                {item.hasSubmenu && (
-                  <button
-                    onClick={() => toggleExpanded(item.name)}
-                    className="p-2 hover:bg-slate-600 rounded"
-                  >
-                    {expandedItems.includes(item.name) ? (
-                      <ChevronDown className="w-4 h-4" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4" />
-                    )}
-                  </button>
-                )}
-              </div>
+        {/* Navigation */}
+        <nav className="p-4 space-y-2" role="navigation">
+          {menuItems.map((item) => {
+            const isActive = pathname === item.href;
 
-              {/* Submenu */}
-              {item.hasSubmenu &&
-                expandedItems.includes(item.name) &&
-                item.submenu && (
-                  <div className="ml-6 border-l border-slate-500">
-                    {item.submenu.map((subItem) => (
-                      <Link
-                        key={subItem.name}
-                        href={subItem.href}
-                        className="block p-2 pl-4 text-sm text-slate-300 hover:text-white hover:bg-slate-600 rounded"
-                        onClick={() => {
-                          if (window.innerWidth < 768) {
-                            onClose();
-                          }
-                        }}
-                      >
-                        {subItem.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-            </div>
-          ))}
+            return (
+              <div key={item.name}>
+                <div className="flex items-center justify-between">
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-3 p-3 rounded text-sm transition-colors duration-200 flex-1 ${
+                      isActive
+                        ? "bg-slate-700 text-white"
+                        : "hover:bg-slate-600 text-slate-300"
+                    }`}
+                    onClick={() => {
+                      if (window.innerWidth < 768) {
+                        onClose();
+                      }
+                    }}
+                  >
+                    <span>{item.icon}</span>
+                    {item.name}
+                  </Link>
+                  {item.hasSubmenu && (
+                    <button
+                      onClick={() => toggleExpanded(item.name)}
+                      className="p-2 hover:bg-slate-600 rounded"
+                      aria-expanded={expandedItems.includes(item.name)}
+                      aria-label={`Toggle ${item.name} submenu`}
+                    >
+                      {expandedItems.includes(item.name) ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Submenu */}
+                {item.hasSubmenu &&
+                  expandedItems.includes(item.name) &&
+                  item.submenu && (
+                    <div className="ml-6 border-l border-slate-500 pl-2 transition-all duration-300">
+                      {item.submenu.map((subItem) => {
+                        const isSubActive = pathname === subItem.href;
+
+                        return (
+                          <Link
+                            key={subItem.name}
+                            href={subItem.href}
+                            className={`block p-2 pl-4 text-sm rounded transition-colors duration-200 ${
+                              isSubActive
+                                ? "bg-slate-700 text-white"
+                                : "text-slate-300 hover:text-white hover:bg-slate-600"
+                            }`}
+                            onClick={() => {
+                              if (window.innerWidth < 768) {
+                                onClose();
+                              }
+                            }}
+                          >
+                            {subItem.name}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+              </div>
+            );
+          })}
         </nav>
       </div>
     </>

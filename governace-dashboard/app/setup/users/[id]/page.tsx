@@ -199,7 +199,7 @@ export default function UserDetailPage({
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
-                {user.image ? (
+                {/* {user.image ? (
                   <img
                     className="h-20 w-20 rounded-full border-4 border-white shadow-lg"
                     src={user.image}
@@ -209,7 +209,10 @@ export default function UserDetailPage({
                   <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center border-4 border-white shadow-lg">
                     <UserIcon className="h-10 w-10 text-blue-600" />
                   </div>
-                )}
+                )} */}
+                <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center border-4 border-white shadow-lg">
+                  <UserIcon className="h-10 w-10 text-blue-600" />
+                </div>
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
