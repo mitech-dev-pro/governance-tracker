@@ -26,6 +26,9 @@ const STATUS_OPTIONS: { value: GovernanceStatus; label: string }[] = [
   { value: "DEFERRED", label: "Deferred" },
 ];
 
+const formInputClass =
+  "w-full px-3 py-2 border border-gray-300 shadow-sm rounded-lg outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent disabled:bg-gray-100";
+
 export default function CreateGovernanceModal({
   isOpen,
   onClose,
@@ -160,7 +163,7 @@ export default function CreateGovernanceModal({
                 onChange={(e) =>
                   handleInputChange("number", e.target.value || undefined)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={formInputClass}
                 placeholder="001"
                 disabled={loading}
               />
@@ -174,7 +177,7 @@ export default function CreateGovernanceModal({
                 type="text"
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={formInputClass}
                 placeholder="Enter governance item title"
                 disabled={loading}
                 required
@@ -194,7 +197,7 @@ export default function CreateGovernanceModal({
               value={formData.description}
               onChange={(e) => handleInputChange("description", e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={formInputClass}
               placeholder="Enter detailed description"
               disabled={loading}
               required
@@ -218,7 +221,7 @@ export default function CreateGovernanceModal({
                     e.target.value as GovernanceStatus
                   )
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={formInputClass}
                 disabled={loading}
               >
                 {STATUS_OPTIONS.map((option) => (
@@ -241,7 +244,7 @@ export default function CreateGovernanceModal({
                 onChange={(e) =>
                   handleInputChange("progress", parseInt(e.target.value) || 0)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={formInputClass}
                 disabled={loading}
               />
             </div>
@@ -262,7 +265,7 @@ export default function CreateGovernanceModal({
                     e.target.value ? parseInt(e.target.value) : undefined
                   )
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={formInputClass}
                 disabled={loading}
               >
                 <option value="">Select owner (optional)</option>
@@ -287,7 +290,7 @@ export default function CreateGovernanceModal({
                     e.target.value ? parseInt(e.target.value) : undefined
                   )
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={formInputClass}
                 disabled={loading}
               >
                 <option value="">Select department (optional)</option>
@@ -311,7 +314,7 @@ export default function CreateGovernanceModal({
               onChange={(e) =>
                 handleInputChange("actionitem", e.target.value || undefined)
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={formInputClass}
               placeholder="e.g., rebuild, review, implement"
               disabled={loading}
             />
@@ -330,7 +333,7 @@ export default function CreateGovernanceModal({
                 onChange={(e) =>
                   handleInputChange("dueDate", e.target.value || undefined)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={formInputClass}
                 disabled={loading}
               />
             </div>
@@ -344,7 +347,7 @@ export default function CreateGovernanceModal({
                 onChange={(e) =>
                   handleInputChange("visibility", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={formInputClass}
                 disabled={loading}
               >
                 <option value="public">Public</option>
@@ -367,7 +370,7 @@ export default function CreateGovernanceModal({
                 onKeyPress={(e) =>
                   e.key === "Enter" && (e.preventDefault(), addClauseRef())
                 }
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`flex-1 ${formInputClass}`}
                 placeholder="e.g., ISO27001 A.5.1"
                 disabled={loading}
               />
@@ -413,7 +416,7 @@ export default function CreateGovernanceModal({
                 onKeyPress={(e) =>
                   e.key === "Enter" && (e.preventDefault(), addTag())
                 }
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`flex-1 ${formInputClass}`}
                 placeholder="Add a tag and press Enter"
                 disabled={loading}
               />
