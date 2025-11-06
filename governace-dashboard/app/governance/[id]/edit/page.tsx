@@ -157,12 +157,45 @@ export default function EditGovernancePage() {
 
         if (usersResponse.ok) {
           const usersData = await usersResponse.json();
-          setUsers(usersData);
+          // The API returns { users: [...], pagination: {...} }
+          if (usersData && Array.isArray(usersData.users)) {
+            setUsers(usersData.users);
+          } else if (Array.isArray(usersData)) {
+            // Fallback in case API returns array directly
+            setUsers(usersData);
+          } else {
+            console.error(
+              "Users API did not return expected format:",
+              usersData
+            );
+            setUsers([]);
+          }
+        } else {
+          console.error("Failed to fetch users:", usersResponse.status);
+          setUsers([]);
         }
 
         if (departmentsResponse.ok) {
           const departmentsData = await departmentsResponse.json();
-          setDepartments(departmentsData);
+          // The API returns { departments: [...], pagination: {...} }
+          if (departmentsData && Array.isArray(departmentsData.departments)) {
+            setDepartments(departmentsData.departments);
+          } else if (Array.isArray(departmentsData)) {
+            // Fallback in case API returns array directly
+            setDepartments(departmentsData);
+          } else {
+            console.error(
+              "Departments API did not return expected format:",
+              departmentsData
+            );
+            setDepartments([]);
+          }
+        } else {
+          console.error(
+            "Failed to fetch departments:",
+            departmentsResponse.status
+          );
+          setDepartments([]);
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -239,29 +272,34 @@ export default function EditGovernancePage() {
   };
 
   // RACI management
-  const addRaciRole = (userId: number, role: "R" | "A" | "C" | "I") => {
-    const existingRole = raciRoles.find(
-      (r) => r.userId === userId && r.role === role
-    );
-    if (!existingRole) {
-      const user = users.find((u) => u.id === userId);
-      if (user) {
-        setRaciRoles((prev) => [
-          ...prev,
-          {
-            id: Date.now(), // Temporary ID
-            itemId: parseInt(itemId),
-            userId,
-            user,
-            role,
-          },
-        ]);
-      }
-    }
+  const assignRaciRole = (userId: number, role: "R" | "A" | "C" | "I") => {
+    if (!Array.isArray(users)) return;
+
+    const user = users.find((u) => u.id === userId);
+    if (!user) return;
+
+    // Remove existing user with this role (only one user per role)
+    const updatedRoles = raciRoles.filter((r) => r.role !== role);
+
+    // Add the new assignment
+    setRaciRoles([
+      ...updatedRoles,
+      {
+        id: Date.now(), // Temporary ID
+        itemId: parseInt(itemId),
+        userId,
+        user,
+        role,
+      },
+    ]);
   };
 
-  const removeRaciRole = (id: number) => {
-    setRaciRoles((prev) => prev.filter((role) => role.id !== id));
+  const removeRaciRole = (role: "R" | "A" | "C" | "I") => {
+    setRaciRoles((prev) => prev.filter((r) => r.role !== role));
+  };
+
+  const getRaciRoleUser = (role: "R" | "A" | "C" | "I") => {
+    return raciRoles.find((r) => r.role === role)?.user;
   };
 
   // Form submission
@@ -279,9 +317,6 @@ export default function EditGovernancePage() {
           ? new Date(formData.dueDate).toISOString()
           : null,
       };
-
-      console.log("Original dueDate:", formData.dueDate);
-      console.log("Formatted dueDate:", formattedData.dueDate);
 
       const response = await fetch(`/api/governance/${itemId}`, {
         method: "PUT",
@@ -482,11 +517,12 @@ export default function EditGovernancePage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select owner</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.name || user.email}
-                      </option>
-                    ))}
+                    {Array.isArray(users) &&
+                      users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.name || user.email}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div>
@@ -504,11 +540,12 @@ export default function EditGovernancePage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select department</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </option>
-                    ))}
+                    {Array.isArray(departments) &&
+                      departments.map((dept) => (
+                        <option key={dept.id} value={dept.id}>
+                          {dept.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div>
@@ -648,101 +685,140 @@ export default function EditGovernancePage() {
                 <Users className="w-5 h-5 mr-2 text-blue-600" />
                 RACI Matrix
               </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Assign one person per role. Users can be reassigned by selecting
+                a different person for the same role.
+              </p>
             </div>
             <div className="p-6">
-              {/* RACI Role Legend */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                {RACI_ROLES.map((role) => (
-                  <div
-                    key={role.value}
-                    className="text-center p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="font-semibold text-blue-600">
-                      {role.value}
-                    </div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {role.label}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {role.description}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Current RACI Assignments */}
-              <div className="space-y-3">
-                {raciRoles.map((role) => (
-                  <div
-                    key={role.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-white ${
-                          role.role === "R"
-                            ? "bg-green-500"
-                            : role.role === "A"
-                            ? "bg-blue-500"
-                            : role.role === "C"
-                            ? "bg-yellow-500"
-                            : "bg-purple-500"
-                        }`}
-                      >
-                        {role.role}
-                      </span>
-                      <div>
-                        <div className="font-medium text-gray-900">
-                          {role.user.name || role.user.email}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {RACI_ROLES.find((r) => r.value === role.role)?.label}
+              {/* RACI Role Assignments */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {RACI_ROLES.map((roleInfo) => {
+                  const assignedUser = getRaciRoleUser(
+                    roleInfo.value as "R" | "A" | "C" | "I"
+                  );
+                  return (
+                    <div
+                      key={roleInfo.value}
+                      className="border border-gray-200 rounded-lg p-4"
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <span
+                          className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-lg ${
+                            roleInfo.value === "R"
+                              ? "bg-green-500"
+                              : roleInfo.value === "A"
+                              ? "bg-blue-500"
+                              : roleInfo.value === "C"
+                              ? "bg-yellow-500"
+                              : "bg-purple-500"
+                          }`}
+                        >
+                          {roleInfo.value}
+                        </span>
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            {roleInfo.label}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {roleInfo.description}
+                          </div>
                         </div>
                       </div>
+
+                      {/* Current Assignment */}
+                      {assignedUser ? (
+                        <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                              <User className="w-4 h-4 text-gray-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">
+                                {assignedUser.name || assignedUser.email}
+                              </div>
+                              <div className="text-xs text-gray-600">
+                                Currently assigned
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              removeRaciRole(
+                                roleInfo.value as "R" | "A" | "C" | "I"
+                              )
+                            }
+                            className="text-red-500 hover:text-red-700 p-1 rounded"
+                            title="Remove assignment"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 rounded-lg p-3 mb-3 text-center">
+                          <div className="text-sm text-gray-500">
+                            No one assigned to this role
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Assignment Dropdown */}
+                      <select
+                        value={assignedUser?.id || ""}
+                        onChange={(e) => {
+                          const userId = parseInt(e.target.value);
+                          if (userId) {
+                            assignRaciRole(
+                              userId,
+                              roleInfo.value as "R" | "A" | "C" | "I"
+                            );
+                          } else {
+                            removeRaciRole(
+                              roleInfo.value as "R" | "A" | "C" | "I"
+                            );
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="">
+                          {assignedUser
+                            ? "Change assignment..."
+                            : "Assign user..."}
+                        </option>
+                        {Array.isArray(users) &&
+                          users.map((user) => (
+                            <option key={user.id} value={user.id}>
+                              {user.name || user.email}
+                            </option>
+                          ))}
+                      </select>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeRaciRole(role.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
-              {/* Add RACI Role */}
-              <div className="mt-4 p-4 border-2 border-dashed border-gray-300 rounded-lg">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Select user</option>
-                    {users.map((user) => (
-                      <option key={user.id} value={user.id}>
-                        {user.name || user.email}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex gap-2">
-                    {RACI_ROLES.map((role) => (
-                      <button
-                        key={role.value}
-                        type="button"
-                        className={`px-3 py-2 rounded-lg font-medium text-white ${
-                          role.value === "R"
-                            ? "bg-green-500 hover:bg-green-600"
-                            : role.value === "A"
-                            ? "bg-blue-500 hover:bg-blue-600"
-                            : role.value === "C"
-                            ? "bg-yellow-500 hover:bg-yellow-600"
-                            : "bg-purple-500 hover:bg-purple-600"
-                        }`}
-                      >
-                        {role.value}
-                      </button>
-                    ))}
+              {/* RACI Matrix Summary */}
+              {raciRoles.length > 0 && (
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-medium text-blue-900 mb-2">
+                    RACI Summary
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                    {RACI_ROLES.map((roleInfo) => {
+                      const user = getRaciRoleUser(
+                        roleInfo.value as "R" | "A" | "C" | "I"
+                      );
+                      return (
+                        <div key={roleInfo.value} className="text-blue-800">
+                          <span className="font-medium">{roleInfo.value}:</span>{" "}
+                          {user ? user.name || user.email : "Unassigned"}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 

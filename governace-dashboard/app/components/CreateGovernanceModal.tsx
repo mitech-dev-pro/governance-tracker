@@ -128,9 +128,9 @@ export default function CreateGovernanceModal({
 
   return (
     <div className="fixed inset-0 bg-black/70 bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl border border-gray-200 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl border border-gray-200 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
           <h2 className="text-xl font-semibold text-gray-900">
             Create Governance Item
           </h2>
@@ -143,345 +143,353 @@ export default function CreateGovernanceModal({
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {errors.general && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800 text-sm">{errors.general}</p>
-            </div>
-          )}
+        {/* Form - Scrollable Content */}
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {errors.general && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-800 text-sm">{errors.general}</p>
+              </div>
+            )}
 
-          {/* Number and Title */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Number and Title */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Number
+                </label>
+                <input
+                  type="text"
+                  value={formData.number || ""}
+                  onChange={(e) =>
+                    handleInputChange("number", e.target.value || undefined)
+                  }
+                  className={formInputClass}
+                  placeholder="001"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="md:col-span-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  className={formInputClass}
+                  placeholder="Enter governance item title"
+                  disabled={loading}
+                  required
+                />
+                {errors.title && (
+                  <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Number
+                Description *
               </label>
-              <input
-                type="text"
-                value={formData.number || ""}
+              <textarea
+                value={formData.description}
                 onChange={(e) =>
-                  handleInputChange("number", e.target.value || undefined)
+                  handleInputChange("description", e.target.value)
                 }
+                rows={4}
                 className={formInputClass}
-                placeholder="001"
-                disabled={loading}
-              />
-            </div>
-
-            <div className="md:col-span-3">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Title *
-              </label>
-              <input
-                type="text"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                className={formInputClass}
-                placeholder="Enter governance item title"
+                placeholder="Enter detailed description"
                 disabled={loading}
                 required
               />
-              {errors.title && (
-                <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+              {errors.description && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.description}
+                </p>
               )}
             </div>
-          </div>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description *
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              rows={4}
-              className={formInputClass}
-              placeholder="Enter detailed description"
-              disabled={loading}
-              required
-            />
-            {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description}</p>
-            )}
-          </div>
+            {/* Row 1: Status and Progress */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "status",
+                      e.target.value as GovernanceStatus
+                    )
+                  }
+                  className={formInputClass}
+                  disabled={loading}
+                >
+                  {STATUS_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          {/* Row 1: Status and Progress */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) =>
-                  handleInputChange(
-                    "status",
-                    e.target.value as GovernanceStatus
-                  )
-                }
-                className={formInputClass}
-                disabled={loading}
-              >
-                {STATUS_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Progress (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={formData.progress || 0}
+                  onChange={(e) =>
+                    handleInputChange("progress", parseInt(e.target.value) || 0)
+                  }
+                  className={formInputClass}
+                  disabled={loading}
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Progress (%)
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={formData.progress || 0}
-                onChange={(e) =>
-                  handleInputChange("progress", parseInt(e.target.value) || 0)
-                }
-                className={formInputClass}
-                disabled={loading}
-              />
-            </div>
-          </div>
+            {/* Row 2: Owner and Department */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <User className="w-4 h-4 inline mr-1" />
+                  Owner
+                </label>
+                <select
+                  value={formData.ownerId || ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "ownerId",
+                      e.target.value ? parseInt(e.target.value) : undefined
+                    )
+                  }
+                  className={`text-gray-500 ${formInputClass}`}
+                  disabled={loading}
+                >
+                  <option value="">Select owner (optional)</option>
+                  {users &&
+                    users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.name || user.email}
+                      </option>
+                    ))}
+                </select>
+              </div>
 
-          {/* Row 2: Owner and Department */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <User className="w-4 h-4 inline mr-1" />
-                Owner
-              </label>
-              <select
-                value={formData.ownerId || ""}
-                onChange={(e) =>
-                  handleInputChange(
-                    "ownerId",
-                    e.target.value ? parseInt(e.target.value) : undefined
-                  )
-                }
-                className={`text-gray-500 ${formInputClass}`}
-                disabled={loading}
-              >
-                <option value="">Select owner (optional)</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name || user.email}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Building2 className="w-4 h-4 inline mr-1" />
-                Department
-              </label>
-              <select
-                value={formData.departmentId || ""}
-                onChange={(e) =>
-                  handleInputChange(
-                    "departmentId",
-                    e.target.value ? parseInt(e.target.value) : undefined
-                  )
-                }
-                className={`text-gray-500 ${formInputClass}`}
-                disabled={loading}
-              >
-                <option value="">Select department (optional)</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Row 3: Action Item */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Action Item
-            </label>
-            <input
-              type="text"
-              value={formData.actionitem || ""}
-              onChange={(e) =>
-                handleInputChange("actionitem", e.target.value || undefined)
-              }
-              className={formInputClass}
-              placeholder="e.g., rebuild, review, implement"
-              disabled={loading}
-            />
-          </div>
-
-          {/* Due Date and Visibility */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="w-4 h-4 inline mr-1" />
-                Due Date
-              </label>
-              <input
-                type="datetime-local"
-                value={formData.dueDate || ""}
-                onChange={(e) =>
-                  handleInputChange("dueDate", e.target.value || undefined)
-                }
-                className={formInputClass}
-                disabled={loading}
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Building2 className="w-4 h-4 inline mr-1" />
+                  Department
+                </label>
+                <select
+                  value={formData.departmentId || ""}
+                  onChange={(e) =>
+                    handleInputChange(
+                      "departmentId",
+                      e.target.value ? parseInt(e.target.value) : undefined
+                    )
+                  }
+                  className={`text-gray-500 ${formInputClass}`}
+                  disabled={loading}
+                >
+                  <option value="">Select department (optional)</option>
+                  {departments &&
+                    departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
             </div>
 
+            {/* Row 3: Action Item */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Visibility
+                Action Item
               </label>
-              <select
-                value={formData.visibility}
-                onChange={(e) =>
-                  handleInputChange("visibility", e.target.value)
-                }
-                className={formInputClass}
-                disabled={loading}
-              >
-                <option value="public">Public</option>
-                <option value="department">Department</option>
-                <option value="private">Private</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Clause References */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Clause References
-            </label>
-            <div className="flex gap-2 mb-2">
               <input
                 type="text"
-                value={clauseRefInput}
-                onChange={(e) => setClauseRefInput(e.target.value)}
-                onKeyPress={(e) =>
-                  e.key === "Enter" && (e.preventDefault(), addClauseRef())
+                value={formData.actionitem || ""}
+                onChange={(e) =>
+                  handleInputChange("actionitem", e.target.value || undefined)
                 }
-                className={`flex-1 ${formInputClass}`}
-                placeholder="e.g., ISO27001 A.5.1"
+                className={formInputClass}
+                placeholder="e.g., rebuild, review, implement"
                 disabled={loading}
               />
+            </div>
+
+            {/* Due Date and Visibility */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Calendar className="w-4 h-4 inline mr-1" />
+                  Due Date
+                </label>
+                <input
+                  type="datetime-local"
+                  value={formData.dueDate || ""}
+                  onChange={(e) =>
+                    handleInputChange("dueDate", e.target.value || undefined)
+                  }
+                  className={formInputClass}
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Visibility
+                </label>
+                <select
+                  value={formData.visibility}
+                  onChange={(e) =>
+                    handleInputChange("visibility", e.target.value)
+                  }
+                  className={formInputClass}
+                  disabled={loading}
+                >
+                  <option value="public">Public</option>
+                  <option value="department">Department</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Clause References */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Clause References
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={clauseRefInput}
+                  onChange={(e) => setClauseRefInput(e.target.value)}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addClauseRef())
+                  }
+                  className={`flex-1 ${formInputClass}`}
+                  placeholder="e.g., ISO27001 A.5.1"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={addClauseRef}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  disabled={loading || !clauseRefInput.trim()}
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {formData.clauseRefs?.map((clauseRef) => (
+                  <span
+                    key={clauseRef}
+                    className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full"
+                  >
+                    {clauseRef}
+                    <button
+                      type="button"
+                      onClick={() => removeClauseRef(clauseRef)}
+                      className="ml-2 text-green-600 hover:text-green-800"
+                      disabled={loading}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tags
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addTag())
+                  }
+                  className={`flex-1 ${formInputClass}`}
+                  placeholder="Add a tag and press Enter"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={addTag}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  disabled={loading || !tagInput.trim()}
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {formData.tags?.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="ml-2 text-blue-600 hover:text-blue-800"
+                      disabled={loading}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
               <button
                 type="button"
-                onClick={addClauseRef}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                disabled={loading || !clauseRefInput.trim()}
-              >
-                Add
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {formData.clauseRefs?.map((clauseRef) => (
-                <span
-                  key={clauseRef}
-                  className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full"
-                >
-                  {clauseRef}
-                  <button
-                    type="button"
-                    onClick={() => removeClauseRef(clauseRef)}
-                    className="ml-2 text-green-600 hover:text-green-800"
-                    disabled={loading}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags
-            </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) =>
-                  e.key === "Enter" && (e.preventDefault(), addTag())
-                }
-                className={`flex-1 ${formInputClass}`}
-                placeholder="Add a tag and press Enter"
+                onClick={onClose}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={addTag}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                disabled={loading || !tagInput.trim()}
               >
-                Add
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={
+                  loading ||
+                  !formData.title.trim() ||
+                  !formData.description.trim()
+                }
+              >
+                {loading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Create Item
+                  </>
+                )}
               </button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {formData.tags?.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="ml-2 text-blue-600 hover:text-blue-800"
-                    disabled={loading}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              disabled={loading}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={
-                loading ||
-                !formData.title.trim() ||
-                !formData.description.trim()
-              }
-            >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Create Item
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

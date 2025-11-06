@@ -576,9 +576,6 @@ export default function GovernancePage() {
           : undefined,
       };
 
-      console.log("Original dueDate:", data.dueDate);
-      console.log("Formatted dueDate:", formattedData.dueDate);
-
       const response = await fetch("/api/governance", {
         method: "POST",
         headers: {

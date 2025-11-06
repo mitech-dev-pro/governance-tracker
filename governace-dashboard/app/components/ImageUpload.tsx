@@ -140,15 +140,21 @@ export default function ImageUpload({
             <button
               type="button"
               onClick={handleRemoveImage}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-md border-2 border-white z-10"
               title="Remove image"
             >
-              <X className="w-3 h-3" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
           <div className="flex-1">
             <p className="text-sm text-gray-600">Current profile picture</p>
-            <p className="text-xs text-gray-400 mt-1">Click the × to remove</p>
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              className="text-xs text-red-600 hover:text-red-700 mt-1 underline"
+            >
+              Remove image
+            </button>
           </div>
         </div>
       )}
