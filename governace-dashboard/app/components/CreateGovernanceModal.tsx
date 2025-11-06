@@ -310,16 +310,19 @@ export default function CreateGovernanceModal({
               </div>
             </div>
 
-            {/* Row 3: Action Item */}
+            {/* Row 3: Action Item Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Action Item
+                Action Item Type
               </label>
               <input
                 type="text"
-                value={formData.actionitem || ""}
+                value={formData.actionitemType || ""}
                 onChange={(e) =>
-                  handleInputChange("actionitem", e.target.value || undefined)
+                  handleInputChange(
+                    "actionitemType",
+                    e.target.value || undefined
+                  )
                 }
                 className={formInputClass}
                 placeholder="e.g., rebuild, review, implement"

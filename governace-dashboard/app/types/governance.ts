@@ -112,9 +112,9 @@ export interface CreateGovernanceItemData {
   progress?: number;
   tags?: string[];
   visibility?: string;
-  number?: string;
+  number?: number;
   clauseRefs?: string[];
-  actionitem?: string;
+  actionitemType?: string;
 }
 
 export interface UpdateGovernanceItemData {
@@ -127,6 +127,9 @@ export interface UpdateGovernanceItemData {
   progress?: number;
   tags?: string[];
   visibility?: string;
+  number?: number;
+  clauseRefs?: string[];
+  actionitemType?: string;
 }
 
 export interface GovernanceQueryParams {

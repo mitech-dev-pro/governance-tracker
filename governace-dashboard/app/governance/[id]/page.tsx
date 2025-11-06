@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
 import {
   ArrowLeft,
   Edit,
@@ -12,14 +13,40 @@ import {
   Download,
   Share,
   XCircle,
+  AlertTriangle,
+  CheckSquare,
+  MessageSquare,
+  Paperclip,
+  Activity,
+  BarChart3,
+  Clock,
+  Archive,
+  TrendingUp,
+  Target,
+  FileText,
+  Users,
+  Eye,
+  Flag,
+  Settings,
+  ListChecks,
+  UserCheck,
+  Briefcase,
+  History,
 } from "lucide-react";
 
+// Complete interfaces matching ALL schema relationships
 interface GovernanceItem {
-  id: string;
+  id: number;
+  number?: number;
   title: string;
   description: string;
-  status: string;
-  priority: string;
+  status:
+    | "NOT_STARTED"
+    | "IN_PROGRESS"
+    | "BLOCKED"
+    | "AT_RISK"
+    | "COMPLETED"
+    | "DEFERRED";
   progress: number;
   dueDate: string | null;
   visibility: string;
@@ -28,56 +55,271 @@ interface GovernanceItem {
   tags?: string[];
   createdAt: string;
   updatedAt: string;
-  owner?: { id: string; name: string; email: string };
-  department?: { id: string; name: string };
-  raci: {
-    responsible?: { id: string; name: string };
-    accountable?: { id: string; name: string };
-    consulted?: { id: string; name: string };
-    informed?: { id: string; name: string };
-  };
-  attachment?: Array<{
-    id: string;
-    filename: string;
-    url: string;
-    size?: number;
-  }>;
-  comment?: Array<{
-    id: string;
-    content: string;
-    createdAt: string;
-    author?: { id: string; name: string };
-  }>;
+
+  // Direct relationships from schema
+  owner?: User;
+  user?: User; // API sometimes returns as 'user' instead of 'owner'
+  department?: Department;
+
+  // All relationship arrays from schema
+  actionitem?: ActionItem[]; // Meeting action items
+  assignment?: Assignment[]; // Task assignments
+  attachment?: Attachment[]; // File attachments
+  auditevent?: AuditEvent[]; // Audit trail events
+  auditplan?: AuditPlan[]; // Audit plans
+  comment?: Comment[]; // Comments/discussions
+  raci?: RaciRole[]; // RACI matrix roles
+  risk?: Risk[]; // Associated risks
+  subtask?: Subtask[]; // Sub-tasks breakdown
+
+  // For legacy compatibility
+  attachments?: Attachment[];
+  comments?: Comment[];
+  subtasks?: Subtask[];
+
   _count?: {
-    subtask: number;
-    comment: number;
+    actionitem: number;
+    assignment: number;
     attachment: number;
+    auditevent: number;
+    auditplan: number;
+    comment: number;
+    raci: number;
+    risk: number;
+    subtask: number;
   };
 }
 
 interface User {
-  id: string;
-  name: string;
+  id: number;
+  name?: string;
   email: string;
+  image?: string;
 }
 
-const statusConfig = {
-  active: {
-    label: "Active",
-    color: "bg-green-100 text-green-800 border-green-200",
+interface Department {
+  id: number;
+  name: string;
+  code?: string;
+  createdAt: string;
+}
+
+interface ActionItem {
+  id: number;
+  title: string;
+  status:
+    | "NOT_STARTED"
+    | "IN_PROGRESS"
+    | "BLOCKED"
+    | "AT_RISK"
+    | "COMPLETED"
+    | "DEFERRED";
+  dueDate?: string;
+  meetingId?: number;
+  owner?: User;
+  meeting?: {
+    id: number;
+    date: string;
+    type: string;
+  };
+}
+
+interface Assignment {
+  id: number;
+  kind: string;
+  user: User;
+}
+
+interface Attachment {
+  id: number;
+  label: string;
+  url: string;
+  createdAt: string;
+  user: User; // addedBy in schema
+}
+
+interface AuditEvent {
+  id: number;
+  kind: string;
+  message: string;
+  createdAt: string;
+  user?: User; // actor in schema
+}
+
+interface AuditPlan {
+  id: number;
+  title: string;
+  quarter: string;
+  scope: string;
+  owner?: User;
+}
+
+interface Comment {
+  id: number;
+  body: string;
+  createdAt: string;
+  user: User; // author in schema
+}
+
+interface RaciRole {
+  id: number;
+  role: "R" | "A" | "C" | "I";
+  user: User;
+}
+
+interface Risk {
+  id: number;
+  title: string;
+  impact: number;
+  likelihood: number;
+  rating: number;
+  status:
+    | "NOT_STARTED"
+    | "IN_PROGRESS"
+    | "BLOCKED"
+    | "AT_RISK"
+    | "COMPLETED"
+    | "DEFERRED";
+  notes?: string;
+  createdAt: string;
+  owner?: User;
+  department?: Department;
+}
+
+interface Subtask {
+  id: number;
+  title: string;
+  done: boolean;
+  dueDate?: string;
+  user?: User; // assignee in schema
+}
+
+const STATUS_CONFIG = {
+  NOT_STARTED: {
+    label: "Not Started",
+    color: "bg-slate-100 text-slate-700",
+    icon: Clock,
   },
-  completed: {
+  IN_PROGRESS: {
+    label: "In Progress",
+    color: "bg-blue-100 text-blue-700",
+    icon: Activity,
+  },
+  BLOCKED: {
+    label: "Blocked",
+    color: "bg-red-100 text-red-700",
+    icon: AlertTriangle,
+  },
+  AT_RISK: {
+    label: "At Risk",
+    color: "bg-amber-100 text-amber-700",
+    icon: Flag,
+  },
+  COMPLETED: {
     label: "Completed",
-    color: "bg-blue-100 text-blue-800 border-blue-200",
+    color: "bg-emerald-100 text-emerald-700",
+    icon: CheckSquare,
   },
-  on_hold: {
-    label: "On Hold",
-    color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  DEFERRED: {
+    label: "Deferred",
+    color: "bg-purple-100 text-purple-700",
+    icon: Archive,
   },
-  cancelled: {
-    label: "Cancelled",
-    color: "bg-red-100 text-red-800 border-red-200",
-  },
+};
+
+// User Avatar Component
+const UserAvatar = ({
+  user,
+  size = "sm",
+}: {
+  user: User;
+  size?: "xs" | "sm" | "md" | "lg";
+}) => {
+  const sizeClasses = {
+    xs: "h-6 w-6 text-xs",
+    sm: "h-8 w-8 text-sm",
+    md: "h-10 w-10 text-sm",
+    lg: "h-12 w-12 text-base",
+  };
+
+  const iconSizes = {
+    xs: "h-3 w-3",
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return user.email.charAt(0).toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Check if user has a valid image URL and it's not empty
+  if (
+    user.image &&
+    user.image.trim() !== "" &&
+    user.image !== "null" &&
+    user.image !== "undefined"
+  ) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        className={`${sizeClasses[size]} rounded-full object-cover border-2 border-gray-200`}
+        src={user.image}
+        alt={user.name || user.email}
+      />
+    );
+  }
+
+  // Show initials if user has a name, otherwise show user icon
+  if (user.name && user.name.trim() !== "") {
+    return (
+      <div
+        className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium border-2 border-gray-200`}
+      >
+        {getInitials(user.name)}
+      </div>
+    );
+  }
+
+  // Fallback to user icon if no name
+  return (
+    <div
+      className={`${sizeClasses[size]} rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-200`}
+    >
+      <User className={`${iconSizes[size]} text-gray-600`} />
+    </div>
+  );
+};
+
+// User Display Component with Avatar and Name
+const UserDisplay = ({
+  user,
+  showEmail = false,
+  size = "sm",
+}: {
+  user: User;
+  showEmail?: boolean;
+  size?: "xs" | "sm" | "md" | "lg";
+}) => {
+  return (
+    <div className="flex items-center space-x-3">
+      <UserAvatar user={user} size={size} />
+      <div className="min-w-0">
+        <p className="font-medium text-gray-900 truncate">
+          {user.name || user.email}
+        </p>
+        {showEmail && user.name && (
+          <p className="text-sm text-gray-500 truncate">{user.email}</p>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default function GovernanceDetailPage({
@@ -86,10 +328,9 @@ export default function GovernanceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const [item, setItem] = useState<GovernanceItem | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("details");
+  const [activeTab, setActiveTab] = useState("overview");
   const router = useRouter();
 
   const resolvedParams = use(params);
@@ -100,22 +341,16 @@ export default function GovernanceDetailPage({
 
     const fetchData = async () => {
       try {
-        const [itemRes, usersRes] = await Promise.all([
-          fetch(`/api/governance/${itemId}`, {
-            headers: { "Cache-Control": "no-cache" },
-          }),
-          fetch("/api/users", { headers: { "Cache-Control": "no-cache" } }),
-        ]);
+        const response = await fetch(`/api/governance/${itemId}`, {
+          headers: { "Cache-Control": "no-cache" },
+        });
 
-        if (!itemRes.ok) {
+        if (!response.ok) {
           throw new Error("Failed to fetch governance item");
         }
 
-        const itemData = await itemRes.json();
-        const usersData = usersRes.ok ? await usersRes.json() : { users: [] };
-
+        const itemData = await response.json();
         setItem(itemData);
-        setUsers(Array.isArray(usersData) ? usersData : usersData.users || []);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err instanceof Error ? err.message : "An error occurred");
@@ -126,6 +361,38 @@ export default function GovernanceDetailPage({
 
     fetchData();
   }, [itemId]);
+
+  // Quick Actions
+  const handleExport = async () => {
+    try {
+      const response = await fetch(`/api/governance/${itemId}/export`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `governance-item-${itemId}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+      alert("Export functionality coming soon!");
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: item?.title,
+        text: item?.description,
+        url: window.location.href,
+      });
+    } catch {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard!");
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -142,68 +409,31 @@ export default function GovernanceDetailPage({
 
   const getStatusConfig = (status: string) => {
     return (
-      statusConfig[status as keyof typeof statusConfig] || statusConfig.active
+      STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ||
+      STATUS_CONFIG.NOT_STARTED
     );
   };
 
-  const assignRaciRole = async (role: string, userId: string) => {
-    try {
-      const response = await fetch(`/api/governance/${itemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          raci: {
-            ...item?.raci,
-            [role]: { id: userId },
-          },
-        }),
-      });
-
-      if (response.ok) {
-        const updatedItem = await response.json();
-        setItem(updatedItem);
-      }
-    } catch (error) {
-      console.error("Error assigning RACI role:", error);
-    }
+  const getRiskScore = () => {
+    if (!item?.risk?.length) return 0;
+    return Math.round(
+      item.risk.reduce((acc, risk) => acc + risk.rating, 0) / item.risk.length
+    );
   };
 
-  const removeRaciRole = async (role: string) => {
-    try {
-      const response = await fetch(`/api/governance/${itemId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          raci: {
-            ...item?.raci,
-            [role]: null,
-          },
-        }),
-      });
-
-      if (response.ok) {
-        const updatedItem = await response.json();
-        setItem(updatedItem);
-      }
-    } catch (error) {
-      console.error("Error removing RACI role:", error);
-    }
-  };
-
-  const getRaciRoleUser = (role: string) => {
-    if (!item?.raci) return null;
-    const roleData = item.raci[role as keyof typeof item.raci];
-    if (!roleData?.id) return null;
-
-    return users.find((user) => user.id === roleData.id);
+  const getCompletionRate = () => {
+    const subtasks = item?.subtask || item?.subtasks || [];
+    const completed = subtasks.filter((t) => t.done).length;
+    const total = subtasks.length || 1;
+    return Math.round((completed / total) * 100);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading governance item...</p>
         </div>
       </div>
     );
@@ -211,16 +441,16 @@ export default function GovernanceDetailPage({
 
   if (error || !item) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
-          <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
             Error Loading Item
           </h1>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => router.back()}
-            className="text-blue-600 hover:text-blue-800"
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             Go back
           </button>
@@ -230,130 +460,390 @@ export default function GovernanceDetailPage({
   }
 
   const statusConf = getStatusConfig(item.status);
+  const StatusIcon = statusConf.icon;
+
+  // All tabs representing schema relationships
   const tabs = [
-    { id: "details", label: "Details" },
-    { id: "raci", label: "RACI Matrix" },
-    { id: "attachments", label: "Attachments" },
-    { id: "activity", label: "Activity" },
+    { id: "overview", label: "Overview", icon: Eye, count: null },
+    { id: "details", label: "Details", icon: FileText, count: null },
+    {
+      id: "subtasks",
+      label: "Subtasks",
+      icon: ListChecks,
+      count: item._count?.subtask || 0,
+    },
+    {
+      id: "actionitems",
+      label: "Action Items",
+      icon: Target,
+      count: item._count?.actionitem || 0,
+    },
+    {
+      id: "raci",
+      label: "RACI Matrix",
+      icon: Users,
+      count: item._count?.raci || 0,
+    },
+    {
+      id: "assignments",
+      label: "Assignments",
+      icon: UserCheck,
+      count: item._count?.assignment || 0,
+    },
+    {
+      id: "risks",
+      label: "Risks",
+      icon: AlertTriangle,
+      count: item._count?.risk || 0,
+    },
+    {
+      id: "attachments",
+      label: "Files",
+      icon: Paperclip,
+      count: item._count?.attachment || 0,
+    },
+    {
+      id: "comments",
+      label: "Comments",
+      icon: MessageSquare,
+      count: item._count?.comment || 0,
+    },
+    {
+      id: "auditplans",
+      label: "Audit Plans",
+      icon: Briefcase,
+      count: item._count?.auditplan || 0,
+    },
+    {
+      id: "audittrail",
+      label: "Audit Trail",
+      icon: History,
+      count: item._count?.auditevent || 0,
+    },
+    { id: "analytics", label: "Analytics", icon: BarChart3, count: null },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Enhanced Header */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-4">
               <Link
                 href="/governance"
-                className="inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors"
+                className="inline-flex items-center px-3 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-gray-700"
               >
-                <ArrowLeft className="w-4 h-4 mr-1" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Governance
               </Link>
-              <div className="text-gray-300">|</div>
-              <h1 className="text-xl font-semibold text-gray-900 truncate">
-                {item.title}
-              </h1>
+              <div className="h-6 w-px bg-gray-300" />
+              <div>
+                <div className="flex items-center space-x-3">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    {item.title}
+                  </h1>
+                  <span className="text-gray-500">
+                    #{item.number || item.id}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-4 mt-1">
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusConf.color}`}
+                  >
+                    <StatusIcon className="w-4 h-4 mr-1" />
+                    {statusConf.label}
+                  </span>
+                  {item.dueDate && (
+                    <span
+                      className={`text-sm ${
+                        isOverdue(item.dueDate)
+                          ? "text-red-600"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      Due: {formatDate(item.dueDate)}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
+
+            {/* Quick Actions */}
             <div className="flex items-center space-x-2">
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConf.color}`}
+              <button
+                onClick={handleShare}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+                title="Share"
               >
-                {statusConf.label}
-              </span>
+                <Share className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleExport}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+                title="Export"
+              >
+                <Download className="w-5 h-5" />
+              </button>
+              <div className="h-6 w-px bg-gray-300" />
+              <Link
+                href={`/governance/${item.id}/edit`}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Link>
             </div>
           </div>
 
-          {/* Tab Navigation */}
-          <div className="mt-4">
-            <nav className="flex space-x-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+          {/* Complete Tab Navigation - All Schema Relationships */}
+          <div className="mt-6">
+            <nav className="flex space-x-1 overflow-x-auto pb-2">
+              {tabs.map((tab) => {
+                const TabIcon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
+                      activeTab === tab.id
+                        ? "bg-blue-100 text-blue-700 border border-blue-200"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
+                  >
+                    <TabIcon className="w-4 h-4 mr-2" />
+                    {tab.label}
+                    {tab.count !== null && tab.count > 0 && (
+                      <span className="ml-2 bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-full">
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </nav>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto p-4">
+      {/* Content Area */}
+      <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
           {/* Main Content */}
           <div className="xl:col-span-3">
-            {activeTab === "details" && (
+            {/* Overview Tab */}
+            {activeTab === "overview" && (
               <div className="space-y-6">
+                {/* Key Metrics Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          Progress
+                        </p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {item.progress}%
+                        </p>
+                      </div>
+                      <TrendingUp className="w-8 h-8 text-blue-500" />
+                    </div>
+                  </div>
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          Risk Score
+                        </p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {getRiskScore()}
+                        </p>
+                      </div>
+                      <AlertTriangle className="w-8 h-8 text-amber-500" />
+                    </div>
+                  </div>
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          Completion
+                        </p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {getCompletionRate()}%
+                        </p>
+                      </div>
+                      <CheckSquare className="w-8 h-8 text-green-500" />
+                    </div>
+                  </div>
+                  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">
+                          Comments
+                        </p>
+                        <p className="text-2xl font-bold text-gray-900">
+                          {item._count?.comment || 0}
+                        </p>
+                      </div>
+                      <MessageSquare className="w-8 h-8 text-purple-500" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description & Key Details */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Description
+                    </h3>
+                    <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Key Information
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-3">
+                        <User className="w-5 h-5 text-gray-400 mt-1" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm text-gray-600 mb-2">Owner</p>
+                          {item.owner || item.user ? (
+                            <UserDisplay
+                              user={(item.owner || item.user)!}
+                              showEmail={false}
+                              size="md"
+                            />
+                          ) : (
+                            <p className="font-medium text-gray-500">
+                              Unassigned
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Building2 className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-600">Department</p>
+                          <p className="font-medium">
+                            {item.department?.name || "Not specified"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Calendar className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-sm text-gray-600">Due Date</p>
+                          <p
+                            className={`font-medium ${
+                              isOverdue(item.dueDate)
+                                ? "text-red-600"
+                                : "text-gray-900"
+                            }`}
+                          >
+                            {item.dueDate
+                              ? formatDate(item.dueDate)
+                              : "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Relationships Summary */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    All Relationships
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {item._count?.subtask || 0}
+                      </div>
+                      <div className="text-sm text-gray-600">Subtasks</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {item._count?.actionitem || 0}
+                      </div>
+                      <div className="text-sm text-gray-600">Action Items</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {item._count?.raci || 0}
+                      </div>
+                      <div className="text-sm text-gray-600">RACI Roles</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-amber-600">
+                        {item._count?.risk || 0}
+                      </div>
+                      <div className="text-sm text-gray-600">Risks</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-indigo-600">
+                        {item._count?.attachment || 0}
+                      </div>
+                      <div className="text-sm text-gray-600">Files</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-teal-600">
+                        {item._count?.auditevent || 0}
+                      </div>
+                      <div className="text-sm text-gray-600">Audit Events</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Details Tab */}
+            {activeTab === "details" && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                  Detailed Information
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Title */}
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Title
                     </label>
-                    <div className="text-lg font-semibold text-gray-900 bg-gray-50 px-3 py-2 rounded border">
+                    <div className="p-3 bg-gray-50 rounded-lg border">
                       {item.title}
                     </div>
                   </div>
-
-                  {/* Owner */}
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-                      <User className="w-4 h-4 mr-1" />
-                      Owner
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Number
                     </label>
-                    <div className="bg-gray-50 px-3 py-2 rounded border text-gray-900">
-                      {item.owner?.name || item.owner?.email || "Unassigned"}
+                    <div className="p-3 bg-gray-50 rounded-lg border">
+                      #{item.number || item.id}
                     </div>
                   </div>
-
-                  {/* Department */}
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-                      <Building2 className="w-4 h-4 mr-1" />
-                      Department
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Status
                     </label>
-                    <div className="bg-gray-50 px-3 py-2 rounded border text-gray-900">
-                      {item.department?.name || "Not specified"}
+                    <div className="p-3 bg-gray-50 rounded-lg border">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${statusConf.color}`}
+                      >
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {statusConf.label}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Due Date */}
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      Due Date
-                    </label>
-                    <div
-                      className={`bg-gray-50 px-3 py-2 rounded border ${
-                        isOverdue(item.dueDate)
-                          ? "text-red-600"
-                          : "text-gray-900"
-                      }`}
-                    >
-                      {item.dueDate ? formatDate(item.dueDate) : "Not set"}
-                    </div>
-                  </div>
-
-                  {/* Progress */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Progress
                     </label>
-                    <div className="bg-gray-50 px-3 py-2 rounded border">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-900">
-                          {item.progress}%
-                        </span>
-                        <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div className="p-3 bg-gray-50 rounded-lg border">
+                      <div className="flex items-center space-x-3">
+                        <span className="font-medium">{item.progress}%</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${item.progress}%` }}
@@ -362,246 +852,124 @@ export default function GovernanceDetailPage({
                       </div>
                     </div>
                   </div>
-
-                  {/* Description */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Description
-                    </label>
-                    <div className="bg-gray-50 px-3 py-2 rounded border min-h-[100px] text-gray-900">
-                      <p className="whitespace-pre-wrap">{item.description}</p>
-                    </div>
-                  </div>
-
-                  {/* Created/Updated dates */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Created Date
+                      Owner
                     </label>
-                    <div className="bg-gray-50 px-3 py-2 rounded border text-gray-900 text-sm">
+                    <div className="p-3 bg-gray-50 rounded-lg border">
+                      {item.owner || item.user ? (
+                        <UserDisplay
+                          user={(item.owner || item.user)!}
+                          showEmail={true}
+                          size="sm"
+                        />
+                      ) : (
+                        <span className="text-gray-500">Unassigned</span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Department
+                    </label>
+                    <div className="p-3 bg-gray-50 rounded-lg border">
+                      {item.department?.name || "Not specified"}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Visibility
+                    </label>
+                    <div className="p-3 bg-gray-50 rounded-lg border capitalize">
+                      {item.visibility}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Action Item Type
+                    </label>
+                    <div className="p-3 bg-gray-50 rounded-lg border">
+                      {item.actionitemType || "Not specified"}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Created
+                    </label>
+                    <div className="p-3 bg-gray-50 rounded-lg border">
                       {formatDate(item.createdAt)}
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Last Updated
                     </label>
-                    <div className="bg-gray-50 px-3 py-2 rounded border text-gray-900 text-sm">
+                    <div className="p-3 bg-gray-50 rounded-lg border">
                       {formatDate(item.updatedAt)}
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "raci" && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      RACI Matrix
-                    </h3>
-                  </div>
-                  <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {[
-                        "responsible",
-                        "accountable",
-                        "consulted",
-                        "informed",
-                      ].map((role, index) => {
-                        const colors = [
-                          "bg-red-500",
-                          "bg-blue-500",
-                          "bg-yellow-500",
-                          "bg-green-500",
-                        ];
-                        const user = getRaciRoleUser(role);
-                        return (
-                          <div key={role}>
-                            <label className="text-sm font-medium text-gray-700 mb-3 flex items-center capitalize">
-                              <span
-                                className={`w-3 h-3 rounded-full ${colors[index]} mr-2`}
-                              ></span>
-                              {role}
-                            </label>
-                            <div className="bg-gray-50 p-4 rounded border min-h-[120px]">
-                              {user ? (
-                                <div className="flex items-center justify-between bg-white p-3 rounded border">
-                                  <span className="font-medium">
-                                    {user.name}
-                                  </span>
-                                  <button
-                                    onClick={() => removeRaciRole(role)}
-                                    className="text-red-500 hover:text-red-700"
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
-                              ) : (
-                                <div>
-                                  <p className="text-gray-500 text-sm mb-2">
-                                    No user assigned
-                                  </p>
-                                  <select
-                                    onChange={(e) => {
-                                      if (e.target.value) {
-                                        assignRaciRole(role, e.target.value);
-                                        e.target.value = "";
-                                      }
-                                    }}
-                                    className="w-full p-2 border border-gray-300 rounded text-sm"
-                                  >
-                                    <option value="">Select a user...</option>
-                                    {users.map((user: User) => (
-                                      <option key={user.id} value={user.id}>
-                                        {user.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Description
+                    </label>
+                    <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+                      <p className="whitespace-pre-wrap">{item.description}</p>
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "attachments" && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Attachments
-                    </h3>
-                  </div>
-                  <div className="p-6">
-                    {item.attachment && item.attachment.length > 0 ? (
-                      <div className="space-y-4">
-                        {item.attachment.map((att, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border"
-                          >
-                            <div className="flex items-center">
-                              <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-3">
-                                <span className="text-blue-600 text-xs font-medium">
-                                  {att.filename
-                                    ? att.filename
-                                        .split(".")
-                                        .pop()
-                                        ?.toUpperCase()
-                                    : "FILE"}
-                                </span>
-                              </div>
-                              <div>
-                                <div className="font-medium text-gray-900">
-                                  {att.filename || "Unknown file"}
-                                </div>
-                                {att.size && (
-                                  <div className="text-sm text-gray-500">
-                                    {(att.size / 1024).toFixed(1)} KB
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <a
-                              href={att.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                  {item.tags && item.tags.length > 0 && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Tags
+                      </label>
+                      <div className="p-3 bg-gray-50 rounded-lg border">
+                        <div className="flex flex-wrap gap-2">
+                          {item.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                             >
-                              View
-                            </a>
-                          </div>
-                        ))}
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                          No attachments
-                        </h3>
-                        <p className="text-gray-500">
-                          No files have been attached to this governance item.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {activeTab === "activity" && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Activity Timeline
-                    </h3>
-                  </div>
-                  <div className="p-6">
-                    {item.comment && item.comment.length > 0 ? (
-                      <div className="space-y-6">
-                        {item.comment.map((comment, index) => (
-                          <div key={index} className="flex space-x-3">
-                            <div className="flex-shrink-0">
-                              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-gray-600">
-                                  {comment.author?.name?.charAt(0) || "?"}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="bg-gray-50 rounded-lg p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="text-sm font-medium text-gray-900">
-                                    {comment.author?.name || "Anonymous"}
-                                  </h4>
-                                  <time className="text-xs text-gray-500">
-                                    {comment.createdAt
-                                      ? formatDate(comment.createdAt)
-                                      : ""}
-                                  </time>
-                                </div>
-                                <p className="text-gray-700 text-sm whitespace-pre-wrap">
-                                  {comment.content}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12">
-                        <h3 className="text-lg font-medium text-gray-900 mb-2">
-                          No activity
-                        </h3>
-                        <p className="text-gray-500">
-                          No comments or activity recorded for this governance
-                          item.
-                        </p>
-                      </div>
-                    )}
-                  </div>
+            {/* Placeholder for other tabs */}
+            {activeTab !== "overview" && activeTab !== "details" && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                <div className="text-gray-400 mb-4">
+                  <Settings className="w-16 h-16 mx-auto" />
                 </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {tabs.find((t) => t.id === activeTab)?.label} Section
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  This section will show all{" "}
+                  {tabs.find((t) => t.id === activeTab)?.label.toLowerCase()}{" "}
+                  related to this governance item.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Count:{" "}
+                  {item._count?.[activeTab as keyof typeof item._count] || 0}{" "}
+                  items
+                </p>
               </div>
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="xl:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="px-4 py-3 border-b border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-900">
-                  Quick Actions
-                </h3>
-              </div>
-              <div className="p-4 space-y-3">
+          {/* Enhanced Sidebar */}
+          <div className="xl:col-span-1 space-y-6">
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                Quick Actions
+              </h3>
+              <div className="space-y-3">
                 <Link
                   href={`/governance/${item.id}/edit`}
                   className="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
@@ -609,63 +977,112 @@ export default function GovernanceDetailPage({
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Item
                 </Link>
-
-                <button className="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                <button
+                  onClick={handleExport}
+                  className="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                >
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </button>
-
-                <button className="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                <button
+                  onClick={handleShare}
+                  className="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                >
                   <Share className="w-4 h-4 mr-2" />
                   Share
                 </button>
+              </div>
+            </div>
 
-                <hr className="border-gray-200" />
-
-                {/* Status */}
+            {/* Progress Tracking */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                Progress Tracking
+              </h3>
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <div className="space-y-1">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusConf.color}`}
-                    >
-                      {statusConf.label}
-                    </span>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Overall Progress</span>
+                    <span className="font-medium">{item.progress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${item.progress}%` }}
+                    />
                   </div>
                 </div>
-
-                <hr className="border-gray-200" />
-
-                {/* Statistics */}
-                {item._count && (
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-2">
-                      Statistics
-                    </label>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Subtasks:</span>
-                        <span className="font-medium">
-                          {item._count.subtask || 0}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Comments:</span>
-                        <span className="font-medium">
-                          {item._count.comment || 0}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Files:</span>
-                        <span className="font-medium">
-                          {item._count.attachment || 0}
-                        </span>
-                      </div>
-                    </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Task Completion</span>
+                    <span className="font-medium">{getCompletionRate()}%</span>
                   </div>
-                )}
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${getCompletionRate()}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Complete Statistics - All Schema Relationships */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                All Relationships
+              </h3>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtasks</span>
+                  <span className="font-medium">
+                    {item._count?.subtask || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Action Items</span>
+                  <span className="font-medium">
+                    {item._count?.actionitem || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">RACI Roles</span>
+                  <span className="font-medium">{item._count?.raci || 0}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Assignments</span>
+                  <span className="font-medium">
+                    {item._count?.assignment || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Risks</span>
+                  <span className="font-medium">{item._count?.risk || 0}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Attachments</span>
+                  <span className="font-medium">
+                    {item._count?.attachment || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Comments</span>
+                  <span className="font-medium">
+                    {item._count?.comment || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Audit Plans</span>
+                  <span className="font-medium">
+                    {item._count?.auditplan || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Audit Events</span>
+                  <span className="font-medium">
+                    {item._count?.auditevent || 0}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

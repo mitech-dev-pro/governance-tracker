@@ -26,6 +26,7 @@ import {
   FileText,
   Check,
   Minus,
+  User,
 } from "lucide-react";
 import type {
   GovernanceResponse,
@@ -33,6 +34,81 @@ import type {
   ApiError,
 } from "../types/governance";
 import CreateGovernanceModal from "../components/CreateGovernanceModal";
+
+// User Avatar Component (reusable)
+const UserAvatar = ({
+  user,
+  size = "sm",
+}: {
+  user: {
+    id?: number | string;
+    name?: string | null;
+    email: string;
+    image?: string | null;
+  };
+  size?: "xs" | "sm" | "md" | "lg";
+}) => {
+  const sizeClasses = {
+    xs: "h-6 w-6 text-xs",
+    sm: "h-8 w-8 text-sm",
+    md: "h-10 w-10 text-sm",
+    lg: "h-12 w-12 text-base",
+  };
+
+  const iconSizes = {
+    xs: "h-3 w-3",
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return user.email.charAt(0).toUpperCase();
+    return name
+      .split(" ")
+      .map((n) => n.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Check if user has a valid image URL and it's not empty
+  if (
+    user.image &&
+    user.image.trim() !== "" &&
+    user.image !== "null" &&
+    user.image !== "undefined"
+  ) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        className={`${sizeClasses[size]} rounded-full object-cover border-2 border-gray-200`}
+        src={user.image}
+        alt={user.name || user.email}
+      />
+    );
+  }
+
+  // Show initials if user has a name, otherwise show user icon
+  if (user.name && user.name.trim() !== "") {
+    return (
+      <div
+        className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium border-2 border-gray-200`}
+      >
+        {getInitials(user.name)}
+      </div>
+    );
+  }
+
+  // Fallback to user icon if no name
+  return (
+    <div
+      className={`${sizeClasses[size]} rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-200`}
+    >
+      <User className={`${iconSizes[size]} text-gray-600`} />
+    </div>
+  );
+};
 
 // Status configuration
 const STATUS_CONFIG = {
@@ -368,9 +444,7 @@ const TableRow = ({
     <td className="px-4 py-3 whitespace-nowrap">
       {item.user ? (
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
-            {item.user.name?.charAt(0) || item.user.email.charAt(0)}
-          </div>
+          <UserAvatar user={item.user} size="xs" />
           <div className="min-w-0 flex-1">
             <div className="text-sm font-medium text-gray-900 truncate">
               {item.user.name || item.user.email.split("@")[0]}
@@ -1001,10 +1075,7 @@ export default function GovernancePage() {
                             <div className="grid grid-cols-1 gap-3 mb-4">
                               {item.user && (
                                 <div className="flex items-center gap-3">
-                                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                                    {item.user.name?.charAt(0) ||
-                                      item.user.email.charAt(0)}
-                                  </div>
+                                  <UserAvatar user={item.user} size="xs" />
                                   <div className="min-w-0 flex-1">
                                     <div className="font-medium text-gray-900 text-sm">
                                       {item.user.name ||
@@ -1174,10 +1245,7 @@ export default function GovernancePage() {
                         <div className="space-y-2 text-xs text-gray-600">
                           {item.user && (
                             <div className="flex items-center gap-2">
-                              <div className="w-5 h-5 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                                {item.user.name?.charAt(0) ||
-                                  item.user.email.charAt(0)}
-                              </div>
+                              <UserAvatar user={item.user} size="xs" />
                               <div className="min-w-0 flex-1">
                                 <div className="font-medium text-gray-900 truncate">
                                   {item.user.name ||
