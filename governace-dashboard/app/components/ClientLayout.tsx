@@ -16,7 +16,7 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
   const pathname = usePathname();
 
   // Pages that should not show navbar/sidebar/footer
-  const authPages = ["/login", "/logout"];
+  const authPages = ["/login", "/register", "/logout"];
   const isAuthPage = authPages.includes(pathname);
 
   const toggleSidebar = () => {
