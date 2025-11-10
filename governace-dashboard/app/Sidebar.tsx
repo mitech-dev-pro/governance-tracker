@@ -47,14 +47,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     },
     {
       name: "Risk Management",
-      icon: "💰",
-      href: "/risk-overview",
-      hasSubmenu: true,
-      submenu: [
-        { name: "Risk Register", href: "/risk/risk-register" },
-        { name: "Risk Matrix", href: "/risk/risk-matrix" },
-        { name: "Treatments", href: "/risk/risk-treatment" },
-      ],
+      icon: "⚠️",
+      href: "/risk",
+      hasSubmenu: false,
     },
     {
       name: "Compliance",
