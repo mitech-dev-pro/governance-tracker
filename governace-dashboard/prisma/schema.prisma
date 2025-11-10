@@ -105,6 +105,7 @@ model department {
   userdepartment userdepartment[]
   controls       control[]
   policies       policy[]
+  audits         audit[]
 }
 
 model GovernanceItem {
@@ -250,6 +251,8 @@ model user {
   policies         policy[]
   approvedPolicies policy[]         @relation("PolicyApprover")
   assessments      assessment[]
+  ledAudits        audit[]          @relation("AuditLead")
+  auditFindings    audit_finding[]
 }
 
 model userdepartment {
@@ -425,4 +428,113 @@ model assessment {
 
   @@index([controlId], map: "Assessment_controlId_fkey")
   @@index([assessorId], map: "Assessment_assessorId_fkey")
+}
+
+model audit {
+  id            Int              @id @default(autoincrement())
+  code          String           @unique @db.VarChar(64)
+  title         String           @db.VarChar(255)
+  description   String           @db.Text
+  type          audit_type       @default(INTERNAL)
+  status        audit_status     @default(PLANNED)
+  scope         String           @db.Text
+  leadAuditorId Int?
+  departmentId  Int?
+  startDate     DateTime
+  endDate       DateTime
+  reportDate    DateTime?
+  conclusion    String?          @db.Text
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  leadAuditor   user?            @relation("AuditLead", fields: [leadAuditorId], references: [id], map: "Audit_leadAuditorId_fkey")
+  department    department?      @relation(fields: [departmentId], references: [id], map: "Audit_departmentId_fkey")
+  findings      audit_finding[]
+  schedules     audit_schedule[]
+
+  @@index([leadAuditorId], map: "Audit_leadAuditorId_fkey")
+  @@index([departmentId], map: "Audit_departmentId_fkey")
+}
+
+model audit_finding {
+  id              Int              @id @default(autoincrement())
+  auditId         Int
+  title           String           @db.VarChar(255)
+  description     String           @db.Text
+  severity        finding_severity @default(MEDIUM)
+  status          finding_status   @default(OPEN)
+  category        String           @db.VarChar(128)
+  recommendation  String           @db.Text
+  responsibleId   Int?
+  dueDate         DateTime?
+  closedDate      DateTime?
+  evidenceUrl     String?          @db.VarChar(512)
+  remediationPlan String?          @db.Text
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  audit           audit            @relation(fields: [auditId], references: [id], onDelete: Cascade, map: "AuditFinding_auditId_fkey")
+  responsible     user?            @relation(fields: [responsibleId], references: [id], map: "AuditFinding_responsibleId_fkey")
+
+  @@index([auditId], map: "AuditFinding_auditId_fkey")
+  @@index([responsibleId], map: "AuditFinding_responsibleId_fkey")
+}
+
+model audit_schedule {
+  id            Int             @id @default(autoincrement())
+  auditId       Int
+  title         String          @db.VarChar(255)
+  description   String          @db.Text
+  scheduledDate DateTime
+  duration      Int             @default(1)
+  location      String?         @db.VarChar(255)
+  attendees     Json?
+  status        schedule_status @default(SCHEDULED)
+  notes         String?         @db.Text
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  audit         audit           @relation(fields: [auditId], references: [id], onDelete: Cascade, map: "AuditSchedule_auditId_fkey")
+
+  @@index([auditId], map: "AuditSchedule_auditId_fkey")
+}
+
+enum audit_type {
+  INTERNAL
+  EXTERNAL
+  COMPLIANCE
+  FINANCIAL
+  OPERATIONAL
+  IT
+  QUALITY
+}
+
+enum audit_status {
+  PLANNED
+  IN_PROGRESS
+  FIELD_WORK
+  REPORTING
+  COMPLETED
+  CANCELLED
+}
+
+enum finding_severity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFORMATIONAL
+}
+
+enum finding_status {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  DEFERRED
+}
+
+enum schedule_status {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
 }
