@@ -103,6 +103,8 @@ model department {
   governanceitem GovernanceItem[]
   risk           risk[]
   userdepartment userdepartment[]
+  controls       control[]
+  policies       policy[]
 }
 
 model GovernanceItem {
@@ -183,6 +185,7 @@ model risk {
   department     department?     @relation(fields: [departmentId], references: [id], map: "Risk_departmentId_fkey")
   user           user?           @relation(fields: [ownerId], references: [id], map: "Risk_ownerId_fkey")
   governanceitem GovernanceItem? @relation(fields: [relatedItemId], references: [id], map: "Risk_relatedItemId_fkey")
+  controls       control[]
 
   @@index([departmentId], map: "Risk_departmentId_fkey")
   @@index([ownerId], map: "Risk_ownerId_fkey")
@@ -224,25 +227,29 @@ model subtask {
 }
 
 model user {
-  id             Int              @id @default(autoincrement())
-  email          String           @unique(map: "User_email_key")
-  password       String
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime
-  image          String?          @db.VarChar(512)
-  name           String?
-  actionitem     actionitem[]
-  assignment     assignment[]
-  attachment     attachment[]
-  auditevent     auditevent[]
-  auditplan      auditplan[]
-  comment        comment[]
-  governanceitem GovernanceItem[]
-  raci           raci[]
-  risk           risk[]
-  subtask        subtask[]
-  userdepartment userdepartment[]
-  userrole       userrole[]
+  id               Int              @id @default(autoincrement())
+  email            String           @unique(map: "User_email_key")
+  password         String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime
+  image            String?          @db.VarChar(512)
+  name             String?
+  actionitem       actionitem[]
+  assignment       assignment[]
+  attachment       attachment[]
+  auditevent       auditevent[]
+  auditplan        auditplan[]
+  comment          comment[]
+  governanceitem   GovernanceItem[]
+  raci             raci[]
+  risk             risk[]
+  subtask          subtask[]
+  userdepartment   userdepartment[]
+  userrole         userrole[]
+  controls         control[]
+  policies         policy[]
+  approvedPolicies policy[]         @relation("PolicyApprover")
+  assessments      assessment[]
 }
 
 model userdepartment {
@@ -301,4 +308,121 @@ enum risk_status {
   AT_RISK
   COMPLETED
   DEFERRED
+}
+
+enum control_status {
+  ACTIVE
+  INACTIVE
+  UNDER_REVIEW
+  DEPRECATED
+}
+
+enum control_frequency {
+  CONTINUOUS
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+  AD_HOC
+}
+
+enum policy_status {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum assessment_status {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+}
+
+enum assessment_result {
+  PASSED
+  FAILED
+  PARTIALLY_COMPLIANT
+  NOT_APPLICABLE
+}
+
+model control {
+  id            Int               @id @default(autoincrement())
+  code          String            @unique @db.VarChar(64)
+  title         String            @db.VarChar(255)
+  description   String            @db.Text
+  category      String            @db.VarChar(128)
+  status        control_status    @default(ACTIVE)
+  frequency     control_frequency @default(MONTHLY)
+  ownerId       Int?
+  departmentId  Int?
+  policyId      Int?
+  riskId        Int?
+  effectiveness Int?              @db.TinyInt
+  lastReviewed  DateTime?
+  nextReview    DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  user          user?             @relation(fields: [ownerId], references: [id], map: "Control_ownerId_fkey")
+  department    department?       @relation(fields: [departmentId], references: [id], map: "Control_departmentId_fkey")
+  policy        policy?           @relation(fields: [policyId], references: [id], map: "Control_policyId_fkey")
+  risk          risk?             @relation(fields: [riskId], references: [id], map: "Control_riskId_fkey")
+  assessments   assessment[]
+
+  @@index([ownerId], map: "Control_ownerId_fkey")
+  @@index([departmentId], map: "Control_departmentId_fkey")
+  @@index([policyId], map: "Control_policyId_fkey")
+  @@index([riskId], map: "Control_riskId_fkey")
+}
+
+model policy {
+  id            Int           @id @default(autoincrement())
+  code          String        @unique @db.VarChar(64)
+  title         String        @db.VarChar(255)
+  description   String        @db.Text
+  category      String        @db.VarChar(128)
+  status        policy_status @default(DRAFT)
+  version       String        @db.VarChar(32)
+  ownerId       Int?
+  departmentId  Int?
+  approvedBy    Int?
+  approvedDate  DateTime?
+  effectiveDate DateTime?
+  reviewDate    DateTime?
+  attachmentUrl String?       @db.VarChar(512)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  user          user?         @relation(fields: [ownerId], references: [id], map: "Policy_ownerId_fkey")
+  department    department?   @relation(fields: [departmentId], references: [id], map: "Policy_departmentId_fkey")
+  approver      user?         @relation("PolicyApprover", fields: [approvedBy], references: [id], map: "Policy_approvedBy_fkey")
+  controls      control[]
+
+  @@index([ownerId], map: "Policy_ownerId_fkey")
+  @@index([departmentId], map: "Policy_departmentId_fkey")
+  @@index([approvedBy], map: "Policy_approvedBy_fkey")
+}
+
+model assessment {
+  id              Int                @id @default(autoincrement())
+  title           String             @db.VarChar(255)
+  description     String             @db.Text
+  controlId       Int?
+  assessorId      Int?
+  status          assessment_status  @default(SCHEDULED)
+  result          assessment_result?
+  score           Int?               @db.TinyInt
+  scheduledDate   DateTime
+  completedDate   DateTime?
+  findings        String?            @db.Text
+  recommendations String?            @db.Text
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  control         control?           @relation(fields: [controlId], references: [id], map: "Assessment_controlId_fkey")
+  assessor        user?              @relation(fields: [assessorId], references: [id], map: "Assessment_assessorId_fkey")
+
+  @@index([controlId], map: "Assessment_controlId_fkey")
+  @@index([assessorId], map: "Assessment_assessorId_fkey")
 }
