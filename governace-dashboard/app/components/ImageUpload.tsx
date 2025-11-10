@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import Image from "next/image";
 import { X, Camera, AlertCircle, Loader2 } from "lucide-react";
 
 interface ImageUploadProps {
@@ -143,21 +142,12 @@ export default function ImageUpload({
           <div
             className={`relative ${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-lg`}
           >
-            {previewUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={previewUrl}
-                alt="Profile preview"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <Image
-                src={currentImage!}
-                alt="Profile preview"
-                fill
-                className="object-cover"
-              />
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={displayImage}
+              alt="Profile preview"
+              className="w-full h-full object-cover"
+            />
             <button
               type="button"
               onClick={handleRemoveImage}

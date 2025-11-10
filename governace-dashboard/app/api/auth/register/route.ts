@@ -57,26 +57,56 @@ export async function POST(request: NextRequest) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the user
+    // Find or create the default "User" role
+    let userRole = await prisma.role.findFirst({
+      where: { name: "User" },
+    });
+
+    // If "User" role doesn't exist, create it
+    if (!userRole) {
+      userRole = await prisma.role.create({
+        data: {
+          name: "User",
+        },
+      });
+    }
+
+    // Create the user with the default User role
     const user = await prisma.user.create({
       data: {
         name,
         email: email.toLowerCase(),
         password: hashedPassword,
         updatedAt: new Date(),
+        userrole: {
+          create: {
+            roleId: userRole.id,
+          },
+        },
       },
       select: {
         id: true,
         name: true,
         email: true,
         createdAt: true,
+        userrole: {
+          include: {
+            role: true,
+          },
+        },
       },
     });
 
     return NextResponse.json(
       {
         message: "Account created successfully",
-        user,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          createdAt: user.createdAt,
+          roles: user.userrole.map((ur) => ur.role.name),
+        },
       },
       { status: 201 }
     );

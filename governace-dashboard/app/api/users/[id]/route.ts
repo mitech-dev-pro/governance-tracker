@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../prisma/client";
+import bcrypt from "bcryptjs";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -131,7 +132,10 @@ export async function PUT(
     } = { updatedAt: new Date() };
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
-    if (password !== undefined) updateData.password = password; // TODO: Hash in production
+    if (password !== undefined && password.trim() !== "") {
+      // Hash the password before storing
+      updateData.password = await bcrypt.hash(password, 10);
+    }
     if (image !== undefined) updateData.image = image;
 
     // Update user in transaction to handle relationships
