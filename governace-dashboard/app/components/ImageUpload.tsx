@@ -22,6 +22,7 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const sizeClasses = {
@@ -52,6 +53,13 @@ export default function ImageUpload({
       setError("File size must be less than 5MB");
       return;
     }
+
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
 
     uploadFile(file);
   };
@@ -118,25 +126,38 @@ export default function ImageUpload({
     } else {
       onImageChange("");
     }
+    setPreviewUrl("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
+  // Display preview or current image
+  const displayImage = previewUrl || currentImage;
+
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Current Image Display */}
-      {currentImage && (
+      {displayImage && (
         <div className="flex items-center space-x-4">
           <div
             className={`relative ${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-lg`}
           >
-            <Image
-              src={currentImage}
-              alt="Profile preview"
-              fill
-              className="object-cover"
-            />
+            {previewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={previewUrl}
+                alt="Profile preview"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                src={currentImage!}
+                alt="Profile preview"
+                fill
+                className="object-cover"
+              />
+            )}
             <button
               type="button"
               onClick={handleRemoveImage}
@@ -147,7 +168,9 @@ export default function ImageUpload({
             </button>
           </div>
           <div className="flex-1">
-            <p className="text-sm text-gray-600">Current profile picture</p>
+            <p className="text-sm text-gray-600">
+              {previewUrl ? "Preview (unsaved)" : "Current profile picture"}
+            </p>
             <button
               type="button"
               onClick={handleRemoveImage}

@@ -161,6 +161,18 @@ export default function EditUserModal({
         return;
       }
 
+      await response.json();
+
+      // Trigger a global refresh for UserContext
+      // This will update the navbar and user account page if it's the current user
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("userProfileUpdated", {
+            detail: { userId: user.id },
+          })
+        );
+      }
+
       onUserUpdated();
     } catch (error) {
       console.error("Error updating user:", error);

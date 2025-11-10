@@ -18,6 +18,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import ImageUpload from "../../components/ImageUpload";
+import { useUser } from "../../contexts/UserContext";
 
 interface UserProfile {
   id: number;
@@ -50,6 +51,7 @@ interface PasswordChangeData {
 }
 
 export default function UserAccountPage() {
+  const { user: currentUser, refetchUser } = useUser();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -79,34 +81,28 @@ export default function UserAccountPage() {
 
   // Fetch current user profile
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      // For now, we'll simulate getting the current user's profile
-      // In a real app, this would get the authenticated user's data
-      const response = await fetch("/api/users/1"); // Assume user ID 1 for demo
-      if (response.ok) {
-        const userData = await response.json();
-        setProfile(userData);
-        setFormData({
-          name: userData.name || "",
-          email: userData.email,
-          image: userData.image || "",
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      setMessage({
-        type: "error",
-        text: "Failed to load profile information",
+    if (currentUser) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const userProfile: UserProfile = {
+        ...currentUser,
+        name: currentUser.name || "",
+        image: currentUser.image || undefined,
+        createdAt: currentUser.createdAt.toString(),
+        updatedAt: currentUser.updatedAt.toString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        departments: currentUser.userdepartment as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        roles: currentUser.userrole as any,
+      };
+      setProfile(userProfile);
+      setFormData({
+        name: currentUser.name || "",
+        email: currentUser.email,
+        image: currentUser.image || "",
       });
-    } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +110,7 @@ export default function UserAccountPage() {
     setMessage(null);
 
     try {
-      const response = await fetch("/api/users/1", {
+      const response = await fetch("/api/auth/update-profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -123,13 +119,20 @@ export default function UserAccountPage() {
       });
 
       if (response.ok) {
-        const updatedProfile = await response.json();
+        const { user: updatedProfile } = await response.json();
         setProfile(updatedProfile);
         setEditing(false);
         setMessage({
           type: "success",
           text: "Profile updated successfully!",
         });
+        // Refetch user to update navbar
+        refetchUser();
+
+        // Trigger event for other components that might need to refresh
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("userProfileUpdated"));
+        }
       } else {
         const error = await response.json();
         throw new Error(error.error || "Failed to update profile");
