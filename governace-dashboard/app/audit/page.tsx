@@ -73,8 +73,7 @@ export default function AuditPage() {
     if (departmentFilter) {
       filtered = filtered.filter(
         (audit) =>
-          audit.department &&
-          audit.department.id === parseInt(departmentFilter)
+          audit.department && audit.department.id === parseInt(departmentFilter)
       );
     }
 
@@ -348,7 +347,8 @@ export default function AuditPage() {
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">
                             {audit.leadAuditor
-                              ? audit.leadAuditor.name || audit.leadAuditor.email
+                              ? audit.leadAuditor.name ||
+                                audit.leadAuditor.email
                               : "—"}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-900">

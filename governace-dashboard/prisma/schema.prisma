@@ -106,6 +106,7 @@ model department {
   controls       control[]
   policies       policy[]
   audits         audit[]
+  assets         asset[]
 }
 
 model GovernanceItem {
@@ -253,6 +254,7 @@ model user {
   assessments      assessment[]
   ledAudits        audit[]          @relation("AuditLead")
   auditFindings    audit_finding[]
+  assignedAssets   asset[]
 }
 
 model userdepartment {
@@ -537,4 +539,141 @@ enum schedule_status {
   COMPLETED
   CANCELLED
   RESCHEDULED
+}
+
+// Asset Management Models
+model asset {
+  id             Int              @id @default(autoincrement())
+  assetTag       String           @unique @db.VarChar(64)
+  name           String           @db.VarChar(255)
+  category       asset_category
+  type           String           @db.VarChar(128)
+  brand          String?          @db.VarChar(128)
+  model          String?          @db.VarChar(128)
+  serialNumber   String?          @unique @db.VarChar(255)
+  status         asset_status     @default(AVAILABLE)
+  condition      asset_condition  @default(GOOD)
+  location       String?          @db.VarChar(255)
+  departmentId   Int?
+  assignedToId   Int?
+  assignedToName String?          @db.VarChar(255) // Free text for person not in system
+  purchaseDate   DateTime?
+  purchaseCost   Decimal?         @db.Decimal(10, 2)
+  warrantyExpiry DateTime?
+  supplier       String?          @db.VarChar(255)
+  description    String?          @db.Text
+  notes          String?          @db.Text
+  imageUrl       String?          @db.VarChar(512)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  department     department?      @relation(fields: [departmentId], references: [id], map: "Asset_departmentId_fkey")
+  assignedTo     user?            @relation(fields: [assignedToId], references: [id], map: "Asset_assignedToId_fkey")
+  maintenances   maintenance[]
+  stockMovements stock_movement[]
+
+  @@index([departmentId], map: "Asset_departmentId_fkey")
+  @@index([assignedToId], map: "Asset_assignedToId_fkey")
+  @@index([category], map: "Asset_category_idx")
+  @@index([status], map: "Asset_status_idx")
+}
+
+model maintenance {
+  id            Int                @id @default(autoincrement())
+  assetId       Int
+  type          maintenance_type   @default(ROUTINE)
+  description   String             @db.Text
+  performedBy   String?            @db.VarChar(255)
+  scheduledDate DateTime
+  completedDate DateTime?
+  cost          Decimal?           @db.Decimal(10, 2)
+  status        maintenance_status @default(SCHEDULED)
+  notes         String?            @db.Text
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  asset         asset              @relation(fields: [assetId], references: [id], onDelete: Cascade, map: "Maintenance_assetId_fkey")
+
+  @@index([assetId], map: "Maintenance_assetId_fkey")
+  @@index([status], map: "Maintenance_status_idx")
+}
+
+model stock_movement {
+  id           Int           @id @default(autoincrement())
+  assetId      Int?
+  type         movement_type
+  quantity     Int           @default(1)
+  fromLocation String?       @db.VarChar(255)
+  toLocation   String?       @db.VarChar(255)
+  fromUserId   Int?
+  toUserId     Int?
+  reason       String?       @db.Text
+  notes        String?       @db.Text
+  movedBy      String        @db.VarChar(255)
+  movementDate DateTime      @default(now())
+  createdAt    DateTime      @default(now())
+  asset        asset?        @relation(fields: [assetId], references: [id], map: "StockMovement_assetId_fkey")
+
+  @@index([assetId], map: "StockMovement_assetId_fkey")
+  @@index([type], map: "StockMovement_type_idx")
+}
+
+enum asset_category {
+  COMPUTER
+  LAPTOP
+  MONITOR
+  PRINTER
+  SCANNER
+  NETWORKING
+  PERIPHERAL
+  ACCESSORY
+  MOBILE_DEVICE
+  SERVER
+  STORAGE
+  SOFTWARE_LICENSE
+  CONSUMABLE
+  OTHER
+}
+
+enum asset_status {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+  RETIRED
+  LOST
+  DAMAGED
+  RESERVED
+}
+
+enum asset_condition {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
+  NEEDS_REPAIR
+}
+
+enum maintenance_type {
+  ROUTINE
+  REPAIR
+  UPGRADE
+  INSPECTION
+  CLEANING
+  CALIBRATION
+}
+
+enum maintenance_status {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  OVERDUE
+}
+
+enum movement_type {
+  CHECK_IN
+  CHECK_OUT
+  TRANSFER
+  RETURN
+  DISPOSAL
+  PURCHASE
+  ADJUSTMENT
 }
