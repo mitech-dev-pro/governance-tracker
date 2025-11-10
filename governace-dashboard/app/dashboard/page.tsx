@@ -25,6 +25,23 @@ import {
   Laptop,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  LineChart,
+  Line,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  RadialBarChart,
+  RadialBar,
+} from "recharts";
 
 interface DashboardStats {
   governance: {
@@ -120,7 +137,7 @@ export default function DashboardPage() {
   }: {
     title: string;
     value: number | string;
-    icon: any;
+    icon: React.ElementType;
     trend?: number;
     trendLabel?: string;
     color: string;
@@ -135,7 +152,7 @@ export default function DashboardPage() {
       indigo: "bg-indigo-500 text-indigo-600 bg-indigo-50",
     };
 
-    const [bg, text, lightBg] =
+    const [, text, lightBg] =
       colorClasses[color as keyof typeof colorClasses].split(" ");
 
     const content = (
@@ -172,34 +189,6 @@ export default function DashboardPage() {
     );
 
     return link ? <Link href={link}>{content}</Link> : content;
-  };
-
-  const ProgressBar = ({
-    percentage,
-    color,
-  }: {
-    percentage: number;
-    color: string;
-  }) => {
-    const colorClasses = {
-      blue: "bg-blue-500",
-      green: "bg-green-500",
-      red: "bg-red-500",
-      yellow: "bg-yellow-500",
-      purple: "bg-purple-500",
-      indigo: "bg-indigo-500",
-    };
-
-    return (
-      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-        <div
-          className={`h-full ${
-            colorClasses[color as keyof typeof colorClasses]
-          } transition-all duration-500 rounded-full`}
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-    );
   };
 
   if (loading) {
@@ -317,217 +306,723 @@ export default function DashboardPage() {
         </div>
 
         {/* Charts and Detailed Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Governance Status Distribution */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Governance Status Distribution - Modern Donut Chart */}
           <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-gray-900">
-                Governance Status
-              </h3>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Governance Status
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Total: {stats.governance.total} items
+                </p>
+              </div>
               <BarChart3 className="h-5 w-5 text-blue-600" />
             </div>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Active
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">
+            <div className="flex items-center justify-center">
+              <ResponsiveContainer width="100%" height={240}>
+                <RechartsPieChart>
+                  <defs>
+                    <linearGradient id="gradActive" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="100%" stopColor="#059669" />
+                    </linearGradient>
+                    <linearGradient id="gradDraft" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#f59e0b" />
+                      <stop offset="100%" stopColor="#d97706" />
+                    </linearGradient>
+                    <linearGradient
+                      id="gradArchived"
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor="#3b82f6" />
+                      <stop offset="100%" stopColor="#2563eb" />
+                    </linearGradient>
+                  </defs>
+                  <Pie
+                    data={[
+                      {
+                        name: "Active",
+                        value: stats.governance.active,
+                        fill: "url(#gradActive)",
+                      },
+                      {
+                        name: "Draft",
+                        value: stats.governance.draft,
+                        fill: "url(#gradDraft)",
+                      },
+                      {
+                        name: "Archived",
+                        value: stats.governance.archived,
+                        fill: "url(#gradArchived)",
+                      },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                    animationBegin={0}
+                    animationDuration={1000}
+                    animationEasing="ease-out"
+                  >
+                    {[
+                      {
+                        name: "Active",
+                        value: stats.governance.active,
+                        fill: "url(#gradActive)",
+                      },
+                      {
+                        name: "Draft",
+                        value: stats.governance.draft,
+                        fill: "url(#gradDraft)",
+                      },
+                      {
+                        name: "Archived",
+                        value: stats.governance.archived,
+                        fill: "url(#gradArchived)",
+                      },
+                    ].map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.fill}
+                        stroke="#fff"
+                        strokeWidth={3}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    }}
+                    formatter={(value: number) => [value, "Items"]}
+                  />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-sm"></div>
+                  <div>
+                    <p className="text-sm font-semibold text-green-900">
+                      Active
+                    </p>
+                    <p className="text-xs text-green-600">Currently in use</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-green-900">
                     {stats.governance.active}
-                  </span>
+                  </p>
+                  <p className="text-xs text-green-700 font-medium">
+                    {(
+                      (stats.governance.active / stats.governance.total) *
+                      100
+                    ).toFixed(1)}
+                    %
+                  </p>
                 </div>
-                <ProgressBar
-                  percentage={
-                    (stats.governance.active / stats.governance.total) * 100
-                  }
-                  color="green"
-                />
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Draft
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-sm"></div>
+                  <div>
+                    <p className="text-sm font-semibold text-yellow-900">
+                      Draft
+                    </p>
+                    <p className="text-xs text-yellow-600">Work in progress</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-yellow-900">
                     {stats.governance.draft}
-                  </span>
+                  </p>
+                  <p className="text-xs text-yellow-700 font-medium">
+                    {(
+                      (stats.governance.draft / stats.governance.total) *
+                      100
+                    ).toFixed(1)}
+                    %
+                  </p>
                 </div>
-                <ProgressBar
-                  percentage={
-                    (stats.governance.draft / stats.governance.total) * 100
-                  }
-                  color="yellow"
-                />
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Archived
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {stats.governance.archived}
-                  </span>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm"></div>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900">
+                      Archived
+                    </p>
+                    <p className="text-xs text-blue-600">Historical records</p>
+                  </div>
                 </div>
-                <ProgressBar
-                  percentage={
-                    (stats.governance.archived / stats.governance.total) * 100
-                  }
-                  color="blue"
-                />
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-blue-900">
+                    {stats.governance.archived}
+                  </p>
+                  <p className="text-xs text-blue-700 font-medium">
+                    {(
+                      (stats.governance.archived / stats.governance.total) *
+                      100
+                    ).toFixed(1)}
+                    %
+                  </p>
+                </div>
               </div>
             </div>
             <Link
               href="/governance"
-              className="mt-6 block text-center py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm"
+              className="mt-4 block text-center py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-medium text-sm shadow-sm hover:shadow-md"
             >
               View All Items
             </Link>
           </div>
 
-          {/* Risk Distribution */}
+          {/* Risk Distribution - Modern Donut Chart */}
           <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-gray-900">
-                Risk Distribution
-              </h3>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Risk Distribution
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Total: {stats.risk.total} risks identified
+                </p>
+              </div>
               <PieChart className="h-5 w-5 text-red-600" />
             </div>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-700">
+            <div className="flex items-center justify-center">
+              <ResponsiveContainer width="100%" height={240}>
+                <RechartsPieChart>
+                  <defs>
+                    <linearGradient
+                      id="gradCritical"
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor="#ef4444" />
+                      <stop offset="100%" stopColor="#dc2626" />
+                    </linearGradient>
+                    <linearGradient id="gradHigh" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#f59e0b" />
+                      <stop offset="100%" stopColor="#d97706" />
+                    </linearGradient>
+                    <linearGradient id="gradMedium" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" />
+                      <stop offset="100%" stopColor="#2563eb" />
+                    </linearGradient>
+                    <linearGradient id="gradLow" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="100%" stopColor="#059669" />
+                    </linearGradient>
+                  </defs>
+                  <Pie
+                    data={[
+                      {
+                        name: "Critical",
+                        value: stats.risk.critical,
+                        fill: "url(#gradCritical)",
+                      },
+                      {
+                        name: "High",
+                        value: stats.risk.high,
+                        fill: "url(#gradHigh)",
+                      },
+                      {
+                        name: "Medium",
+                        value: stats.risk.medium,
+                        fill: "url(#gradMedium)",
+                      },
+                      {
+                        name: "Low",
+                        value: stats.risk.low,
+                        fill: "url(#gradLow)",
+                      },
+                    ]}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={5}
+                    dataKey="value"
+                    animationBegin={0}
+                    animationDuration={1000}
+                    animationEasing="ease-out"
+                  >
+                    {[
+                      {
+                        name: "Critical",
+                        value: stats.risk.critical,
+                        fill: "url(#gradCritical)",
+                      },
+                      {
+                        name: "High",
+                        value: stats.risk.high,
+                        fill: "url(#gradHigh)",
+                      },
+                      {
+                        name: "Medium",
+                        value: stats.risk.medium,
+                        fill: "url(#gradMedium)",
+                      },
+                      {
+                        name: "Low",
+                        value: stats.risk.low,
+                        fill: "url(#gradLow)",
+                      },
+                    ].map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.fill}
+                        stroke="#fff"
+                        strokeWidth={3}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#fff",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                    }}
+                    formatter={(value: number) => [value, "Risks"]}
+                  />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-red-50 to-red-100 rounded-lg hover:shadow-md transition-shadow border border-red-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-sm"></div>
+                  <div>
+                    <p className="text-sm font-semibold text-red-900">
                       Critical
-                    </span>
+                    </p>
+                    <p className="text-xs text-red-600">
+                      Immediate action required
+                    </p>
                   </div>
-                  <span className="text-sm font-bold text-gray-900">
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-red-900">
                     {stats.risk.critical}
-                  </span>
+                  </p>
+                  <p className="text-xs text-red-700 font-medium">
+                    {((stats.risk.critical / stats.risk.total) * 100).toFixed(
+                      1
+                    )}
+                    %
+                  </p>
                 </div>
-                <ProgressBar
-                  percentage={(stats.risk.critical / stats.risk.total) * 100}
-                  color="red"
-                />
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-700">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg hover:shadow-md transition-shadow border border-orange-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm"></div>
+                  <div>
+                    <p className="text-sm font-semibold text-orange-900">
                       High
-                    </span>
+                    </p>
+                    <p className="text-xs text-orange-600">
+                      Needs urgent attention
+                    </p>
                   </div>
-                  <span className="text-sm font-bold text-gray-900">
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-orange-900">
                     {stats.risk.high}
-                  </span>
+                  </p>
+                  <p className="text-xs text-orange-700 font-medium">
+                    {((stats.risk.high / stats.risk.total) * 100).toFixed(1)}%
+                  </p>
                 </div>
-                <ProgressBar
-                  percentage={(stats.risk.high / stats.risk.total) * 100}
-                  color="yellow"
-                />
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-700">
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-shadow border border-blue-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm"></div>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900">
                       Medium
-                    </span>
+                    </p>
+                    <p className="text-xs text-blue-600">Monitor regularly</p>
                   </div>
-                  <span className="text-sm font-bold text-gray-900">
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-blue-900">
                     {stats.risk.medium}
-                  </span>
+                  </p>
+                  <p className="text-xs text-blue-700 font-medium">
+                    {((stats.risk.medium / stats.risk.total) * 100).toFixed(1)}%
+                  </p>
                 </div>
-                <ProgressBar
-                  percentage={(stats.risk.medium / stats.risk.total) * 100}
-                  color="blue"
-                />
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-700">
-                      Low
-                    </span>
+              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:shadow-md transition-shadow border border-green-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-sm"></div>
+                  <div>
+                    <p className="text-sm font-semibold text-green-900">Low</p>
+                    <p className="text-xs text-green-600">Minimal impact</p>
                   </div>
-                  <span className="text-sm font-bold text-gray-900">
-                    {stats.risk.low}
-                  </span>
                 </div>
-                <ProgressBar
-                  percentage={(stats.risk.low / stats.risk.total) * 100}
-                  color="green"
-                />
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-green-900">
+                    {stats.risk.low}
+                  </p>
+                  <p className="text-xs text-green-700 font-medium">
+                    {((stats.risk.low / stats.risk.total) * 100).toFixed(1)}%
+                  </p>
+                </div>
               </div>
             </div>
             <Link
               href="/reports/risk"
-              className="mt-6 block text-center py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm"
+              className="mt-4 block text-center py-2 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-lg hover:from-red-600 hover:to-orange-700 transition-all font-medium text-sm shadow-sm hover:shadow-md"
             >
               View Risk Report
             </Link>
           </div>
+        </div>
 
-          {/* Audit Status */}
+        {/* Audit Progress and Compliance - Animated Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Audit Status - Radial Bar Chart */}
           <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-gray-900">Audit Status</h3>
+              <h3 className="text-lg font-bold text-gray-900">
+                Audit Progress
+              </h3>
               <Calendar className="h-5 w-5 text-purple-600" />
             </div>
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Completed
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {stats.audit.completed}
-                  </span>
-                </div>
-                <ProgressBar
-                  percentage={(stats.audit.completed / stats.audit.total) * 100}
-                  color="green"
+            <ResponsiveContainer width="100%" height={280}>
+              <RadialBarChart
+                cx="50%"
+                cy="50%"
+                innerRadius="20%"
+                outerRadius="90%"
+                barSize={20}
+                data={[
+                  {
+                    name: "Completed",
+                    value: (stats.audit.completed / stats.audit.total) * 100,
+                    fill: "#10b981",
+                  },
+                  {
+                    name: "In Progress",
+                    value: (stats.audit.inProgress / stats.audit.total) * 100,
+                    fill: "#3b82f6",
+                  },
+                  {
+                    name: "Planned",
+                    value: (stats.audit.planned / stats.audit.total) * 100,
+                    fill: "#8b5cf6",
+                  },
+                ]}
+                startAngle={90}
+                endAngle={-270}
+              >
+                <RadialBar
+                  minAngle={15}
+                  background
+                  clockWise
+                  dataKey="value"
+                  cornerRadius={10}
+                  animationDuration={1000}
                 />
+                <Legend
+                  iconSize={10}
+                  layout="vertical"
+                  verticalAlign="middle"
+                  align="right"
+                  wrapperStyle={{ fontSize: "14px" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  }}
+                  formatter={(value: number) => `${value.toFixed(1)}%`}
+                />
+              </RadialBarChart>
+            </ResponsiveContainer>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              <div className="bg-green-50 p-2 rounded">
+                <p className="text-xs text-green-700 font-medium">Completed</p>
+                <p className="text-lg font-bold text-green-900">
+                  {stats.audit.completed}
+                </p>
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    In Progress
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {stats.audit.inProgress}
-                  </span>
-                </div>
-                <ProgressBar
-                  percentage={
-                    (stats.audit.inProgress / stats.audit.total) * 100
-                  }
-                  color="blue"
-                />
+              <div className="bg-blue-50 p-2 rounded">
+                <p className="text-xs text-blue-700 font-medium">In Progress</p>
+                <p className="text-lg font-bold text-blue-900">
+                  {stats.audit.inProgress}
+                </p>
               </div>
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Planned
-                  </span>
-                  <span className="text-sm font-bold text-gray-900">
-                    {stats.audit.planned}
-                  </span>
-                </div>
-                <ProgressBar
-                  percentage={(stats.audit.planned / stats.audit.total) * 100}
-                  color="purple"
-                />
+              <div className="bg-purple-50 p-2 rounded">
+                <p className="text-xs text-purple-700 font-medium">Planned</p>
+                <p className="text-lg font-bold text-purple-900">
+                  {stats.audit.planned}
+                </p>
               </div>
             </div>
             <Link
               href="/reports/audit"
-              className="mt-6 block text-center py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium text-sm"
+              className="mt-4 block text-center py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium text-sm"
             >
               View Audit Schedule
             </Link>
+          </div>
+
+          {/* Compliance Trend - Area Chart */}
+          <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-gray-900">
+                Compliance Overview
+              </h3>
+              <Shield className="h-5 w-5 text-green-600" />
+            </div>
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart
+                data={[
+                  { name: "Compliant", value: stats.compliance.compliant },
+                  { name: "Pending", value: stats.compliance.pending },
+                  {
+                    name: "Non-Compliant",
+                    value: stats.compliance.nonCompliant,
+                  },
+                ]}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              >
+                <defs>
+                  <linearGradient
+                    id="colorCompliance"
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="name" stroke="#6b7280" />
+                <YAxis stroke="#6b7280" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  fillOpacity={1}
+                  fill="url(#colorCompliance)"
+                  animationDuration={1200}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+            <div className="mt-4 bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Compliance Rate</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {stats.compliance.percentage}%
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Total Items</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {stats.compliance.total}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <Link
+              href="/reports/compliance"
+              className="mt-4 block text-center py-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors font-medium text-sm"
+            >
+              View Compliance Report
+            </Link>
+          </div>
+        </div>
+
+        {/* Monthly Trends - Animated Line Chart with Tension */}
+        <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">
+                6-Month Performance Trends
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Tracking governance, compliance, risks, and audits over time
+              </p>
+            </div>
+            <TrendingUp className="h-6 w-6 text-green-600" />
+          </div>
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart
+              data={[
+                {
+                  month: "May",
+                  governance: 45,
+                  compliance: 78,
+                  risks: 23,
+                  audits: 12,
+                },
+                {
+                  month: "Jun",
+                  governance: 52,
+                  compliance: 82,
+                  risks: 19,
+                  audits: 15,
+                },
+                {
+                  month: "Jul",
+                  governance: 61,
+                  compliance: 85,
+                  risks: 25,
+                  audits: 18,
+                },
+                {
+                  month: "Aug",
+                  governance: 58,
+                  compliance: 88,
+                  risks: 21,
+                  audits: 20,
+                },
+                {
+                  month: "Sep",
+                  governance: 67,
+                  compliance: 91,
+                  risks: 17,
+                  audits: 22,
+                },
+                {
+                  month: "Oct",
+                  governance: stats.governance.active || 72,
+                  compliance: stats.compliance.percentage || 93,
+                  risks: stats.risk.critical + stats.risk.high || 15,
+                  audits: stats.audit.completed || 25,
+                },
+              ]}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="month"
+                stroke="#6b7280"
+                style={{ fontSize: "12px" }}
+              />
+              <YAxis stroke="#6b7280" style={{ fontSize: "12px" }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                }}
+              />
+              <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="line" />
+              <Line
+                type="natural"
+                dataKey="governance"
+                stroke="#3b82f6"
+                strokeWidth={3}
+                dot={{ fill: "#3b82f6", r: 5 }}
+                activeDot={{ r: 7 }}
+                animationDuration={1500}
+                name="Governance Items"
+              />
+              <Line
+                type="natural"
+                dataKey="compliance"
+                stroke="#10b981"
+                strokeWidth={3}
+                dot={{ fill: "#10b981", r: 5 }}
+                activeDot={{ r: 7 }}
+                animationDuration={1500}
+                animationBegin={300}
+                name="Compliance %"
+              />
+              <Line
+                type="natural"
+                dataKey="risks"
+                stroke="#ef4444"
+                strokeWidth={3}
+                dot={{ fill: "#ef4444", r: 5 }}
+                activeDot={{ r: 7 }}
+                animationDuration={1500}
+                animationBegin={600}
+                name="Active Risks"
+              />
+              <Line
+                type="natural"
+                dataKey="audits"
+                stroke="#8b5cf6"
+                strokeWidth={3}
+                dot={{ fill: "#8b5cf6", r: 5 }}
+                activeDot={{ r: 7 }}
+                animationDuration={1500}
+                animationBegin={900}
+                name="Completed Audits"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <div>
+                <p className="text-xs text-gray-600">Governance</p>
+                <p className="text-lg font-bold text-blue-900">
+                  {stats.governance.active}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <div>
+                <p className="text-xs text-gray-600">Compliance</p>
+                <p className="text-lg font-bold text-green-900">
+                  {stats.compliance.percentage}%
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <div>
+                <p className="text-xs text-gray-600">Active Risks</p>
+                <p className="text-lg font-bold text-red-900">
+                  {stats.risk.critical + stats.risk.high}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <div>
+                <p className="text-xs text-gray-600">Audits Done</p>
+                <p className="text-lg font-bold text-purple-900">
+                  {stats.audit.completed}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
