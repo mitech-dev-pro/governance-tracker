@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import Dropdown from "./Dropdown";
 
 interface CreateAssetModalProps {
   isOpen: boolean;
@@ -66,6 +67,40 @@ export default function CreateAssetModal({
     description: "",
     notes: "",
   });
+
+  const STATUS_OPTIONS: { label: string; value: string }[] = [
+    { value: "AVAILABLE", label: "Available" },
+    { value: "IN_USE", label: "In Use" },
+    { value: "MAINTENANCE", label: "Maintenance" },
+    { value: "RETIRED", label: "Retired" },
+    { value: "LOST", label: "Lost" },
+    { value: "DAMAGED", label: "Damaged" },
+  ];
+
+  const CATEGORY_OPTIONS: { label: string; value: string }[] = [
+    { value: "COMPUTER", label: "Computer" },
+    { value: "LAPTOP", label: "Laptop" },
+    { value: "MONITOR", label: "Monitor" },
+    { value: "PRINTER", label: "Printer" },
+    { value: "SCANNER", label: "Scanner" },
+    { value: "NETWORKING", label: "Networking (Turbonet)" },
+    { value: "PERIPHERAL", label: "Peripheral (Headset)" },
+    { value: "ACCESSORY", label: "Accessory" },
+    { value: "MOBILE_DEVICE", label: "Mobile Device" },
+    { value: "SERVER", label: "Server" },
+    { value: "STORAGE", label: "Storage" },
+    { value: "SOFTWARE_LICENSE", label: "Software License" },
+    { value: "CONSUMABLE", label: "Consumable (Toner)" },
+    { value: "OTHER", label: "Other" },
+  ];
+
+  const CONDITION_OPTIONS: { label: string; value: string }[] = [
+    { value: "EXCELLENT", label: "Excellent" },
+    { value: "GOOD", label: "Good" },
+    { value: "FAIR", label: "Fair" },
+    { value: "POOR", label: "Poor" },
+    { value: "NEEDS_REPAIR", label: "Needs Repair" },
+  ];
 
   useEffect(() => {
     if (isOpen) {
@@ -159,7 +194,7 @@ export default function CreateAssetModal({
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 flex items-center justify-between rounded-t-lg z-50">
           <h2 className="text-2xl font-bold">Add New Asset</h2>
           <button
             onClick={onClose}
@@ -188,7 +223,7 @@ export default function CreateAssetModal({
                   onChange={(e) =>
                     setFormData({ ...formData, assetTag: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -204,7 +239,7 @@ export default function CreateAssetModal({
                     setFormData({ ...formData, name: e.target.value })
                   }
                   placeholder="e.g., Dell Latitude 7420"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -212,29 +247,39 @@ export default function CreateAssetModal({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Category <span className="text-red-500">*</span>
                 </label>
-                <select
-                  required
+                <Dropdown
+                  onChange={(e) => setFormData({ ...formData, category: e })}
                   value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="COMPUTER">Computer</option>
-                  <option value="LAPTOP">Laptop</option>
-                  <option value="MONITOR">Monitor</option>
-                  <option value="PRINTER">Printer</option>
-                  <option value="SCANNER">Scanner</option>
-                  <option value="NETWORKING">Networking (Turbonet)</option>
-                  <option value="PERIPHERAL">Peripheral (Headset)</option>
-                  <option value="ACCESSORY">Accessory</option>
-                  <option value="MOBILE_DEVICE">Mobile Device</option>
-                  <option value="SERVER">Server</option>
-                  <option value="STORAGE">Storage</option>
-                  <option value="SOFTWARE_LICENSE">Software License</option>
-                  <option value="CONSUMABLE">Consumable (Toner)</option>
-                  <option value="OTHER">Other</option>
-                </select>
+                  options={CATEGORY_OPTIONS.map((cat) => ({
+                    label: cat.label,
+                    value: cat.value,
+                  }))}
+                  borderShade="blue"
+                  className="h-10.5"
+                />
+                {/* <select
+                //   required
+                //   value={formData.category}
+                //   onChange={(e) =>
+                //     setFormData({ ...formData, category: e.target.value })
+                //   }
+                //   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                // >
+                //   <option value="COMPUTER">Computer</option>
+                //   <option value="LAPTOP">Laptop</option>
+                //   <option value="MONITOR">Monitor</option>
+                //   <option value="PRINTER">Printer</option>
+                //   <option value="SCANNER">Scanner</option>
+                //   <option value="NETWORKING">Networking (Turbonet)</option>
+                //   <option value="PERIPHERAL">Peripheral (Headset)</option>
+                //   <option value="ACCESSORY">Accessory</option>
+                //   <option value="MOBILE_DEVICE">Mobile Device</option>
+                //   <option value="SERVER">Server</option>
+                //   <option value="STORAGE">Storage</option>
+                //   <option value="SOFTWARE_LICENSE">Software License</option>
+                //   <option value="CONSUMABLE">Consumable (Toner)</option>
+                //   <option value="OTHER">Other</option>
+                // </select> */}
               </div>
 
               <div>
@@ -249,7 +294,7 @@ export default function CreateAssetModal({
                     setFormData({ ...formData, type: e.target.value })
                   }
                   placeholder="e.g., Desktop PC, Laser Printer"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -264,7 +309,7 @@ export default function CreateAssetModal({
                     setFormData({ ...formData, brand: e.target.value })
                   }
                   placeholder="e.g., Dell, HP, Cisco"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -279,7 +324,7 @@ export default function CreateAssetModal({
                     setFormData({ ...formData, model: e.target.value })
                   }
                   placeholder="e.g., Latitude 7420, LaserJet Pro"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -293,7 +338,7 @@ export default function CreateAssetModal({
                   onChange={(e) =>
                     setFormData({ ...formData, serialNumber: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -309,40 +354,30 @@ export default function CreateAssetModal({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Status
                 </label>
-                <select
+                <Dropdown
+                  onChange={(e) => setFormData({ ...formData, status: e })}
                   value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="AVAILABLE">Available</option>
-                  <option value="IN_USE">In Use</option>
-                  <option value="MAINTENANCE">Maintenance</option>
-                  <option value="RETIRED">Retired</option>
-                  <option value="LOST">Lost</option>
-                  <option value="DAMAGED">Damaged</option>
-                  <option value="RESERVED">Reserved</option>
-                </select>
+                  options={STATUS_OPTIONS.map((status) => ({
+                    label: status.label,
+                    value: status.value,
+                  }))}
+                  borderShade="blue"
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Condition
                 </label>
-                <select
+                <Dropdown
+                  onChange={(e) => setFormData({ ...formData, condition: e })}
                   value={formData.condition}
-                  onChange={(e) =>
-                    setFormData({ ...formData, condition: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="EXCELLENT">Excellent</option>
-                  <option value="GOOD">Good</option>
-                  <option value="FAIR">Fair</option>
-                  <option value="POOR">Poor</option>
-                  <option value="NEEDS_REPAIR">Needs Repair</option>
-                </select>
+                  options={CONDITION_OPTIONS.map((status) => ({
+                    label: status.label,
+                    value: status.value,
+                  }))}
+                  borderShade="blue"
+                />
               </div>
 
               <div>
@@ -356,7 +391,7 @@ export default function CreateAssetModal({
                     setFormData({ ...formData, location: e.target.value })
                   }
                   placeholder="e.g., Floor 3, Room 301"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-1.5 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -372,7 +407,20 @@ export default function CreateAssetModal({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Department
                 </label>
-                <select
+                <Dropdown
+                  onChange={(e) =>
+                    setFormData({ ...formData, departmentId: e })
+                  }
+                  value={formData.departmentId}
+                  options={departments.map((dept) => ({
+                    label: `${dept.code} ${dept.name}`,
+                    value: dept.id,
+                  }))}
+                  borderShade="blue"
+                  dropdownCategory="department"
+                  placeholder="Select department"
+                />
+                {/* <select
                   value={formData.departmentId}
                   onChange={(e) =>
                     setFormData({ ...formData, departmentId: e.target.value })
@@ -385,17 +433,16 @@ export default function CreateAssetModal({
                       {dept.name}
                     </option>
                   ))}
-                </select>
+                </select> */}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Assigned To (System User)
                 </label>
-                <select
-                  value={formData.assignedToId}
+                <Dropdown
                   onChange={(e) => {
-                    const userId = e.target.value;
+                    const userId = e;
                     const user = users.find((u) => u.id === parseInt(userId));
                     setFormData({
                       ...formData,
@@ -403,15 +450,16 @@ export default function CreateAssetModal({
                       assignedTo: user ? user.name : formData.assignedTo,
                     });
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">Select User (Optional)</option>
-                  {users.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </option>
-                  ))}
-                </select>
+                  value={formData.assignedToId}
+                  options={users.map((dept) => ({
+                    label: `${dept.name} - (${dept.email})`,
+                    value: dept.id,
+                  }))}
+                  borderShade="blue"
+                  dropdownCategory="user"
+                  placeholder="Select user"
+                  isOptional={true}
+                />
               </div>
 
               <div className="md:col-span-2">
@@ -425,7 +473,7 @@ export default function CreateAssetModal({
                     setFormData({ ...formData, assignedTo: e.target.value })
                   }
                   placeholder="Enter person's name if not in system (e.g., John Doe - IT Department)"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Use this field if the person doesn&apos;t have a system
@@ -451,7 +499,7 @@ export default function CreateAssetModal({
                   onChange={(e) =>
                     setFormData({ ...formData, purchaseDate: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -467,7 +515,7 @@ export default function CreateAssetModal({
                     setFormData({ ...formData, purchaseCost: e.target.value })
                   }
                   placeholder="0.00"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -481,7 +529,7 @@ export default function CreateAssetModal({
                   onChange={(e) =>
                     setFormData({ ...formData, warrantyExpiry: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -496,7 +544,7 @@ export default function CreateAssetModal({
                     setFormData({ ...formData, supplier: e.target.value })
                   }
                   placeholder="e.g., Dell Direct, Amazon"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -519,7 +567,7 @@ export default function CreateAssetModal({
                   }
                   rows={3}
                   placeholder="Asset description and specifications..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -534,7 +582,7 @@ export default function CreateAssetModal({
                   }
                   rows={2}
                   placeholder="Additional notes..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>

@@ -14,6 +14,7 @@ import {
   Headphones,
 } from "lucide-react";
 import CreateAssetModal from "../components/CreateAssetModal";
+import Dropdown from "../components/Dropdown";
 
 interface Asset {
   id: number;
@@ -44,9 +45,29 @@ export default function AssetsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const CATEGORY_OPTIONS: { label: string; value: string }[] = [
+    { value: "", label: "All Categories" },
+    { value: "COMPUTER", label: "Computers" },
+    { value: "LAPTOP", label: "Laptops" },
+    { value: "MONITOR", label: "Monitors" },
+    { value: "PRINTER", label: "Printers" },
+    { value: "NETWORKING", label: "Networking (Turbonets)" },
+    { value: "PERIPHERAL", label: "Peripherals (Headsets)" },
+    { value: "CONSUMABLE", label: "Consumables (Toner)" },
+  ];
+
+  const STATUS_OPTIONS: { label: string; value: string }[] = [
+    { value: "", label: "All Status" },
+    { value: "AVAILABLE", label: "Available" },
+    { value: "IN_USE", label: "In Use" },
+    { value: "MAINTENANCE", label: "Maintenance" },
+    { value: "RETIRED", label: "Retired" },
+    { value: "DAMAGED", label: "Damaged" },
+  ];
+
   useEffect(() => {
     fetchAssets();
-  }, [page, searchTerm, categoryFilter, statusFilter]);
+  }, []);
 
   const fetchAssets = async () => {
     try {
@@ -172,10 +193,19 @@ export default function AssetsPage() {
                   placeholder="Search assets..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <select
+              <Dropdown
+                onChange={(e) => setCategoryFilter(e)}
+                options={CATEGORY_OPTIONS.map((cat) => ({
+                  label: cat.label,
+                  value: cat.value,
+                }))}
+                value={categoryFilter}
+                borderShade="blue"
+              />
+              {/* <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -188,8 +218,17 @@ export default function AssetsPage() {
                 <option value="NETWORKING">Networking (Turbonets)</option>
                 <option value="PERIPHERAL">Peripherals (Headsets)</option>
                 <option value="CONSUMABLE">Consumables (Toner)</option>
-              </select>
-              <select
+              </select> */}
+              <Dropdown
+                onChange={(e) => setStatusFilter(e)}
+                options={STATUS_OPTIONS.map((stat) => ({
+                  label: stat.label,
+                  value: stat.value,
+                }))}
+                value={categoryFilter}
+                borderShade="blue"
+              />
+              {/* <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -200,7 +239,7 @@ export default function AssetsPage() {
                 <option value="MAINTENANCE">Maintenance</option>
                 <option value="RETIRED">Retired</option>
                 <option value="DAMAGED">Damaged</option>
-              </select>
+              </select> */}
               <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
                 <Filter className="w-5 h-5" />
                 <span>More Filters</span>

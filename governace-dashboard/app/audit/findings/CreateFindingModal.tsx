@@ -7,7 +7,7 @@ import {
   FINDING_SEVERITIES,
   FINDING_STATUSES,
   FINDING_CATEGORIES,
-  FindingStatus,
+  // FindingStatus,
 } from "../../types/audit";
 import Dropdown from "@/app/components/Dropdown";
 
@@ -195,25 +195,8 @@ export default function CreateFindingModal({
                 value: audit.id,
                 label: `${audit.code} - ${audit.title}`,
               }))}
+              dropdownCategory="audit"
             />
-            {/* <select
-              required
-              value={formData.auditId || ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  auditId: parseInt(e.target.value),
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            >
-              <option value="">Select audit...</option>
-              {audits.map((audit) => (
-                <option key={audit.id} value={audit.id}>
-                  {audit.code} - {audit.title}
-                </option>
-              ))}
-            </select> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

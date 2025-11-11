@@ -321,9 +321,9 @@ export default function FindingsPage() {
                 }}
                 value={categoryFilter}
                 placeholder="Select a category"
-                options={FINDING_STATUSES.map((statuses) => ({
-                  label: statuses.label,
-                  value: statuses.value,
+                options={FINDING_CATEGORIES.map((cats) => ({
+                  label: cats,
+                  value: cats,
                 }))}
               />
               {/* <div>

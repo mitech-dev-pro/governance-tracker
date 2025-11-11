@@ -60,22 +60,6 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
           <Image src="/milife_logo.png" alt="Logo" width={150} height={150} />
         </Link>
       </span>
-
-      <ul className="hidden md:flex space-x-6">
-        <li>
-          <Link
-            className="text-zinc-500 hover:text-zinc-800"
-            href="/components"
-          >
-            Components
-          </Link>
-        </li>
-        <li>
-          <Link className="text-zinc-500 hover:text-zinc-800" href="/dashboard">
-            Dashboard
-          </Link>
-        </li>
-      </ul>
       <div className="ml-auto flex items-center space-x-2 relative">
         <button
           onClick={() => setShowUserMenu(!showUserMenu)}

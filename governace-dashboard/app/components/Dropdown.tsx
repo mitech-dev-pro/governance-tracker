@@ -15,6 +15,8 @@ interface DropdownProps {
   disabled?: boolean;
   error?: boolean;
   dropdownCategory?: string;
+  borderShade?: string;
+  isOptional?: boolean;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
@@ -26,6 +28,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   disabled = false,
   error = false,
   dropdownCategory = "option",
+  borderShade = "red",
+  isOptional = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<"bottom" | "top">(
@@ -147,21 +151,29 @@ const Dropdown: React.FC<DropdownProps> = ({
             ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
             : error
             ? "bg-white border-red-500 text-gray-700 hover:bg-gray-50 focus:ring-red-600 focus:border-red-600 cursor-pointer"
-            : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-red-600 focus:border-red-600 cursor-pointer"
+            : `bg-white border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-${borderShade}-600 focus:border-${borderShade}-600 cursor-pointer`
         }`}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label={`Select ${value || placeholder}`}
+        aria-label={`Select ${value || placeholder} ${
+          isOptional ? "(Optional)" : "null"
+        }`}
         disabled={disabled}
       >
         <span
           className={`truncate ${value ? "text-gray-700" : "text-gray-400"}`}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedOption
+            ? selectedOption.label
+            : placeholder + ` ${isOptional ? "(Optional)" : ""}`}
         </span>
         <ChevronDown
           className={`ml-2 h-4 w-4 transition-transform ${
-            disabled ? "text-gray-400" : error ? "text-red-600" : "text-red-600"
+            disabled
+              ? "text-gray-400"
+              : error
+              ? "text-red-600"
+              : `text-${borderShade}-600`
           } ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
@@ -177,33 +189,40 @@ const Dropdown: React.FC<DropdownProps> = ({
             focusedIndex >= 0 ? `option-${focusedIndex}` : undefined
           }
         >
-          {options.length === 0
-            ? `No ${dropdownCategory} available`
-            : options.map((option, index) => (
-                <button
-                  key={option.value}
-                  ref={(el) => {
-                    optionRefs.current[index] = el;
-                  }}
-                  id={`option-${index}`}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => {
-                    onChange(String(option.value));
-                    setIsOpen(false);
-                  }}
-                  onMouseEnter={() => setFocusedIndex(index)}
-                  className={`w-full px-3 py-2 text-sm text-left text-gray-700 focus:outline-none cursor-pointer ${
-                    focusedIndex === index
-                      ? "bg-red-50"
-                      : "hover:bg-red-50 focus:bg-gray-50"
-                  }`}
-                  role="option"
-                  aria-selected={value === option.value}
-                >
-                  {option.label}
-                </button>
-              ))}
+          {options.length === 0 ? (
+            <span
+              className={`truncate text-gray-400
+               px-3 text-sm text-left focus:outline-none`}
+            >
+              No {dropdownCategory} available
+            </span>
+          ) : (
+            options.map((option, index) => (
+              <button
+                key={option.value}
+                ref={(el) => {
+                  optionRefs.current[index] = el;
+                }}
+                id={`option-${index}`}
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onChange(String(option.value));
+                  setIsOpen(false);
+                }}
+                onMouseEnter={() => setFocusedIndex(index)}
+                className={`w-full px-3 py-2 text-sm text-left text-gray-700 focus:outline-none cursor-pointer ${
+                  focusedIndex === index
+                    ? `bg-${borderShade}-50`
+                    : `hover:bg-${borderShade}-50 focus:bg-gray-50`
+                }`}
+                role="option"
+                aria-selected={value === option.value}
+              >
+                {option.label}
+              </button>
+            ))
+          )}
         </div>
       )}
     </div>

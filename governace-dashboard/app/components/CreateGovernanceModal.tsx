@@ -8,6 +8,7 @@ import type {
   User as UserType,
   Department,
 } from "../types/governance";
+import Dropdown from "./Dropdown";
 
 interface CreateGovernanceModalProps {
   isOpen: boolean;
@@ -24,6 +25,12 @@ const STATUS_OPTIONS: { value: GovernanceStatus; label: string }[] = [
   { value: "AT_RISK", label: "At Risk" },
   { value: "COMPLETED", label: "Completed" },
   { value: "DEFERRED", label: "Deferred" },
+];
+
+const VISIBILY_OPTIONS: { value: string; label: string }[] = [
+  { label: "PUBLIC", value: "PUBLIC" },
+  { label: "DEPARTMENT", value: "DEPARTMENT" },
+  { label: "PRIVATE", value: "PRIVATE" },
 ];
 
 const formInputClass =
@@ -218,7 +225,19 @@ export default function CreateGovernanceModal({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Status
                 </label>
-                <select
+                <Dropdown
+                  onChange={(e) => {
+                    handleInputChange("status", e as GovernanceStatus);
+                  }}
+                  options={STATUS_OPTIONS.map((status) => ({
+                    value: status.value,
+                    label: status.label,
+                  }))}
+                  value={formData.status || ""}
+                  borderShade="purple"
+                  className="h-12 shadow-sm rounded-lg"
+                />
+                {/* <select
                   value={formData.status}
                   onChange={(e) =>
                     handleInputChange(
@@ -234,7 +253,7 @@ export default function CreateGovernanceModal({
                       {option.label}
                     </option>
                   ))}
-                </select>
+                </select> */}
               </div>
 
               <div>
@@ -262,7 +281,23 @@ export default function CreateGovernanceModal({
                   <User className="w-4 h-4 inline mr-1" />
                   Owner
                 </label>
-                <select
+                <Dropdown
+                  onChange={(e) => {
+                    handleInputChange("status", e as GovernanceStatus);
+                  }}
+                  options={users.map((user) => ({
+                    label: user.name ? user.name : "",
+                    value: user.id,
+                  }))}
+                  value={formData.ownerId || ""}
+                  borderShade="purple"
+                  isOptional={true}
+                  placeholder="Select owner"
+                  dropdownCategory="owner"
+                  className="h-12 shadow-sm rounded-lg"
+                />
+
+                {/* <select
                   value={formData.ownerId || ""}
                   onChange={(e) =>
                     handleInputChange(
@@ -280,7 +315,7 @@ export default function CreateGovernanceModal({
                         {user.name || user.email}
                       </option>
                     ))}
-                </select>
+                </select> */}
               </div>
 
               <div>
@@ -288,7 +323,22 @@ export default function CreateGovernanceModal({
                   <Building2 className="w-4 h-4 inline mr-1" />
                   Department
                 </label>
-                <select
+                <Dropdown
+                  onChange={(e) => {
+                    handleInputChange("departmentId", e);
+                  }}
+                  options={departments.map((dept) => ({
+                    label: dept.name ? dept.name : "",
+                    value: dept.id,
+                  }))}
+                  value={formData.departmentId || ""}
+                  borderShade="purple"
+                  isOptional={true}
+                  placeholder="Select department"
+                  dropdownCategory="department"
+                  className="h-12 shadow-sm rounded-lg"
+                />
+                {/* <select
                   value={formData.departmentId || ""}
                   onChange={(e) =>
                     handleInputChange(
@@ -306,7 +356,7 @@ export default function CreateGovernanceModal({
                         {dept.name}
                       </option>
                     ))}
-                </select>
+                </select> */}
               </div>
             </div>
 
@@ -352,7 +402,21 @@ export default function CreateGovernanceModal({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Visibility
                 </label>
-                <select
+                <Dropdown
+                  onChange={(e) => {
+                    handleInputChange("visibility", e);
+                  }}
+                  options={VISIBILY_OPTIONS.map((visibility) => ({
+                    label: visibility.label,
+                    value: visibility.value,
+                  }))}
+                  value={formData.visibility || ""}
+                  borderShade="purple"
+                  placeholder="Select visibility"
+                  dropdownCategory="visibility"
+                  className="h-12 shadow-sm rounded-lg"
+                />
+                {/* <select
                   value={formData.visibility}
                   onChange={(e) =>
                     handleInputChange("visibility", e.target.value)
@@ -363,7 +427,7 @@ export default function CreateGovernanceModal({
                   <option value="public">Public</option>
                   <option value="department">Department</option>
                   <option value="private">Private</option>
-                </select>
+                </select> */}
               </div>
             </div>
 
