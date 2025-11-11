@@ -7,6 +7,7 @@ import {
   FINDING_SEVERITIES,
   FINDING_STATUSES,
   FINDING_CATEGORIES,
+  FindingStatus,
 } from "../../types/audit";
 import Dropdown from "@/app/components/Dropdown";
 
@@ -47,6 +48,31 @@ export default function CreateFindingModal({
   const [audits, setAudits] = useState<Audit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const isNonEmpty = (s?: string) => (s ?? "").trim().length > 0;
+  const isSelected = (v?: string | number) =>
+    typeof v === "number" ? v > 0 : isNonEmpty(v);
+
+  const isValidUrl = (u?: string) => {
+    if (!u || u.trim() === "") return true;
+    try {
+      new URL(u);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const requiredFilled =
+    isSelected(formData.auditId) &&
+    isNonEmpty(formData.severity) &&
+    isNonEmpty(formData.category) &&
+    isNonEmpty(formData.status) &&
+    isNonEmpty(formData.title) &&
+    isNonEmpty(formData.description) &&
+    isNonEmpty(formData.recommendation) &&
+    isValidUrl(formData.evidenceUrl);
+
+  const isDisabled = loading || !requiredFilled;
 
   useEffect(() => {
     if (isOpen) {
@@ -206,32 +232,11 @@ export default function CreateFindingModal({
                   });
                 }}
                 value={formData.severity || ""}
-                options={FINDING_SEVERITIES.map((severity) => {
-                  console.log(severity);
-
-                  return {
-                    value: severity.value,
-                    label: severity.label,
-                  };
-                })}
+                options={FINDING_SEVERITIES.map((severity) => ({
+                  value: severity.value,
+                  label: severity.label,
+                }))}
               />
-              {/* <select
-                required
-                value={formData.severity}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    severity: e.target.value as any,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              >
-                {FINDING_SEVERITIES.map((severity) => (
-                  <option key={severity.value} value={severity.value}>
-                    {severity.label}
-                  </option>
-                ))}
-              </select> */}
             </div>
 
             {/* Category */}
@@ -239,7 +244,21 @@ export default function CreateFindingModal({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category <span className="text-red-500">*</span>
               </label>
-              <select
+              <Dropdown
+                placeholder="Select a category"
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    category: e,
+                  });
+                }}
+                value={formData.category}
+                options={FINDING_CATEGORIES.map((cat) => ({
+                  value: cat,
+                  label: cat,
+                }))}
+              />
+              {/* <select
                 required
                 value={formData.category}
                 onChange={(e) =>
@@ -252,7 +271,7 @@ export default function CreateFindingModal({
                     {category}
                   </option>
                 ))}
-              </select>
+              </select> */}
             </div>
           </div>
 
@@ -268,7 +287,7 @@ export default function CreateFindingModal({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full px-3 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="Inadequate access controls"
             />
           </div>
@@ -285,7 +304,7 @@ export default function CreateFindingModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full px-3 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="Detailed description of the finding..."
             />
           </div>
@@ -302,7 +321,7 @@ export default function CreateFindingModal({
                 setFormData({ ...formData, recommendation: e.target.value })
               }
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full px-3 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="Recommended actions to address this finding..."
             />
           </div>
@@ -313,7 +332,22 @@ export default function CreateFindingModal({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Responsible Person
               </label>
-              <select
+              <Dropdown
+                placeholder="Select a person"
+                dropdownCategory="person"
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    responsibleId: parseInt(e),
+                  });
+                }}
+                value={formData.responsibleId || ""}
+                options={users.map((user) => ({
+                  value: user.id,
+                  label: `${user.name || user.email}`,
+                }))}
+              />
+              {/* <select
                 value={formData.responsibleId || ""}
                 onChange={(e) =>
                   setFormData({
@@ -331,7 +365,7 @@ export default function CreateFindingModal({
                     {user.name || user.email}
                   </option>
                 ))}
-              </select>
+              </select> */}
             </div>
 
             {/* Due Date */}
@@ -348,7 +382,7 @@ export default function CreateFindingModal({
                     dueDate: e.target.value || undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                className="w-full px-3 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
 
@@ -357,23 +391,21 @@ export default function CreateFindingModal({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Status <span className="text-red-500">*</span>
               </label>
-              <select
-                required
-                value={formData.status}
-                onChange={(e) =>
+              <Dropdown
+                placeholder="Select a status"
+                dropdownCategory="status"
+                onChange={(e) => {
                   setFormData({
                     ...formData,
-                    status: e.target.value as any,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              >
-                {FINDING_STATUSES.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
+                    status: e as CreateFindingInput["status"],
+                  });
+                }}
+                value={formData.status || ""}
+                options={FINDING_STATUSES.map((status) => ({
+                  value: status.value,
+                  label: status.label,
+                }))}
+              />
             </div>
           </div>
 
@@ -391,7 +423,7 @@ export default function CreateFindingModal({
                   evidenceUrl: e.target.value || undefined,
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full px-3 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="https://..."
             />
           </div>
@@ -410,7 +442,7 @@ export default function CreateFindingModal({
                 })
               }
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full px-3 py-2 border outline-none border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               placeholder="Detailed remediation steps..."
             />
           </div>
@@ -418,15 +450,15 @@ export default function CreateFindingModal({
           {/* Footer */}
           <div className="flex justify-end space-x-3 pt-4 border-t">
             <button
-              // type="button"
+              type="button"
               onClick={handleClose}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>
             <button
-              // type="submit"
-              disabled={loading}
+              type="submit"
+              disabled={loading || isDisabled}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating..." : "Create Finding"}

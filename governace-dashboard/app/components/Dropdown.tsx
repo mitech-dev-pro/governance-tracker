@@ -138,6 +138,8 @@ const Dropdown: React.FC<DropdownProps> = ({
     <div className={`relative ${className}`} ref={dropdownRef}>
       <button
         ref={buttonRef}
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         onKeyDown={handleKeyDown}
         className={`flex items-center justify-between w-full px-3 py-2 text-sm border rounded-lg transition-colors focus:outline-none focus:ring-1 h-full ${
@@ -184,6 +186,8 @@ const Dropdown: React.FC<DropdownProps> = ({
                     optionRefs.current[index] = el;
                   }}
                   id={`option-${index}`}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
                     onChange(String(option.value));
                     setIsOpen(false);
