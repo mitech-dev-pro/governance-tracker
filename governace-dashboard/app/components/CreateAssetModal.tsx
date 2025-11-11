@@ -9,14 +9,42 @@ interface CreateAssetModalProps {
   onSuccess: () => void;
 }
 
+interface DepartmentStructure {
+  id: number;
+  name: string;
+  createdAt: string;
+  code: string;
+  _count: {
+    userdepartment: 1;
+    governanceitem: 0;
+    risk: 0;
+  };
+}
+
+interface UserStructure {
+  id: number;
+  name: string;
+  email: string;
+  image: null;
+  createdAt: string;
+  updatedAt: string;
+  _count: {
+    governanceitem: number;
+    actionitem: number;
+    assignment: number;
+  };
+  departments: [];
+  roles: [];
+}
+
 export default function CreateAssetModal({
   isOpen,
   onClose,
   onSuccess,
 }: CreateAssetModalProps) {
   const [loading, setLoading] = useState(false);
-  const [departments, setDepartments] = useState<any[]>([]);
-  const [users, setUsers] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<DepartmentStructure[]>([]);
+  const [users, setUsers] = useState<UserStructure[]>([]);
   const [formData, setFormData] = useState({
     assetTag: "",
     name: "",
@@ -112,9 +140,14 @@ export default function CreateAssetModal({
 
       alert("Asset created successfully!");
       onSuccess();
-    } catch (error: any) {
-      console.error("Error creating asset:", error);
-      alert(error.message || "Failed to create asset");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error creating asset:", error);
+        alert(error.message || "Failed to create asset");
+      } else {
+        console.error("Unknown error:", error);
+        alert("An unexpected error occured.");
+      }
     } finally {
       setLoading(false);
     }
@@ -123,7 +156,7 @@ export default function CreateAssetModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">

@@ -20,6 +20,7 @@ import {
 } from "../../types/audit";
 import CreateFindingModal from "./CreateFindingModal";
 import EditFindingModal from "./EditFindingModal";
+import Dropdown from "@/app/components/Dropdown";
 
 export default function FindingsPage() {
   const [findings, setFindings] = useState<AuditFinding[]>([]);
@@ -260,7 +261,18 @@ export default function FindingsPage() {
               </div>
 
               {/* Severity Filter */}
-              <div>
+              <Dropdown
+                onChange={(e) => {
+                  setSeverityFilter(e);
+                }}
+                value={severityFilter}
+                placeholder="Select a severity"
+                options={FINDING_SEVERITIES.map((severity) => ({
+                  label: severity.label,
+                  value: severity.value,
+                }))}
+              />
+              {/* <div>
                 <select
                   value={severityFilter}
                   onChange={(e) => setSeverityFilter(e.target.value)}
@@ -273,10 +285,21 @@ export default function FindingsPage() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
 
               {/* Status Filter */}
-              <div>
+              <Dropdown
+                onChange={(e) => {
+                  setStatusFilter(e);
+                }}
+                value={statusFilter}
+                placeholder="Select a status"
+                options={FINDING_STATUSES.map((statuses) => ({
+                  label: statuses.label,
+                  value: statuses.value,
+                }))}
+              />
+              {/* <div>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -289,10 +312,21 @@ export default function FindingsPage() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
 
               {/* Category Filter */}
-              <div>
+              <Dropdown
+                onChange={(e) => {
+                  setCategoryFilter(e);
+                }}
+                value={categoryFilter}
+                placeholder="Select a category"
+                options={FINDING_STATUSES.map((statuses) => ({
+                  label: statuses.label,
+                  value: statuses.value,
+                }))}
+              />
+              {/* <div>
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
@@ -305,7 +339,7 @@ export default function FindingsPage() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

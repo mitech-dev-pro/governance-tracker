@@ -29,20 +29,38 @@ export interface Audit {
   schedules?: AuditSchedule[];
 }
 
-export type AuditType = "INTERNAL" | "EXTERNAL" | "COMPLIANCE" | "FINANCIAL" | "OPERATIONAL" | "IT" | "QUALITY";
-export type AuditStatus = "PLANNED" | "IN_PROGRESS" | "FIELD_WORK" | "REPORTING" | "COMPLETED" | "CANCELLED";
+export type AuditType =
+  | "INTERNAL"
+  | "EXTERNAL"
+  | "COMPLIANCE"
+  | "FINANCIAL"
+  | "OPERATIONAL"
+  | "IT"
+  | "QUALITY";
+export type AuditStatus =
+  | "PLANNED"
+  | "IN_PROGRESS"
+  | "FIELD_WORK"
+  | "REPORTING"
+  | "COMPLETED"
+  | "CANCELLED";
 
-export const AUDIT_TYPES: { value: AuditType; label: string; color: string }[] = [
-  { value: "INTERNAL", label: "Internal", color: "blue" },
-  { value: "EXTERNAL", label: "External", color: "purple" },
-  { value: "COMPLIANCE", label: "Compliance", color: "green" },
-  { value: "FINANCIAL", label: "Financial", color: "yellow" },
-  { value: "OPERATIONAL", label: "Operational", color: "orange" },
-  { value: "IT", label: "IT", color: "indigo" },
-  { value: "QUALITY", label: "Quality", color: "pink" },
-];
+export const AUDIT_TYPES: { value: AuditType; label: string; color: string }[] =
+  [
+    { value: "INTERNAL", label: "Internal", color: "blue" },
+    { value: "EXTERNAL", label: "External", color: "purple" },
+    { value: "COMPLIANCE", label: "Compliance", color: "green" },
+    { value: "FINANCIAL", label: "Financial", color: "yellow" },
+    { value: "OPERATIONAL", label: "Operational", color: "orange" },
+    { value: "IT", label: "IT", color: "indigo" },
+    { value: "QUALITY", label: "Quality", color: "pink" },
+  ];
 
-export const AUDIT_STATUSES: { value: AuditStatus; label: string; color: string }[] = [
+export const AUDIT_STATUSES: {
+  value: AuditStatus;
+  label: string;
+  color: string;
+}[] = [
   { value: "PLANNED", label: "Planned", color: "gray" },
   { value: "IN_PROGRESS", label: "In Progress", color: "blue" },
   { value: "FIELD_WORK", label: "Field Work", color: "yellow" },
@@ -80,10 +98,24 @@ export interface AuditFinding {
   };
 }
 
-export type FindingSeverity = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFORMATIONAL";
-export type FindingStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "DEFERRED";
+export type FindingSeverity =
+  | "CRITICAL"
+  | "HIGH"
+  | "MEDIUM"
+  | "LOW"
+  | "INFORMATIONAL";
+export type FindingStatus =
+  | "OPEN"
+  | "IN_PROGRESS"
+  | "RESOLVED"
+  | "CLOSED"
+  | "DEFERRED";
 
-export const FINDING_SEVERITIES: { value: FindingSeverity; label: string; color: string }[] = [
+export const FINDING_SEVERITIES: {
+  value: FindingSeverity;
+  label: string;
+  color: string;
+}[] = [
   { value: "CRITICAL", label: "Critical", color: "red" },
   { value: "HIGH", label: "High", color: "orange" },
   { value: "MEDIUM", label: "Medium", color: "yellow" },
@@ -91,7 +123,11 @@ export const FINDING_SEVERITIES: { value: FindingSeverity; label: string; color:
   { value: "INFORMATIONAL", label: "Informational", color: "gray" },
 ];
 
-export const FINDING_STATUSES: { value: FindingStatus; label: string; color: string }[] = [
+export const FINDING_STATUSES: {
+  value: FindingStatus;
+  label: string;
+  color: string;
+}[] = [
   { value: "OPEN", label: "Open", color: "red" },
   { value: "IN_PROGRESS", label: "In Progress", color: "yellow" },
   { value: "RESOLVED", label: "Resolved", color: "green" },
@@ -133,9 +169,18 @@ export interface AuditSchedule {
   };
 }
 
-export type ScheduleStatus = "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | "RESCHEDULED";
+export type ScheduleStatus =
+  | "SCHEDULED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "RESCHEDULED";
 
-export const SCHEDULE_STATUSES: { value: ScheduleStatus; label: string; color: string }[] = [
+export const SCHEDULE_STATUSES: {
+  value: ScheduleStatus;
+  label: string;
+  color: string;
+}[] = [
   { value: "SCHEDULED", label: "Scheduled", color: "blue" },
   { value: "IN_PROGRESS", label: "In Progress", color: "yellow" },
   { value: "COMPLETED", label: "Completed", color: "green" },

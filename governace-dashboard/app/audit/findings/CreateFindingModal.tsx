@@ -8,6 +8,7 @@ import {
   FINDING_STATUSES,
   FINDING_CATEGORIES,
 } from "../../types/audit";
+import Dropdown from "@/app/components/Dropdown";
 
 interface CreateFindingModalProps {
   isOpen: boolean;
@@ -122,7 +123,9 @@ export default function CreateFindingModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      className={`fixed inset-0 bg-black/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4 transform transition-opacity duration-300 opacity-100 scale-100`}
+    >
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -153,7 +156,21 @@ export default function CreateFindingModal({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Audit <span className="text-red-500">*</span>
             </label>
-            <select
+            <Dropdown
+              placeholder="Select an audit"
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  auditId: parseInt(e),
+                });
+              }}
+              value={formData.auditId || ""}
+              options={audits.map((audit) => ({
+                value: audit.id,
+                label: `${audit.code} - ${audit.title}`,
+              }))}
+            />
+            {/* <select
               required
               value={formData.auditId || ""}
               onChange={(e) =>
@@ -170,7 +187,7 @@ export default function CreateFindingModal({
                   {audit.code} - {audit.title}
                 </option>
               ))}
-            </select>
+            </select> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -179,7 +196,26 @@ export default function CreateFindingModal({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Severity <span className="text-red-500">*</span>
               </label>
-              <select
+              <Dropdown
+                onChange={(e) => {
+                  console.log(e);
+
+                  setFormData({
+                    ...formData,
+                    severity: e as CreateFindingInput["severity"],
+                  });
+                }}
+                value={formData.severity || ""}
+                options={FINDING_SEVERITIES.map((severity) => {
+                  console.log(severity);
+
+                  return {
+                    value: severity.value,
+                    label: severity.label,
+                  };
+                })}
+              />
+              {/* <select
                 required
                 value={formData.severity}
                 onChange={(e) =>
@@ -195,7 +231,7 @@ export default function CreateFindingModal({
                     {severity.label}
                   </option>
                 ))}
-              </select>
+              </select> */}
             </div>
 
             {/* Category */}
@@ -382,14 +418,14 @@ export default function CreateFindingModal({
           {/* Footer */}
           <div className="flex justify-end space-x-3 pt-4 border-t">
             <button
-              type="button"
+              // type="button"
               onClick={handleClose}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>
             <button
-              type="submit"
+              // type="submit"
               disabled={loading}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
