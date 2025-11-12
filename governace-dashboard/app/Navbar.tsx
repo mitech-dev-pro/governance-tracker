@@ -9,7 +9,6 @@ import {
   Key,
   Menu,
   Bell,
-  Search,
   Moon,
   Sun,
 } from "lucide-react";
