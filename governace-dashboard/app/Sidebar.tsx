@@ -177,7 +177,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 isDarkMode ? "text-white" : "text-slate-900"
               } text-sm transition-colors duration-200`}
             >
-              GRC Dashboard
+              Governance Management
             </span>
           </div>
           <button
