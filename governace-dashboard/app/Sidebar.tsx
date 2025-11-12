@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronRight,
-  ChevronDown,
   X,
   LayoutDashboard,
   Users,
@@ -33,7 +32,26 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const pathname = usePathname();
+
+  // Check dark mode on mount and listen for changes
+  useEffect(() => {
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains("dark"));
+    };
+
+    checkDarkMode();
+
+    // Listen for dark mode changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const toggleExpanded = (itemName: string) => {
     setExpandedItems((prev) => {
@@ -124,7 +142,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-20 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/60 z-20 md:hidden backdrop-blur-sm transition-opacity duration-300"
           onClick={onClose}
         />
       )}
@@ -133,26 +151,42 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <div
         className={`
           fixed md:static inset-y-0 left-0 z-30
-          w-64 md:w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 h-screen overflow-y-auto
-          transform transition-transform duration-300 ease-in-out
+          w-64 md:w-64 ${
+            isDarkMode
+              ? "bg-slate-900 border-slate-800"
+              : "bg-white border-slate-200"
+          } border-r h-screen overflow-y-auto
+          transform transition-all duration-300 ease-in-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0
           shadow-lg
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+        <div
+          className={`flex items-center justify-between p-4 border-b ${
+            isDarkMode ? "border-slate-800" : "border-slate-200"
+          } transition-colors duration-200`}
+        >
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
               <Shield className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-slate-900 dark:text-white text-sm">
+            <span
+              className={`font-semibold ${
+                isDarkMode ? "text-white" : "text-slate-900"
+              } text-sm transition-colors duration-200`}
+            >
               GRC Dashboard
             </span>
           </div>
           <button
             onClick={onClose}
-            className="md:hidden p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400"
+            className={`md:hidden p-1.5 rounded-lg ${
+              isDarkMode
+                ? "hover:bg-slate-800 text-slate-400"
+                : "hover:bg-slate-100 text-slate-500"
+            } transition-all duration-200`}
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
@@ -172,8 +206,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex-1 ${
                       isActive
-                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:translate-x-0.5"
+                        ? `${
+                            isDarkMode
+                              ? "bg-blue-900/20 text-blue-400"
+                              : "bg-blue-50 text-blue-600"
+                          } shadow-sm`
+                        : `${
+                            isDarkMode
+                              ? "text-slate-300 hover:bg-slate-800/50"
+                              : "text-slate-700 hover:bg-slate-50"
+                          } hover:translate-x-0.5`
                     }`}
                     onClick={() => {
                       if (window.innerWidth < 768) {
@@ -191,7 +233,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   {item.hasSubmenu && (
                     <button
                       onClick={() => toggleExpanded(item.name)}
-                      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-all duration-200 hover:scale-110"
+                      className={`p-2 ${
+                        isDarkMode
+                          ? "hover:bg-slate-800 text-slate-400"
+                          : "hover:bg-slate-100 text-slate-500"
+                      } rounded-lg transition-all duration-200 hover:scale-110`}
                       aria-expanded={expandedItems.includes(item.name)}
                       aria-label={`Toggle ${item.name} submenu`}
                     >
@@ -224,8 +270,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             href={subItem.href}
                             className={`flex items-center gap-2.5 px-3 py-1.5 text-sm rounded-lg transition-all duration-200 ${
                               isSubActive
-                                ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium translate-x-1"
-                                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:translate-x-1"
+                                ? `${
+                                    isDarkMode
+                                      ? "bg-blue-900/20 text-blue-400"
+                                      : "bg-blue-50 text-blue-600"
+                                  } font-medium translate-x-1`
+                                : `${
+                                    isDarkMode
+                                      ? "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                                  } hover:translate-x-1`
                             }`}
                             style={{
                               animationDelay: `${index * 50}ms`,

@@ -51,14 +51,23 @@ export async function GET() {
     ).length;
     const governanceTrend =
       governanceLastMonth > 0
-        ? Math.round(((governanceThisMonth - governanceLastMonth) / governanceLastMonth) * 100)
-        : governanceThisMonth > 0 ? 100 : 0;
+        ? Math.round(
+            ((governanceThisMonth - governanceLastMonth) /
+              governanceLastMonth) *
+              100
+          )
+        : governanceThisMonth > 0
+        ? 100
+        : 0;
 
     const governanceStats = {
       total: governanceItems.length,
-      active: governanceItems.filter((item) => item.status === "IN_PROGRESS").length,
-      draft: governanceItems.filter((item) => item.status === "NOT_STARTED").length,
-      archived: governanceItems.filter((item) => item.status === "COMPLETED").length,
+      active: governanceItems.filter((item) => item.status === "IN_PROGRESS")
+        .length,
+      draft: governanceItems.filter((item) => item.status === "NOT_STARTED")
+        .length,
+      archived: governanceItems.filter((item) => item.status === "COMPLETED")
+        .length,
       thisMonth: governanceThisMonth,
       trend: governanceTrend,
     };
@@ -66,9 +75,10 @@ export async function GET() {
     // Compliance stats (using controls, policies, assessments)
     const complianceTotal = controlsCount + policiesCount + assessmentsCount;
     const complianceCompliant = controlsCount; // Simplified - controls are compliant
-    const compliancePercentage = complianceTotal > 0 
-      ? Math.round((complianceCompliant / complianceTotal) * 100)
-      : 0;
+    const compliancePercentage =
+      complianceTotal > 0
+        ? Math.round((complianceCompliant / complianceTotal) * 100)
+        : 0;
 
     const complianceStats = {
       total: complianceTotal,
@@ -99,14 +109,24 @@ export async function GET() {
     const riskTrend =
       riskLastMonth > 0
         ? Math.round(((riskThisMonth - riskLastMonth) / riskLastMonth) * 100)
-        : riskThisMonth > 0 ? 100 : 0;
+        : riskThisMonth > 0
+        ? 100
+        : 0;
 
     const riskStats = {
       total: riskItems.length,
-      critical: riskItems.filter((item) => getRiskLevel(item.likelihood, item.impact) === "critical").length,
-      high: riskItems.filter((item) => getRiskLevel(item.likelihood, item.impact) === "high").length,
-      medium: riskItems.filter((item) => getRiskLevel(item.likelihood, item.impact) === "medium").length,
-      low: riskItems.filter((item) => getRiskLevel(item.likelihood, item.impact) === "low").length,
+      critical: riskItems.filter(
+        (item) => getRiskLevel(item.likelihood, item.impact) === "critical"
+      ).length,
+      high: riskItems.filter(
+        (item) => getRiskLevel(item.likelihood, item.impact) === "high"
+      ).length,
+      medium: riskItems.filter(
+        (item) => getRiskLevel(item.likelihood, item.impact) === "medium"
+      ).length,
+      low: riskItems.filter(
+        (item) => getRiskLevel(item.likelihood, item.impact) === "low"
+      ).length,
       trend: riskTrend,
     };
 
@@ -122,18 +142,24 @@ export async function GET() {
     const auditTrend =
       auditLastMonth > 0
         ? Math.round(((auditThisMonth - auditLastMonth) / auditLastMonth) * 100)
-        : auditThisMonth > 0 ? 100 : 0;
+        : auditThisMonth > 0
+        ? 100
+        : 0;
 
     const upcomingAudits = auditItems.filter((item) => {
       const startDate = new Date(item.startDate);
-      const daysUntilStart = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysUntilStart = Math.ceil(
+        (startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      );
       return daysUntilStart > 0 && daysUntilStart <= 30;
     }).length;
 
     const auditStats = {
       total: auditItems.length,
-      completed: auditItems.filter((item) => item.status === "COMPLETED").length,
-      inProgress: auditItems.filter((item) => item.status === "IN_PROGRESS").length,
+      completed: auditItems.filter((item) => item.status === "COMPLETED")
+        .length,
+      inProgress: auditItems.filter((item) => item.status === "IN_PROGRESS")
+        .length,
       planned: auditItems.filter((item) => item.status === "PLANNED").length,
       upcoming: upcomingAudits,
       trend: auditTrend,
@@ -151,20 +177,26 @@ export async function GET() {
     const assetTrend =
       assetLastMonth > 0
         ? Math.round(((assetThisMonth - assetLastMonth) / assetLastMonth) * 100)
-        : assetThisMonth > 0 ? 100 : 0;
+        : assetThisMonth > 0
+        ? 100
+        : 0;
 
     const assetStats = {
       total: assetItems.length,
-      available: assetItems.filter((item) => item.status === "AVAILABLE").length,
+      available: assetItems.filter((item) => item.status === "AVAILABLE")
+        .length,
       inUse: assetItems.filter((item) => item.status === "IN_USE").length,
-      maintenance: assetItems.filter((item) => item.status === "MAINTENANCE").length,
+      maintenance: assetItems.filter((item) => item.status === "MAINTENANCE")
+        .length,
       computers: assetItems.filter(
         (item) =>
           item.category === "COMPUTER" ||
           item.category === "LAPTOP" ||
           item.category === "MONITOR"
       ).length,
-      software: assetItems.filter((item) => item.category === "SOFTWARE_LICENSE").length,
+      software: assetItems.filter(
+        (item) => item.category === "SOFTWARE_LICENSE"
+      ).length,
       trend: assetTrend,
     };
 
@@ -188,7 +220,13 @@ export async function GET() {
     });
 
     const recentRisks = await prisma.risk.findMany({
-      select: { id: true, title: true, likelihood: true, impact: true, createdAt: true },
+      select: {
+        id: true,
+        title: true,
+        likelihood: true,
+        impact: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: "desc" },
       take: 2,
     });

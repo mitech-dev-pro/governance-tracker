@@ -10,17 +10,19 @@ import {
   Menu,
   Bell,
   Search,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUser } from "./contexts/UserContext";
 
-//interface
 interface NavbarProps {
   onToggleSidebar?: () => void;
 }
 
 const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const router = useRouter();
   const { user } = useUser();
 
@@ -40,6 +42,32 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
     setImageError(false);
   }, [user?.image]);
 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+
+    setIsDarkMode(shouldBeDark);
+    if (shouldBeDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -56,13 +84,23 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   }, [showUserMenu]);
 
   return (
-    <nav className="flex items-center justify-between h-16 px-4 md:px-6 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <nav
+      className={`flex items-center justify-between h-16 px-4 md:px-6 ${
+        isDarkMode
+          ? "bg-slate-900 border-slate-800"
+          : "bg-white border-slate-200"
+      } border-b shadow-sm transition-colors duration-200`}
+    >
       {/* Left Section */}
       <div className="flex items-center gap-4">
-        {/* Hamburger Menu Button */}
+        {/* Hamburger Menu Button - Only visible on mobile */}
         <button
           onClick={onToggleSidebar}
-          className="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all duration-200 hover:scale-105"
+          className={`md:hidden p-2 rounded-lg ${
+            isDarkMode
+              ? "hover:bg-slate-800 text-slate-300"
+              : "hover:bg-slate-100 text-slate-700"
+          } transition-all duration-200 hover:scale-105`}
           aria-label="Toggle sidebar"
         >
           <Menu className="w-5 h-5" />
@@ -74,7 +112,7 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
           className="flex items-center transition-opacity hover:opacity-80"
         >
           <Image
-            src="/milife_logo.png"
+            src={isDarkMode ? "/milife_white.png" : "/milife_logo.png"}
             alt="Logo"
             width={120}
             height={40}
@@ -85,32 +123,65 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
 
       {/* Right Section */}
       <div className="flex items-center gap-2 md:gap-3">
-        {/* Search Button */}
-        {/* <button
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 transition-all duration-200 border border-slate-200 dark:border-slate-700"
-          aria-label="Search"
-        >
-          <Search className="w-4 h-4" />
-          <span className="text-sm">Search...</span>
-          <kbd className="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded">
-            ⌘K
-          </kbd>
-        </button> */}
         {/* Notifications */}
-        {/* <button
-          className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all duration-200 hover:scale-105"
+        <button
+          className={`relative p-2 rounded-lg ${
+            isDarkMode
+              ? "hover:bg-slate-800 text-slate-300"
+              : "hover:bg-slate-100 text-slate-700"
+          } transition-all duration-200 hover:scale-105`}
           aria-label="Notifications"
         >
           <Bell className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
-        </button> */}
+          <span
+            className={`absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ${
+              isDarkMode ? "ring-slate-900" : "ring-white"
+            } transition-colors duration-200`}
+          ></span>
+        </button>
+
+        {/* Dark Mode Toggle */}
+        <button
+          onClick={toggleDarkMode}
+          className={`relative p-2 rounded-lg ${
+            isDarkMode
+              ? "hover:bg-slate-800 text-slate-300"
+              : "hover:bg-slate-100 text-slate-700"
+          } transition-all duration-200 hover:scale-105 group`}
+          aria-label="Toggle dark mode"
+        >
+          <div className="relative w-5 h-5">
+            <Sun
+              className={`w-5 h-5 absolute inset-0 transition-all duration-300 ${
+                isDarkMode
+                  ? "opacity-0 rotate-90 scale-0"
+                  : "opacity-100 rotate-0 scale-100"
+              }`}
+            />
+            <Moon
+              className={`w-5 h-5 absolute inset-0 transition-all duration-300 ${
+                isDarkMode
+                  ? "opacity-100 rotate-0 scale-100"
+                  : "opacity-0 -rotate-90 scale-0"
+              }`}
+            />
+          </div>
+        </button>
+
         {/* Divider */}
-        <div className="hidden md:block w-px h-6 bg-slate-200 dark:bg-slate-700"></div>
+        <div
+          className={`hidden md:block w-px h-6 ${
+            isDarkMode ? "bg-slate-700" : "bg-slate-200"
+          } transition-colors duration-200`}
+        ></div>
+
         {/* User Menu */}
         <div className="relative user-menu-container">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 group"
+            className={`flex items-center gap-2 px-2 md:px-3 py-1.5 rounded-lg ${
+              isDarkMode ? "hover:bg-slate-800" : "hover:bg-slate-100"
+            } transition-all duration-200 group`}
           >
             {/* User Profile Picture or Avatar */}
             {displayImage && !imageError ? (
@@ -118,11 +189,13 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
               <img
                 src={displayImage}
                 alt={displayName}
-                className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 transition-transform duration-200 group-hover:scale-105"
+                className={`w-8 h-8 rounded-full object-cover border-2 ${
+                  isDarkMode ? "border-slate-700" : "border-slate-200"
+                } transition-transform duration-200 group-hover:scale-105`}
                 onError={() => setImageError(true)}
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-xs shadow-lg transition-transform duration-200 group-hover:scale-105">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-xs shadow-lg transition-transform duration-200 group-hover:scale-105">
                 {displayName
                   .split(" ")
                   .map((n) => n[0])
@@ -131,11 +204,17 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                   .slice(0, 2)}
               </div>
             )}
-            <span className="hidden lg:block font-medium text-sm text-slate-700 dark:text-slate-300 max-w-[120px] truncate">
+            <span
+              className={`hidden lg:block font-medium text-sm ${
+                isDarkMode ? "text-slate-300" : "text-slate-700"
+              } max-w-[120px] truncate transition-colors duration-200`}
+            >
               {displayName}
             </span>
             <ChevronDown
-              className={`w-4 h-4 text-slate-500 dark:text-slate-400 transition-transform duration-200 ${
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-slate-400" : "text-slate-500"
+              } transition-transform duration-200 ${
                 showUserMenu ? "rotate-180" : ""
               }`}
             />
@@ -143,13 +222,31 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
 
           {/* Dropdown Menu */}
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div
+              className={`absolute right-0 top-full mt-2 w-56 ${
+                isDarkMode
+                  ? "bg-slate-800 border-slate-700"
+                  : "bg-white border-slate-200"
+              } rounded-lg shadow-xl border py-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200 transition-colors`}
+            >
               {/* User Info Section */}
-              <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+              <div
+                className={`px-4 py-3 border-b ${
+                  isDarkMode ? "border-slate-700" : "border-slate-100"
+                } transition-colors duration-200`}
+              >
+                <p
+                  className={`text-sm font-medium ${
+                    isDarkMode ? "text-white" : "text-slate-900"
+                  } truncate transition-colors duration-200`}
+                >
                   {displayName}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                <p
+                  className={`text-xs ${
+                    isDarkMode ? "text-slate-400" : "text-slate-500"
+                  } truncate transition-colors duration-200`}
+                >
                   {user?.email || "user@example.com"}
                 </p>
               </div>
@@ -158,10 +255,18 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
               <div className="py-1">
                 <Link
                   href="/setup/user-account"
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm ${
+                    isDarkMode
+                      ? "text-slate-300 hover:bg-slate-700/50"
+                      : "text-slate-700 hover:bg-slate-50"
+                  } transition-colors group`}
                   onClick={() => setShowUserMenu(false)}
                 >
-                  <User className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+                  <User
+                    className={`w-4 h-4 ${
+                      isDarkMode ? "text-slate-400" : "text-slate-500"
+                    } group-hover:text-blue-500 transition-colors`}
+                  />
                   <span>User Account</span>
                 </Link>
                 <button
@@ -169,18 +274,34 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                     setShowUserMenu(false);
                     router.push("/change-password");
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm ${
+                    isDarkMode
+                      ? "text-slate-300 hover:bg-slate-700/50"
+                      : "text-slate-700 hover:bg-slate-50"
+                  } transition-colors group`}
                 >
-                  <Key className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-blue-500 transition-colors" />
+                  <Key
+                    className={`w-4 h-4 ${
+                      isDarkMode ? "text-slate-400" : "text-slate-500"
+                    } group-hover:text-blue-500 transition-colors`}
+                  />
                   <span>Change Password</span>
                 </button>
               </div>
 
               {/* Logout Section */}
-              <div className="border-t border-slate-100 dark:border-slate-700 py-1">
+              <div
+                className={`border-t ${
+                  isDarkMode ? "border-slate-700" : "border-slate-100"
+                } py-1 transition-colors duration-200`}
+              >
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group"
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm ${
+                    isDarkMode
+                      ? "text-red-400 hover:bg-red-900/20"
+                      : "text-red-600 hover:bg-red-50"
+                  } transition-colors group`}
                 >
                   <LogOut className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                   <span>Logout</span>
