@@ -110,6 +110,23 @@ export async function POST(request: NextRequest) {
 
     const data: CreateGovernanceData = validation.data;
 
+    // Check if number is provided and if it's already in use
+    if (data.number) {
+      const numberAsInt = parseInt(data.number);
+      const existingItem = await prisma.governanceItem.findUnique({
+        where: { number: numberAsInt },
+      });
+
+      if (existingItem) {
+        return NextResponse.json(
+          {
+            error: `Governance item number ${data.number} is already in use. Please choose a different number.`,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     // Prepare create data with optional relations
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const createData: any = {
@@ -160,6 +177,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(governanceItem, { status: 201 });
   } catch (error) {
     console.error("Error creating governance item:", error);
+
+    // Handle Prisma unique constraint errors
+    if (error instanceof Error && "code" in error && error.code === "P2002") {
+      const meta = (error as any).meta;
+      if (meta?.target?.includes("number")) {
+        return NextResponse.json(
+          {
+            error:
+              "This governance item number is already in use. Please choose a different number.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

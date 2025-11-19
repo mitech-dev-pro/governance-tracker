@@ -15,7 +15,7 @@ export const createGovernanceSchema = z.object({
   clauseRefs: z.array(z.string()).default([]),
   progress: z.number().min(0).max(100).default(0),
   tags: z.array(z.string()).default([]),
-  visibility: z.enum(["public", "department", "private"]).default("department"),
+  visibility: z.string().transform(val => val.toLowerCase()).pipe(z.enum(["public", "department", "private"])).default("department"),
   actionitemType: z.string().optional(), // Add actionitem type field
   actionitem: z.string().optional(), // Alias for actionitemType for backwards compatibility
 });
@@ -32,7 +32,7 @@ export const updateGovernanceSchema = z.object({
   clauseRefs: z.array(z.string()).optional(),
   progress: z.number().min(0).max(100).optional(),
   tags: z.array(z.string()).optional(),
-  visibility: z.enum(["public", "department", "private"]).optional(),
+  visibility: z.string().transform(val => val.toLowerCase()).pipe(z.enum(["public", "department", "private"])).optional(),
   actionitemType: z.string().optional(), // Add actionitem type field
   actionitem: z.string().optional(), // Alias for actionitemType for backwards compatibility
 });

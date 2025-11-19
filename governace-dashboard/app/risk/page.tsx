@@ -39,7 +39,6 @@ export default function RiskManagementPage() {
   useEffect(() => {
     fetchRisks();
     fetchDepartments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

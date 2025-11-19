@@ -283,7 +283,10 @@ export default function CreateGovernanceModal({
                 </label>
                 <Dropdown
                   onChange={(e) => {
-                    handleInputChange("status", e as GovernanceStatus);
+                    handleInputChange(
+                      "ownerId",
+                      e ? parseInt(e as string) : undefined
+                    );
                   }}
                   options={users.map((user) => ({
                     label: user.name ? user.name : "",
@@ -325,7 +328,10 @@ export default function CreateGovernanceModal({
                 </label>
                 <Dropdown
                   onChange={(e) => {
-                    handleInputChange("departmentId", e);
+                    handleInputChange(
+                      "departmentId",
+                      e ? parseInt(e as string) : undefined
+                    );
                   }}
                   options={departments.map((dept) => ({
                     label: dept.name ? dept.name : "",

@@ -307,12 +307,54 @@ const SortButton = ({
   );
 };
 
-const ActionDropdown = ({ item }: { item: GovernanceResponse["items"][0] }) => {
+const ActionDropdown = ({
+  item,
+  onDelete,
+}: {
+  item: GovernanceResponse["items"][0];
+  onDelete: (id: number) => void;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top?: number;
+    bottom?: number;
+    right: number;
+  }>({ right: 0 });
+
+  const handleDelete = () => {
+    setIsOpen(false);
+    onDelete(item.id);
+  };
+
+  React.useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const dropdownHeight = 200; // Approximate dropdown height
+
+      // Calculate position
+      const right = window.innerWidth - rect.right;
+
+      // If not enough space below, open upward
+      if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+        setDropdownPosition({
+          bottom: window.innerHeight - rect.top,
+          right: right,
+        });
+      } else {
+        setDropdownPosition({
+          top: rect.bottom + 4,
+          right: right,
+        });
+      }
+    }
+  }, [isOpen]);
 
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
       >
@@ -322,10 +364,17 @@ const ActionDropdown = ({ item }: { item: GovernanceResponse["items"][0] }) => {
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 z-10"
+            className="fixed inset-0 z-[100]"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 z-20 w-44 mt-1 bg-white border border-gray-200 rounded-md shadow-lg py-1">
+          <div
+            className="fixed z-[101] w-44 bg-white border border-gray-200 rounded-md shadow-lg py-1"
+            style={{
+              top: dropdownPosition.top,
+              bottom: dropdownPosition.bottom,
+              right: dropdownPosition.right,
+            }}
+          >
             <Link
               href={`/governance/${item.id}`}
               className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -352,7 +401,7 @@ const ActionDropdown = ({ item }: { item: GovernanceResponse["items"][0] }) => {
             <div className="border-t border-gray-100 my-1" />
             <button
               className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-              onClick={() => setIsOpen(false)}
+              onClick={handleDelete}
             >
               <Trash2 className="w-4 h-4" />
               Delete
@@ -370,12 +419,14 @@ const TableRow = ({
   handleSelectItem,
   formatDate,
   isOverdue,
+  onDelete,
 }: {
   item: GovernanceResponse["items"][0];
   selectedItems: Set<number>;
   handleSelectItem: (id: number, checked: boolean) => void;
   formatDate: (date: Date | string) => string;
   isOverdue: (date?: Date | string) => boolean;
+  onDelete: (id: number) => void;
 }) => (
   <tr
     className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${
@@ -499,7 +550,7 @@ const TableRow = ({
 
     {/* Action */}
     <td className="px-4 py-3 whitespace-nowrap text-center">
-      <ActionDropdown item={item} />
+      <ActionDropdown item={item} onDelete={onDelete} />
     </td>
   </tr>
 );
@@ -519,6 +570,12 @@ export default function GovernancePage() {
   } | null>(null);
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [users, setUsers] = useState<
+    { id: number; name: string | null; email: string }[]
+  >([]);
+  const [departments, setDepartments] = useState<
+    { id: number; name: string; code: string | null; createdAt: Date }[]
+  >([]);
 
   // Fetch governance items
   const fetchGovernanceItems = async (page = 1, search = "", status = "") => {
@@ -547,6 +604,32 @@ export default function GovernancePage() {
       setLoading(false);
     }
   };
+
+  // Fetch users and departments
+  useEffect(() => {
+    const fetchUsersAndDepartments = async () => {
+      try {
+        const [usersRes, deptsRes] = await Promise.all([
+          fetch("/api/users"),
+          fetch("/api/departments"),
+        ]);
+
+        if (usersRes.ok) {
+          const usersData = await usersRes.json();
+          setUsers(usersData.users || []);
+        }
+
+        if (deptsRes.ok) {
+          const deptsData = await deptsRes.json();
+          setDepartments(deptsData.departments || []);
+        }
+      } catch (error) {
+        console.error("Error fetching users/departments:", error);
+      }
+    };
+
+    fetchUsersAndDepartments();
+  }, []);
 
   // Effects
   useEffect(() => {
@@ -687,6 +770,39 @@ export default function GovernancePage() {
 
   const handleRefresh = () => {
     fetchGovernanceItems(currentPage, searchTerm, statusFilter);
+  };
+
+  const handleDeleteItem = async (itemId: number) => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this governance item? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/governance/${itemId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to delete governance item");
+        return;
+      }
+
+      // Refresh the list after successful deletion
+      await fetchGovernanceItems(currentPage, searchTerm, statusFilter);
+
+      // If we deleted the last item on the page and it's not page 1, go to previous page
+      if (data && data.items.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    } catch (error) {
+      console.error("Error deleting governance item:", error);
+      alert("Failed to delete governance item. Please try again.");
+    }
   };
 
   return (
@@ -989,6 +1105,7 @@ export default function GovernancePage() {
                               handleSelectItem={handleSelectItem}
                               formatDate={formatDate}
                               isOverdue={isOverdue}
+                              onDelete={handleDeleteItem}
                             />
                           ))}
                         </tbody>
@@ -1407,6 +1524,8 @@ export default function GovernancePage() {
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
           onSubmit={handleCreateGovernanceItem}
+          users={users}
+          departments={departments}
         />
       </div>
     </div>
