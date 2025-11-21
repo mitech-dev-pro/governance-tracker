@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
 
     if (search) {
       where.OR = [
@@ -72,10 +72,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching assets:", error);
     return NextResponse.json(
-      { error: "Failed to fetch assets", details: error.message },
+      { error: "Failed to fetch assets", details: (error as Error).message },
       { status: 500 }
     );
   }
@@ -123,10 +123,10 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(asset, { status: 201 });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating asset:", error);
     return NextResponse.json(
-      { error: "Failed to create asset", details: error.message },
+      { error: "Failed to create asset", details: (error as Error).message },
       { status: 500 }
     );
   }

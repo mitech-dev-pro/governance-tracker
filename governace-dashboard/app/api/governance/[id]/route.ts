@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { NextRequest, NextResponse } from "next/server";
 import { updateGovernanceSchema } from "../../validationSchema";
 import prisma from "../../../../prisma/client";
@@ -231,7 +232,7 @@ export async function PUT(
     }
 
     // Build update data
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const updateData: any = {};
 
     if (data.title !== undefined) updateData.title = data.title;

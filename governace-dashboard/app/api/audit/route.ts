@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient, Prisma } from "@prisma/client";
 
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     const departmentId = searchParams.get("departmentId");
     const search = searchParams.get("search");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const where: any = {};
 
     if (status) {

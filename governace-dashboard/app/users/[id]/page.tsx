@@ -71,7 +71,6 @@ export default function UserDetailPage() {
 
   useEffect(() => {
     fetchUser();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const fetchUser = async () => {
@@ -192,7 +191,6 @@ export default function UserDetailPage() {
                 <div className="relative inline-block mb-4">
                   {user.image && !imageError ? (
                     <div className="w-[120px] h-[120px] rounded-full overflow-hidden border-4 border-blue-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={user.image}
                         alt={user.name || "User"}

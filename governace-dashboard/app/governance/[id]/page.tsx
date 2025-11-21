@@ -267,7 +267,6 @@ const UserAvatar = ({
     user.image !== "undefined"
   ) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
       <img
         className={`${sizeClasses[size]} rounded-full object-cover border-2 border-gray-200`}
         src={user.image}

@@ -77,7 +77,6 @@ export default function ApplicationsPage() {
 
   useEffect(() => {
     fetchAssets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchTerm, statusFilter]);
 
   const getStatusColor = (status: string) => {

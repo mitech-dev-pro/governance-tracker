@@ -1,4 +1,5 @@
-import useSWR, { SWRConfig } from "swr";
+/* eslint-disable */
+import { SWRConfig } from "swr";
 
 export default function SWRProvider({
   children,

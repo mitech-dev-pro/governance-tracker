@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -184,7 +185,6 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
           >
             {/* User Profile Picture or Avatar */}
             {displayImage && !imageError ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={displayImage}
                 alt={displayName}

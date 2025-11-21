@@ -66,7 +66,6 @@ export default function EditUserPage() {
 
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const fetchData = async () => {

@@ -58,23 +58,33 @@ export default function UsersPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {data?.users?.length > 0 ? (
-                  data.users.map((user: any) => (
-                    <tr key={user.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">{user.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {user.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {user.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {user.role}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {user.department?.name || "-"}
-                      </td>
-                    </tr>
-                  ))
+                  data.users.map(
+                    (user: {
+                      id: number;
+                      name: string;
+                      email: string;
+                      role: string;
+                      department?: { name: string };
+                    }) => (
+                      <tr key={user.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {user.id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {user.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {user.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {user.role}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {user.department?.name || "-"}
+                        </td>
+                      </tr>
+                    )
+                  )
                 ) : (
                   <tr>
                     <td

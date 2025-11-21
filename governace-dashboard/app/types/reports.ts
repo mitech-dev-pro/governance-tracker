@@ -22,9 +22,9 @@ export interface GovernanceReportData {
   byStatus: Record<string, number>;
   byType: Record<string, number>;
   byDepartment: Record<string, number>;
-  recentItems: any[];
-  upcomingMeetings: any[];
-  actionItems: any[];
+  recentItems: unknown[];
+  upcomingMeetings: unknown[];
+  actionItems: unknown[];
 }
 
 // Audit Report Types
@@ -34,13 +34,13 @@ export interface AuditReportData {
     total: number;
     bySeverity: Record<string, number>;
     byStatus: Record<string, number>;
-    critical: any[];
-    high: any[];
+    critical: unknown[];
+    high: unknown[];
   };
   schedules: {
     total: number;
-    upcoming: any[];
-    completed: any[];
+    upcoming: unknown[];
+    completed: unknown[];
   };
 }
 
@@ -75,8 +75,8 @@ export interface RiskReportData {
   byCategory: Record<string, number>;
   byImpact: Record<string, number>;
   byLikelihood: Record<string, number>;
-  highRisks: any[];
-  mitigations: any[];
+  highRisks: unknown[];
+  mitigations: unknown[];
 }
 
 // Management Report Types (Executive Summary)
@@ -121,7 +121,7 @@ export interface ExportConfig {
     start: Date;
     end: Date;
   };
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 // Bulk Export Types

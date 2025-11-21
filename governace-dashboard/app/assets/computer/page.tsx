@@ -72,7 +72,6 @@ export default function ComputersPage() {
 
   useEffect(() => {
     fetchAssets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchTerm, statusFilter, categoryFilter]);
 
   const getCategoryIcon = (category: string) => {

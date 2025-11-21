@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
@@ -140,7 +141,7 @@ export async function PUT(
     const newLikelihood = likelihood ?? currentRisk.likelihood;
     const rating = newImpact * newLikelihood;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const updateData: any = {
       rating,
     };

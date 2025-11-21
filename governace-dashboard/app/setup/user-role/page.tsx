@@ -428,7 +428,6 @@ export default function UserRolePage() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           {userRole.user.image ? (
-                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               className="h-10 w-10 rounded-full"
                               src={userRole.user.image}

@@ -142,7 +142,6 @@ export default function ImageUpload({
           <div
             className={`relative ${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-lg`}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={displayImage}
               alt="Profile preview"
