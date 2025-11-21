@@ -355,7 +355,7 @@ export default function AssetsPage() {
         </div>
 
         {/* Empty State */}
-        {!loading && assets.length === 0 && (
+        {!isLoading && assets.length === 0 && (
           <div className="text-center py-12">
             <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-800 mb-2">

@@ -466,15 +466,18 @@ export default function RiskReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {reportData?.highRisks.map(
-                    (risk: {
+                  {(() => {
+                    type Risk = {
                       id: string;
                       title: string;
                       category: string;
                       impact: string;
                       likelihood: string;
                       status: string;
-                    }) => (
+                    };
+                    const risks: Risk[] = (reportData?.highRisks ||
+                      []) as Risk[];
+                    return risks.map((risk) => (
                       <tr key={risk.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="text-sm font-medium text-gray-900">
@@ -506,8 +509,8 @@ export default function RiskReportsPage() {
                           </span>
                         </td>
                       </tr>
-                    )
-                  )}
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>

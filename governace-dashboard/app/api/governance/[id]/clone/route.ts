@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/prisma/client';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const idParam = searchParams.get("id");
+  const id = idParam ? parseInt(idParam) : undefined;
+  if (!id) {
+    return NextResponse.json({ error: "Missing or invalid governance id" }, { status: 400 });
+  }
   try {
-    const { id } = params;
     
     // Fetch the original item
     const originalItem = await prisma.governanceItem.findUnique({
-      where: { id: parseInt(id) },
+      where: { id },
     });
 
     if (!originalItem) {
@@ -29,11 +31,12 @@ export async function POST(
         progress: 0,
         visibility: originalItem.visibility,
         actionitemType: originalItem.actionitemType,
-        tags: originalItem.tags || null,
-        clauseRefs: originalItem.clauseRefs,
+        tags: originalItem.tags as import('@prisma/client').Prisma.InputJsonValue ?? undefined,
+        clauseRefs: originalItem.clauseRefs === null ? undefined : originalItem.clauseRefs,
         ownerId: originalItem.ownerId,
         departmentId: originalItem.departmentId,
         dueDate: null, // Reset due date
+        updatedAt: new Date(), // Add updatedAt property
       },
     });
 

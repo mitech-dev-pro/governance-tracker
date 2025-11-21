@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/prisma/client';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
-    const { id } = params;
-    
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json(
+        { error: "Missing id parameter" },
+        { status: 400 }
+      );
+    }
     // In a real implementation, you would:
     // 1. Get the current user ID from session/auth
     // 2. Check if user is already watching
     // 3. Toggle the watch status
-    
     // For now, just create an audit event to log the action
     await prisma.auditevent.create({
       data: {
@@ -22,7 +24,6 @@ export async function POST(
         createdAt: new Date(),
       },
     });
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Watch toggle error:', error);

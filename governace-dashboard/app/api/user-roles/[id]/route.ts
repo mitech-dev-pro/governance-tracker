@@ -3,20 +3,17 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
   try {
-    const userRoleId = parseInt(params.id);
-
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const userRoleId = id ? parseInt(id, 10) : NaN;
     if (isNaN(userRoleId)) {
       return NextResponse.json(
         { error: "Invalid user role ID" },
         { status: 400 }
       );
     }
-
     // Check if user role exists
     const existingUserRole = await prisma.userrole.findUnique({
       where: { id: userRoleId },
@@ -34,19 +31,16 @@ export async function DELETE(
         },
       },
     });
-
     if (!existingUserRole) {
       return NextResponse.json(
         { error: "User role assignment not found" },
         { status: 404 }
       );
     }
-
     // Delete the user role assignment
     await prisma.userrole.delete({
       where: { id: userRoleId },
     });
-
     return NextResponse.json({
       message: `Successfully removed role "${existingUserRole.role.name}" from user "${existingUserRole.user.name || existingUserRole.user.email}"`,
     });

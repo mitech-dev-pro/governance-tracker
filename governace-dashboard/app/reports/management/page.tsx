@@ -104,7 +104,7 @@ export default function ManagementReportPage() {
 
   const handleExportPDF = () => {
     if (!reportData) return;
-    exportManagementReportPDF(reportData);
+    exportManagementReportPDF(reportData as unknown as Record<string, unknown>);
   };
 
   const handleExportExcel = () => {

@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/prisma/client';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const idParam = searchParams.get("id");
+  const id = idParam ? parseInt(idParam) : undefined;
+  if (!id) {
+    return NextResponse.json({ error: "Missing or invalid governance id" }, { status: 400 });
+  }
   try {
-    const { id } = params;
     
     // Update the governance item to archived status
     await prisma.governanceItem.update({
-      where: { id: parseInt(id) },
+      where: { id },
       data: {
         status: 'DEFERRED', // Using DEFERRED as archived status
         updatedAt: new Date(),
@@ -20,7 +22,7 @@ export async function POST(
     // Create an audit event
     await prisma.auditevent.create({
       data: {
-        itemId: parseInt(id),
+        itemId: id,
         kind: 'archived',
         message: 'Governance item archived',
         createdAt: new Date(),

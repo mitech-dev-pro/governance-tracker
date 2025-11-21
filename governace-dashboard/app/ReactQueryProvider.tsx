@@ -1,6 +1,10 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryFunctionContext,
+} from "@tanstack/react-query";
 import React, { useRef } from "react";
 
 export function ReactQueryProvider({
@@ -11,8 +15,9 @@ export function ReactQueryProvider({
   // Ensure QueryClient is only created once per client
 
   // Inline fetcher for React Query (if you use fetchQuery)
-  const fetcher = async ({ queryKey }: { queryKey: [string] }) => {
-    const res = await fetch(queryKey[0]);
+  const fetcher = async (context: QueryFunctionContext) => {
+    const url = context.queryKey[0] as string;
+    const res = await fetch(url);
     if (!res.ok) {
       throw new Error("An error occurred while fetching the data.");
     }
@@ -20,20 +25,19 @@ export function ReactQueryProvider({
   };
 
   // Inline defaultOptions to avoid passing imported functions
-  const queryClientRef = useRef<QueryClient>();
-  if (!queryClientRef.current) {
-    queryClientRef.current = new QueryClient({
+  const queryClientRef = useRef<QueryClient>(
+    new QueryClient({
       defaultOptions: {
         queries: {
           queryFn: fetcher,
           refetchOnWindowFocus: true,
           retry: 2,
           staleTime: 60000,
-          cacheTime: 120000,
+          gcTime: 120000,
         },
       },
-    });
-  }
+    })
+  );
 
   return (
     <QueryClientProvider client={queryClientRef.current}>

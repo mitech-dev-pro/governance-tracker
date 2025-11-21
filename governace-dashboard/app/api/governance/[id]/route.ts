@@ -5,14 +5,11 @@ import prisma from "../../../../prisma/client";
 
 
 // GET - Fetch single governance item by ID
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { id: paramId } = await params;
-    const id = parseInt(paramId, 10);
-    
+    const { searchParams } = new URL(request.url);
+    const paramId = searchParams.get("id");
+    const id = paramId ? parseInt(paramId, 10) : NaN;
     if (isNaN(id)) {
       return NextResponse.json(
         { error: "Invalid ID format" },
@@ -190,14 +187,11 @@ export async function GET(
 }
 
 // PUT - Update governance item
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest) {
   try {
-    const { id: paramId } = await params;
-    const id = parseInt(paramId, 10);
-    
+    const { searchParams } = new URL(request.url);
+    const paramId = searchParams.get("id");
+    const id = paramId ? parseInt(paramId, 10) : NaN;
     if (isNaN(id)) {
       return NextResponse.json(
         { error: "Invalid ID format" },
@@ -289,14 +283,11 @@ export async function PUT(
 }
 
 // DELETE - Delete governance item
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest) {
   try {
-    const { id: paramId } = await params;
-    const id = parseInt(paramId, 10);
-    
+    const { searchParams } = new URL(request.url);
+    const paramId = searchParams.get("id");
+    const id = paramId ? parseInt(paramId, 10) : NaN;
     if (isNaN(id)) {
       return NextResponse.json(
         { error: "Invalid ID format" },

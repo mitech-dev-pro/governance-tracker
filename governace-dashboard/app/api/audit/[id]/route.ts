@@ -4,12 +4,14 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // GET /api/audit/[id] - Get a single audit
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const idParam = searchParams.get("id");
+  const id = idParam ? parseInt(idParam) : undefined;
+  if (!id) {
+    return NextResponse.json({ error: "Missing or invalid audit id" }, { status: 400 });
+  }
   try {
-    const id = parseInt(params.id);
 
     const audit = await prisma.audit.findUnique({
       where: { id },
@@ -58,12 +60,14 @@ export async function GET(
 }
 
 // PUT /api/audit/[id] - Update an audit
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const idParam = searchParams.get("id");
+  const id = idParam ? parseInt(idParam) : undefined;
+  if (!id) {
+    return NextResponse.json({ error: "Missing or invalid audit id" }, { status: 400 });
+  }
   try {
-    const id = parseInt(params.id);
     const body = await request.json();
 
     const {
@@ -151,12 +155,14 @@ export async function PUT(
 }
 
 // DELETE /api/audit/[id] - Delete an audit
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const idParam = searchParams.get("id");
+  const id = idParam ? parseInt(idParam) : undefined;
+  if (!id) {
+    return NextResponse.json({ error: "Missing or invalid audit id" }, { status: 400 });
+  }
   try {
-    const id = parseInt(params.id);
 
     // Check if audit exists
     const existingAudit = await prisma.audit.findUnique({

@@ -3,13 +3,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/prisma/client';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const { id } = params;
-    
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json(
+        { error: "Missing id parameter" },
+        { status: 400 }
+      );
+    }
     const response = await fetch(`${process.env.NEXTAUTH_URL}/api/governance/${id}/export`, {
       method: 'GET',
       headers: {
@@ -22,7 +25,6 @@ export async function GET(
     }
 
     const buffer = await response.arrayBuffer();
-    
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'application/pdf',

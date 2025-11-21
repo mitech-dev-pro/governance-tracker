@@ -4,12 +4,14 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // GET /api/audit/schedules/[id] - Get a single schedule
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const idParam = searchParams.get("id");
+  const id = idParam ? parseInt(idParam) : undefined;
+  if (!id) {
+    return NextResponse.json({ error: "Missing or invalid schedule id" }, { status: 400 });
+  }
   try {
-    const id = parseInt(params.id);
 
     const schedule = await prisma.audit_schedule.findUnique({
       where: { id },
@@ -42,12 +44,14 @@ export async function GET(
 }
 
 // PUT /api/audit/schedules/[id] - Update a schedule
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const idParam = searchParams.get("id");
+  const id = idParam ? parseInt(idParam) : undefined;
+  if (!id) {
+    return NextResponse.json({ error: "Missing or invalid schedule id" }, { status: 400 });
+  }
   try {
-    const id = parseInt(params.id);
     const body = await request.json();
 
     const {
@@ -109,12 +113,14 @@ export async function PUT(
 }
 
 // DELETE /api/audit/schedules/[id] - Delete a schedule
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const idParam = searchParams.get("id");
+  const id = idParam ? parseInt(idParam) : undefined;
+  if (!id) {
+    return NextResponse.json({ error: "Missing or invalid schedule id" }, { status: 400 });
+  }
   try {
-    const id = parseInt(params.id);
 
     // Check if schedule exists
     const existingSchedule = await prisma.audit_schedule.findUnique({

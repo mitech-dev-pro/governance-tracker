@@ -99,7 +99,7 @@ export default function GovernanceReportsPage() {
   const handleExportCSV = () => {
     if (!reportData) return;
     exportToCSV(
-      reportData.recentItems,
+      reportData.recentItems as Record<string, unknown>[],
       generateFilename("governance-report", "csv")
     );
   };
@@ -126,7 +126,7 @@ export default function GovernanceReportsPage() {
   const handleExportExcel = () => {
     if (!reportData) return;
 
-    exportToExcel(reportData.recentItems, {
+    exportToExcel(reportData.recentItems as Record<string, unknown>[], {
       fileName: "governance-report.xlsx",
       sheetName: "Governance Items",
     });
@@ -359,14 +359,17 @@ export default function GovernanceReportsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {reportData?.recentItems.map(
-                  (item: {
+                {(() => {
+                  type GovernanceItem = {
                     id: string;
                     title: string;
                     type: string;
                     status: string;
                     createdAt: string;
-                  }) => (
+                  };
+                  const items: GovernanceItem[] = (reportData?.recentItems ||
+                    []) as GovernanceItem[];
+                  return items.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
@@ -393,8 +396,8 @@ export default function GovernanceReportsPage() {
                         {new Date(item.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
-                  )
-                )}
+                  ));
+                })()}
               </tbody>
             </table>
           </div>

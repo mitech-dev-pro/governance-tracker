@@ -30,16 +30,10 @@ export default function AuditReportsPage() {
         fetch("/api/audit/findings"),
         fetch("/api/audit/schedules"),
       ]);
+      const audits = await auditsRes.json();
+      const findings = await findingsRes.json();
+      const schedules = await schedulesRes.json();
 
-      const audits = auditsRes.ok ? await auditsRes.json() : { audits: [] };
-      const findings = findingsRes.ok
-        ? await findingsRes.json()
-        : { findings: [] };
-      const schedules = schedulesRes.ok
-        ? await schedulesRes.json()
-        : { schedules: [] };
-
-      // Group findings by severity
       const findingsList = findings.findings || [];
       const bySeverity = findingsList.reduce(
         (acc: Record<string, number>, f: { severity: string }) => {
@@ -415,17 +409,19 @@ export default function AuditReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {[
-                    ...(reportData?.findings.critical || []),
-                    ...(reportData?.findings.high || []),
-                  ].map(
-                    (finding: {
+                  {(() => {
+                    type Finding = {
                       id: string;
                       title: string;
                       severity: string;
                       status: string;
                       identifiedDate: string;
-                    }) => (
+                    };
+                    const critical = (reportData?.findings.critical ||
+                      []) as Finding[];
+                    const high = (reportData?.findings.high || []) as Finding[];
+                    const findingsList: Finding[] = [...critical, ...high];
+                    return findingsList.map((finding) => (
                       <tr key={finding.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4">
                           <div className="text-sm font-medium text-gray-900">
@@ -452,8 +448,8 @@ export default function AuditReportsPage() {
                           ).toLocaleDateString()}
                         </td>
                       </tr>
-                    )
-                  )}
+                    ));
+                  })()}
                 </tbody>
               </table>
             </div>
@@ -483,32 +479,30 @@ export default function AuditReportsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {reportData?.schedules.upcoming.map(
-                    (schedule: {
+                  {(
+                    reportData?.schedules.upcoming as Array<{
                       id: string;
                       scheduledDate: string;
                       status: string;
                       audit?: { title: string };
-                    }) => (
-                      <tr key={schedule.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {schedule.audit?.title || "N/A"}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
-                          {new Date(
-                            schedule.scheduledDate
-                          ).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                            {schedule.status}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  )}
+                    }>
+                  ).map((schedule) => (
+                    <tr key={schedule.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {schedule.audit?.title || "N/A"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {new Date(schedule.scheduledDate).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                          {schedule.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

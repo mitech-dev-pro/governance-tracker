@@ -1,5 +1,6 @@
+"use client";
 import React from "react";
-import useSWR from "swr";
+import useSWR from "swr/immutable";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
