@@ -1,6 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import useSWR from "swr";
+
+// Inline fetcher to avoid Next.js Client Component error
+const fetcher = async (...args: Parameters<typeof fetch>) => {
+  const res = await fetch(...args);
+  if (!res.ok) {
+    throw new Error("An error occurred while fetching the data.");
+  }
+  return res.json();
+};
 import {
   Plus,
   Search,
@@ -36,14 +46,33 @@ interface Asset {
 }
 
 export default function AssetsPage() {
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+
+  // Build query string for SWR key
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: "12",
+  });
+  if (searchTerm) params.append("search", searchTerm);
+  if (categoryFilter) params.append("category", categoryFilter);
+  if (statusFilter) params.append("status", statusFilter);
+  const swrKey = `/api/asset?${params.toString()}`;
+
+  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
+    revalidateOnFocus: true,
+    dedupingInterval: 60000,
+    refreshInterval: 120000,
+    shouldRetryOnError: true,
+    errorRetryCount: 2,
+    errorRetryInterval: 5000,
+  });
+
+  const assets: Asset[] = data?.assets || [];
+  const totalPages: number = data?.pagination?.totalPages || 1;
 
   const CATEGORY_OPTIONS: { label: string; value: string }[] = [
     { value: "", label: "All Categories" },
@@ -65,33 +94,9 @@ export default function AssetsPage() {
     { value: "DAMAGED", label: "Damaged" },
   ];
 
-  useEffect(() => {
-    fetchAssets();
-  }, []);
-
-  const fetchAssets = async () => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: "12",
-      });
-
-      if (searchTerm) params.append("search", searchTerm);
-      if (categoryFilter) params.append("category", categoryFilter);
-      if (statusFilter) params.append("status", statusFilter);
-
-      const res = await fetch(`/api/asset?${params}`);
-      if (!res.ok) throw new Error("Failed to fetch");
-
-      const data = await res.json();
-      setAssets(data.assets || []);
-      setTotalPages(data.pagination?.totalPages || 1);
-    } catch (error) {
-      console.error("Error fetching assets:", error);
-    } finally {
-      setLoading(false);
-    }
+  // Refresh assets after create
+  const handleRefreshAssets = () => {
+    mutate();
   };
 
   const getCategoryIcon = (category: string) => {
@@ -145,10 +150,26 @@ export default function AssetsPage() {
     }
   };
 
-  if (loading && assets.length === 0) {
+  if (isLoading && assets.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 mb-2">Error loading assets.</div>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+            onClick={() => mutate()}
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -376,7 +397,7 @@ export default function AssetsPage() {
       <CreateAssetModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={fetchAssets}
+        onSuccess={handleRefreshAssets}
       />
     </div>
   );

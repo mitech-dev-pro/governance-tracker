@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import useSWR from "swr";
+import { fetcher } from "../../utils/fetcher";
 import {
   Plus,
   Search,
@@ -17,9 +19,7 @@ import CreateRiskModal from "./CreateRiskModal";
 import EditRiskModal from "./EditRiskModal";
 
 export default function RiskManagementPage() {
-  const [risks, setRisks] = useState<Risk[]>([]);
   const [filteredRisks, setFilteredRisks] = useState<Risk[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -31,49 +31,29 @@ export default function RiskManagementPage() {
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [riskLevelFilter, setRiskLevelFilter] = useState("");
 
-  // For dropdowns
-  const [departments, setDepartments] = useState<
-    Array<{ id: number; name: string }>
-  >([]);
+  // SWR data fetching
+  const {
+    data: risksData,
+    isLoading: risksLoading,
+    mutate: mutateRisks,
+  } = useSWR("/api/risk", fetcher, {
+    revalidateOnFocus: false,
+    shouldRetryOnError: true,
+  });
+
+  const { data: departmentsData } = useSWR("/api/departments", fetcher, {
+    revalidateOnFocus: false,
+    shouldRetryOnError: true,
+  });
+
+  const risks: Risk[] = React.useMemo(
+    () => risksData?.risks || [],
+    [risksData]
+  );
+  const departments: Array<{ id: number; name: string }> =
+    departmentsData?.departments || [];
 
   useEffect(() => {
-    fetchRisks();
-    fetchDepartments();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [risks, searchTerm, statusFilter, departmentFilter, riskLevelFilter]);
-
-  const fetchRisks = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/risk");
-      if (response.ok) {
-        const data = await response.json();
-        setRisks(data.risks || []);
-      }
-    } catch (error) {
-      console.error("Error fetching risks:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDepartments = async () => {
-    try {
-      const response = await fetch("/api/departments");
-      if (response.ok) {
-        const data = await response.json();
-        setDepartments(data.departments || []);
-      }
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-    }
-  };
-
-  const applyFilters = () => {
     let filtered = [...risks];
 
     // Search filter
@@ -106,15 +86,16 @@ export default function RiskManagementPage() {
     }
 
     setFilteredRisks(filtered);
-  };
+  }, [risks, searchTerm, statusFilter, departmentFilter, riskLevelFilter]);
 
   const handleEditRisk = (risk: Risk) => {
     setSelectedRisk(risk);
     setShowEditModal(true);
   };
 
-  const handleDeleteRisk = () => {
-    fetchRisks();
+  // Refresh risks after edit/delete/create
+  const handleRefreshRisks = () => {
+    mutateRisks();
   };
 
   // Calculate statistics
@@ -308,7 +289,7 @@ export default function RiskManagementPage() {
         </div>
 
         {/* Content */}
-        {loading ? (
+        {risksLoading ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading risks...</p>
@@ -430,7 +411,7 @@ export default function RiskManagementPage() {
       <CreateRiskModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSuccess={fetchRisks}
+        onSuccess={handleRefreshRisks}
       />
 
       <EditRiskModal
@@ -440,8 +421,8 @@ export default function RiskManagementPage() {
           setShowEditModal(false);
           setSelectedRisk(null);
         }}
-        onSuccess={fetchRisks}
-        onDelete={handleDeleteRisk}
+        onSuccess={handleRefreshRisks}
+        onDelete={handleRefreshRisks}
       />
     </div>
   );

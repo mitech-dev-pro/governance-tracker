@@ -1,6 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
+import useSWR from "swr";
+
+// Inline fetcher to avoid Next.js Client Component error
+const fetcher = async (...args: Parameters<typeof fetch>) => {
+  const res = await fetch(...args);
+  if (!res.ok) {
+    throw new Error("An error occurred while fetching the data.");
+  }
+  return res.json();
+};
 import {
   Plus,
   Search,
@@ -18,9 +28,7 @@ import CreateAuditModal from "./CreateAuditModal";
 import EditAuditModal from "./EditAuditModal";
 
 export default function AuditPage() {
-  const [audits, setAudits] = useState<Audit[]>([]);
   const [filteredAudits, setFilteredAudits] = useState<Audit[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedAudit, setSelectedAudit] = useState<Audit | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -31,19 +39,28 @@ export default function AuditPage() {
   const [typeFilter, setTypeFilter] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
 
-  const fetchAudits = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/audit");
-      if (response.ok) {
-        const data = await response.json();
-        setAudits(data.audits || []);
-      }
-    } catch (error) {
-      console.error("Error fetching audits:", error);
-    } finally {
-      setLoading(false);
-    }
+  // Build query string for SWR key
+  const params = new URLSearchParams();
+  if (searchTerm) params.append("search", searchTerm);
+  if (statusFilter) params.append("status", statusFilter);
+  if (typeFilter) params.append("type", typeFilter);
+  if (departmentFilter) params.append("department", departmentFilter);
+  const swrKey = `/api/audit?${params.toString()}`;
+
+  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
+    revalidateOnFocus: true,
+    dedupingInterval: 60000,
+    refreshInterval: 120000,
+    shouldRetryOnError: true,
+    errorRetryCount: 2,
+    errorRetryInterval: 5000,
+  });
+
+  const audits: Audit[] = data?.audits || [];
+
+  // Refresh audits after create/edit/delete
+  const handleRefreshAudits = () => {
+    mutate();
   };
 
   const applyFilters = useCallback(() => {
@@ -80,13 +97,39 @@ export default function AuditPage() {
     setFilteredAudits(filtered);
   }, [audits, searchTerm, statusFilter, typeFilter, departmentFilter]);
 
-  useEffect(() => {
-    fetchAudits();
-  }, []);
+  React.useEffect(() => {
+    let filtered = [...audits];
 
-  useEffect(() => {
-    applyFilters();
-  }, [applyFilters]);
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (audit) =>
+          audit.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          audit.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          audit.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Status filter
+    if (statusFilter) {
+      filtered = filtered.filter((audit) => audit.status === statusFilter);
+    }
+
+    // Type filter
+    if (typeFilter) {
+      filtered = filtered.filter((audit) => audit.type === typeFilter);
+    }
+
+    // Department filter
+    if (departmentFilter) {
+      filtered = filtered.filter(
+        (audit) =>
+          audit.department && audit.department.id === parseInt(departmentFilter)
+      );
+    }
+
+    setFilteredAudits(filtered);
+  }, [audits, searchTerm, statusFilter, typeFilter, departmentFilter]);
 
   const handleEditAudit = (audit: Audit) => {
     setSelectedAudit(audit);
@@ -94,7 +137,7 @@ export default function AuditPage() {
   };
 
   const handleDeleteAudit = () => {
-    fetchAudits();
+    handleRefreshAudits();
   };
 
   // Calculate statistics
@@ -274,7 +317,7 @@ export default function AuditPage() {
         </div>
 
         {/* Content */}
-        {loading ? (
+        {isLoading ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading audits...</p>
@@ -380,7 +423,7 @@ export default function AuditPage() {
       <CreateAuditModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
-        onSuccess={fetchAudits}
+        onSuccess={handleRefreshAudits}
       />
 
       <EditAuditModal
@@ -390,7 +433,7 @@ export default function AuditPage() {
           setShowEditModal(false);
           setSelectedAudit(null);
         }}
-        onSuccess={fetchAudits}
+        onSuccess={handleRefreshAudits}
         onDelete={handleDeleteAudit}
       />
     </div>

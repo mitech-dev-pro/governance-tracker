@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import {
   FileText,
   Shield,
   AlertTriangle,
   CheckCircle2,
   TrendingUp,
-  TrendingDown,
   Users,
   Building2,
   Package,
@@ -102,29 +101,16 @@ interface RecentActivity {
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
+  // SWR fetcher
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const { data, error, isLoading, mutate } = useSWR("/api/dashboard", fetcher, {
+    revalidateOnFocus: true,
+    dedupingInterval: 60000, // 1 minute cache
+    refreshInterval: 120000, // 2 minutes background refresh
+  });
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("/api/dashboard");
-      const data = await response.json();
-      setStats(data.stats);
-      setRecentActivities(data.recentActivities || []);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const stats: DashboardStats | null = data?.stats || null;
+  const recentActivities: RecentActivity[] = data?.recentActivities || [];
 
   const StatCard = ({
     title,
@@ -191,7 +177,7 @@ export default function DashboardPage() {
     return link ? <Link href={link}>{content}</Link> : content;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
@@ -202,7 +188,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!stats) {
+  if (error || !stats) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
@@ -225,7 +211,7 @@ export default function DashboardPage() {
               Dashboard Overview
             </h1>
             <button
-              onClick={fetchDashboardData}
+              onClick={() => mutate()}
               className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all text-gray-700 font-medium"
             >
               <Activity className="h-4 w-4" />
@@ -732,9 +718,7 @@ export default function DashboardPage() {
                 endAngle={-270}
               >
                 <RadialBar
-                  minAngle={15}
                   background
-                  clockWise
                   dataKey="value"
                   cornerRadius={10}
                   animationDuration={1000}

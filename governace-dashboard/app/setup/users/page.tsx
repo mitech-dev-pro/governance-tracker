@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Users,
-  Plus,
   Search,
   Filter,
   Edit,
@@ -12,11 +11,9 @@ import {
   Building2,
   Shield,
   Calendar,
-  MoreVertical,
   UserPlus,
   Eye,
   CheckCircle2,
-  AlertCircle,
   User as UserIcon,
 } from "lucide-react";
 import type {
@@ -183,7 +180,7 @@ export default function UsersPage() {
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-6 pb-8 min-h-screen">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">

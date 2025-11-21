@@ -1,6 +1,8 @@
 import "./globals.css";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import ClientLayout from "./components/ClientLayout";
+import { ReactQueryProvider } from "./ReactQueryProvider";
+import SWRProvider from "./SWRProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +29,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased h-screen overflow-hidden`}
       >
-        <ClientLayout>{children}</ClientLayout>
+        <ReactQueryProvider>
+          <SWRProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </SWRProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

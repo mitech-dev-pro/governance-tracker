@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef } from "react";
 import { Risk, getRiskColor } from "../types/risk";
 
 interface RiskMatrixProps {
@@ -9,6 +9,17 @@ interface RiskMatrixProps {
 }
 
 export default function RiskMatrix({ risks, onRiskClick }: RiskMatrixProps) {
+  const [hoveredCell, setHoveredCell] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [hoveredRisks, setHoveredRisks] = useState<Risk[]>([]);
+  const [hoveredCellData, setHoveredCellData] = useState({
+    impact: 0,
+    likelihood: 0,
+    rating: 0,
+  });
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const hideTimeout = useRef<NodeJS.Timeout | null>(null);
+
   // Group risks by their impact and likelihood
   const getRisksAtPosition = (impact: number, likelihood: number) => {
     return risks.filter(
@@ -32,11 +43,11 @@ export default function RiskMatrix({ risks, onRiskClick }: RiskMatrixProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white rounded-lg shadow-md p-6 overflow-visible">
       <h3 className="text-lg font-semibold mb-4">Risk Matrix</h3>
 
-      <div className="overflow-x-auto">
-        <div className="inline-block min-w-full">
+      <div className="overflow-visible">
+        <div className="inline-block min-w-full overflow-visible">
           {/* Matrix Header */}
           <div className="flex items-center mb-2">
             <div className="w-24"></div>
@@ -80,10 +91,33 @@ export default function RiskMatrix({ risks, onRiskClick }: RiskMatrixProps) {
                         key={`${impact}-${likelihood}`}
                         className={`relative border-2 rounded p-2 min-h-[80px] transition-all ${cellColor} ${
                           cellRisks.length > 0
-                            ? "hover:shadow-md cursor-pointer"
+                            ? "hover:shadow-lg hover:scale-105 cursor-pointer"
                             : ""
                         }`}
-                        title={`Impact: ${impact}, Likelihood: ${likelihood}, Rating: ${rating}`}
+                        onMouseEnter={(e) => {
+                          if (cellRisks.length > 0) {
+                            if (hideTimeout.current) {
+                              clearTimeout(hideTimeout.current);
+                            }
+                            setHoveredCell(`${impact}-${likelihood}`);
+                            const rect =
+                              e.currentTarget.getBoundingClientRect();
+                            setTooltipPosition({
+                              top: rect.bottom + 8,
+                              left: rect.left,
+                            });
+                            setHoveredRisks(cellRisks);
+                            setHoveredCellData({ impact, likelihood, rating });
+                            setTooltipVisible(true);
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          hideTimeout.current = setTimeout(() => {
+                            setTooltipVisible(false);
+                            setHoveredCell(null);
+                            setHoveredRisks([]);
+                          }, 100);
+                        }}
                       >
                         {/* Rating badge in corner */}
                         <div className="absolute top-1 right-1 text-xs font-bold text-gray-500">
@@ -158,6 +192,65 @@ export default function RiskMatrix({ risks, onRiskClick }: RiskMatrixProps) {
           </div>
         </div>
       </div>
+
+      {/* Global Tooltip - Rendered outside matrix containers */}
+      {tooltipVisible && hoveredCell && hoveredRisks.length > 0 && (
+        <div
+          className="fixed w-64 bg-white rounded-lg shadow-2xl border-2 border-blue-500 p-4 z-[9999]"
+          style={{
+            top: `${tooltipPosition.top}px`,
+            left: `${tooltipPosition.left}px`,
+          }}
+          onMouseEnter={() => {
+            if (hideTimeout.current) {
+              clearTimeout(hideTimeout.current);
+            }
+            setTooltipVisible(true);
+          }}
+          onMouseLeave={() => {
+            hideTimeout.current = setTimeout(() => {
+              setTooltipVisible(false);
+              setHoveredCell(null);
+              setHoveredRisks([]);
+            }, 100);
+          }}
+        >
+          <div className="mb-2 pb-2 border-b border-gray-200">
+            <p className="font-bold text-gray-800 text-sm">
+              Impact: {hoveredCellData.impact} × Likelihood:{" "}
+              {hoveredCellData.likelihood} = {hoveredCellData.rating}
+            </p>
+            <p className="text-xs text-gray-600 mt-1">
+              {hoveredRisks.length}{" "}
+              {hoveredRisks.length === 1 ? "risk" : "risks"} in this cell
+            </p>
+          </div>
+          <div className="max-h-64 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-200 pr-2">
+            {hoveredRisks.map((risk, idx) => (
+              <div
+                key={risk.id}
+                onClick={() => onRiskClick && onRiskClick(risk)}
+                className="p-2 bg-gray-50 hover:bg-blue-50 rounded border border-gray-200 hover:border-blue-300 transition-colors cursor-pointer"
+              >
+                <p className="font-semibold text-sm text-gray-900">
+                  {idx + 1}. {risk.title}
+                </p>
+                {risk.notes && (
+                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                    {risk.notes}
+                  </p>
+                )}
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-gray-500">
+                    Owner:{" "}
+                    {risk.owner?.name || risk.owner?.email || "Unassigned"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

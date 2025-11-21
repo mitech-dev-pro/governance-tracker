@@ -94,7 +94,14 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ risks });
+    // Map 'user' to 'owner' for frontend compatibility
+    const mappedRisks = risks.map(risk => ({
+      ...risk,
+      owner: risk.user,
+      user: undefined,
+    }));
+
+    return NextResponse.json({ risks: mappedRisks });
   } catch (error) {
     console.error("Error fetching risks:", error);
     return NextResponse.json(

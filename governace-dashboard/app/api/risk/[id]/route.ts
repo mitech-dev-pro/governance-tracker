@@ -69,7 +69,14 @@ export async function GET(
       return NextResponse.json({ error: "Risk not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ risk });
+    // Map 'user' to 'owner' for frontend compatibility
+    const mappedRisk = {
+      ...risk,
+      owner: risk.user,
+      user: undefined,
+    };
+
+    return NextResponse.json({ risk: mappedRisk });
   } catch (error) {
     console.error("Error fetching risk:", error);
     return NextResponse.json(
@@ -177,7 +184,14 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json({ risk });
+    // Map 'user' to 'owner' for frontend compatibility
+    const mappedRisk = {
+      ...risk,
+      owner: risk.user,
+      user: undefined,
+    };
+
+    return NextResponse.json({ risk: mappedRisk });
   } catch (error) {
     console.error("Error updating risk:", error);
     return NextResponse.json(

@@ -124,7 +124,7 @@ export default function EditRiskModal({
       });
 
       if (response.ok) {
-        onSuccess();
+        onSuccess(); // This will trigger fetchRisks() in parent
         onClose();
       } else {
         const data = await response.json();

@@ -46,7 +46,9 @@ export default function EditScheduleModal({
         status: schedule.status,
         notes: schedule.notes || undefined,
       });
-      setAttendeesInput(attendeesList.join(", "));
+      setAttendeesInput(
+        Array.isArray(attendeesList) ? attendeesList.join(", ") : ""
+      );
     }
   }, [isOpen, schedule]);
 

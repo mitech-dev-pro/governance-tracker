@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
+import useSWR from "swr";
 import Link from "next/link";
 import {
   Plus,
@@ -556,9 +557,6 @@ const TableRow = ({
 );
 
 export default function GovernancePage() {
-  const [data, setData] = useState<GovernanceResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -577,36 +575,36 @@ export default function GovernancePage() {
     { id: number; name: string; code: string | null; createdAt: Date }[]
   >([]);
 
-  // Fetch governance items
-  const fetchGovernanceItems = async (page = 1, search = "", status = "") => {
-    try {
-      setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: "10",
-        ...(search && { search }),
-        ...(status && { status }),
-      });
+  // Build query string for SWR key
+  const params = new URLSearchParams({
+    page: currentPage.toString(),
+    limit: itemsPerPage.toString(),
+    ...(searchTerm && { search: searchTerm }),
+    ...(statusFilter && { status: statusFilter }),
+  });
+  const swrKey = `/api/governance?${params.toString()}`;
 
-      const response = await fetch(`/api/governance?${params}`);
+  const fetcher = async (url: string) => {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("An error occurred while fetching the data.");
+    return res.json();
+  };
+  const { data, error, isLoading, mutate } = useSWR(swrKey, fetcher, {
+    revalidateOnFocus: true,
+    dedupingInterval: 60000,
+    refreshInterval: 120000,
+    shouldRetryOnError: true,
+    errorRetryCount: 2,
+    errorRetryInterval: 5000,
+  });
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch governance items");
-      }
-
-      const result: GovernanceResponse = await response.json();
-      setData(result);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
+  // Refresh governance items after create/delete
+  const handleRefreshGovernance = () => {
+    mutate();
   };
 
   // Fetch users and departments
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchUsersAndDepartments = async () => {
       try {
         const [usersRes, deptsRes] = await Promise.all([
@@ -630,11 +628,6 @@ export default function GovernancePage() {
 
     fetchUsersAndDepartments();
   }, []);
-
-  // Effects
-  useEffect(() => {
-    fetchGovernanceItems(currentPage, searchTerm, statusFilter);
-  }, [currentPage, searchTerm, statusFilter]);
 
   // Computed values
   const sortedItems = useMemo(() => {
@@ -704,7 +697,12 @@ export default function GovernancePage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(new Set(data?.items.map((item) => item.id) || []));
+      setSelectedItems(
+        new Set(
+          data?.items.map((item: GovernanceResponse["items"][0]) => item.id) ||
+            []
+        )
+      );
     } else {
       setSelectedItems(new Set());
     }
@@ -747,7 +745,7 @@ export default function GovernancePage() {
       }
 
       // Refresh the list
-      await fetchGovernanceItems(1, searchTerm, statusFilter);
+      handleRefreshGovernance();
       setCurrentPage(1);
       setSelectedItems(new Set());
     } catch (error) {
@@ -769,7 +767,7 @@ export default function GovernancePage() {
   };
 
   const handleRefresh = () => {
-    fetchGovernanceItems(currentPage, searchTerm, statusFilter);
+    handleRefreshGovernance();
   };
 
   const handleDeleteItem = async (itemId: number) => {
@@ -793,7 +791,7 @@ export default function GovernancePage() {
       }
 
       // Refresh the list after successful deletion
-      await fetchGovernanceItems(currentPage, searchTerm, statusFilter);
+      handleRefreshGovernance();
 
       // If we deleted the last item on the page and it's not page 1, go to previous page
       if (data && data.items.length === 1 && currentPage > 1) {
@@ -823,10 +821,12 @@ export default function GovernancePage() {
               <button
                 onClick={handleRefresh}
                 className="inline-flex items-center px-3 sm:px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 shadow-sm text-sm"
-                disabled={loading}
+                disabled={isLoading}
               >
                 <RefreshCw
-                  className={`w-4 h-4 ${loading ? "animate-spin" : ""} sm:mr-2`}
+                  className={`w-4 h-4 ${
+                    isLoading ? "animate-spin" : ""
+                  } sm:mr-2`}
                 />
                 <span className="hidden sm:inline">Refresh</span>
               </button>
@@ -935,7 +935,7 @@ export default function GovernancePage() {
         </div>
 
         {/* Content */}
-        {loading && <TableSkeleton />}
+        {isLoading && <TableSkeleton />}
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6">
@@ -947,9 +947,7 @@ export default function GovernancePage() {
                 </h3>
                 <p className="text-red-700 text-sm mb-3">{error}</p>
                 <button
-                  onClick={() =>
-                    fetchGovernanceItems(currentPage, searchTerm, statusFilter)
-                  }
+                  onClick={() => mutate()}
                   className="text-red-600 hover:text-red-700 font-medium text-sm"
                 >
                   Try again
@@ -959,7 +957,7 @@ export default function GovernancePage() {
           </div>
         )}
 
-        {!loading && !error && data && (
+        {!isLoading && !error && data && (
           <>
             {data.items.length === 0 ? (
               <EmptyState onCreateClick={() => setIsCreateModalOpen(true)} />
@@ -1097,17 +1095,19 @@ export default function GovernancePage() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-100">
-                          {sortedItems.map((item) => (
-                            <TableRow
-                              key={item.id}
-                              item={item}
-                              selectedItems={selectedItems}
-                              handleSelectItem={handleSelectItem}
-                              formatDate={formatDate}
-                              isOverdue={isOverdue}
-                              onDelete={handleDeleteItem}
-                            />
-                          ))}
+                          {sortedItems.map(
+                            (item: GovernanceResponse["items"][0]) => (
+                              <TableRow
+                                key={item.id}
+                                item={item}
+                                selectedItems={selectedItems}
+                                handleSelectItem={handleSelectItem}
+                                formatDate={formatDate}
+                                isOverdue={isOverdue}
+                                onDelete={handleDeleteItem}
+                              />
+                            )
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -1115,160 +1115,162 @@ export default function GovernancePage() {
                     {/* Mobile Card View */}
                     <div className="lg:hidden">
                       <div className="space-y-4 p-4">
-                        {sortedItems.map((item) => (
-                          <div
-                            key={item.id}
-                            className={`bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200 ${
-                              selectedItems.has(item.id)
-                                ? "border-blue-500 bg-blue-50/50"
-                                : "hover:border-gray-300 hover:shadow-sm"
-                            }`}
-                          >
-                            {/* Mobile Card Header */}
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex items-start gap-3 flex-1 min-w-0">
-                                <Checkbox
-                                  checked={selectedItems.has(item.id)}
-                                  onChange={(checked) =>
-                                    handleSelectItem(item.id, checked)
-                                  }
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-semibold bg-gray-100 text-gray-900">
-                                      #{item.number || item.id}
-                                    </span>
-                                    <StatusBadge status={item.status} />
+                        {sortedItems.map(
+                          (item: GovernanceResponse["items"][0]) => (
+                            <div
+                              key={item.id}
+                              className={`bg-white rounded-lg border border-gray-200 p-4 transition-all duration-200 ${
+                                selectedItems.has(item.id)
+                                  ? "border-blue-500 bg-blue-50/50"
+                                  : "hover:border-gray-300 hover:shadow-sm"
+                              }`}
+                            >
+                              {/* Mobile Card Header */}
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-start gap-3 flex-1 min-w-0">
+                                  <Checkbox
+                                    checked={selectedItems.has(item.id)}
+                                    onChange={(checked) =>
+                                      handleSelectItem(item.id, checked)
+                                    }
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono font-semibold bg-gray-100 text-gray-900">
+                                        #{item.number || item.id}
+                                      </span>
+                                      <StatusBadge status={item.status} />
+                                    </div>
+                                    <h4 className="font-semibold text-gray-900 leading-5 mb-2">
+                                      <Link
+                                        href={`/governance/${item.id}`}
+                                        className="hover:text-blue-600 transition-colors"
+                                      >
+                                        {item.title}
+                                      </Link>
+                                    </h4>
+                                    <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                                      {item.description}
+                                    </p>
                                   </div>
-                                  <h4 className="font-semibold text-gray-900 leading-5 mb-2">
-                                    <Link
-                                      href={`/governance/${item.id}`}
-                                      className="hover:text-blue-600 transition-colors"
-                                    >
-                                      {item.title}
-                                    </Link>
-                                  </h4>
-                                  <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                                    {item.description}
-                                  </p>
                                 </div>
                               </div>
-                            </div>
 
-                            {/* Progress Bar */}
-                            <div className="mb-4">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium text-gray-700">
-                                  Progress
-                                </span>
-                                <span className="text-sm font-semibold text-gray-900">
-                                  {item.progress}%
-                                </span>
+                              {/* Progress Bar */}
+                              <div className="mb-4">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm font-medium text-gray-700">
+                                    Progress
+                                  </span>
+                                  <span className="text-sm font-semibold text-gray-900">
+                                    {item.progress}%
+                                  </span>
+                                </div>
+                                <ProgressBar progress={item.progress} />
                               </div>
-                              <ProgressBar progress={item.progress} />
-                            </div>
 
-                            {/* Tags */}
-                            {item.tags && item.tags.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mb-4">
-                                {item.tags.slice(0, 3).map((tag) => (
-                                  <span
-                                    key={tag}
-                                    className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700"
-                                  >
-                                    <Tag className="w-3 h-3 mr-1" />
-                                    {tag}
-                                  </span>
-                                ))}
-                                {item.tags.length > 3 && (
-                                  <span className="text-xs text-gray-500">
-                                    +{item.tags.length - 3} more
-                                  </span>
+                              {/* Tags */}
+                              {item.tags && item.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-4">
+                                  {item.tags.slice(0, 3).map((tag) => (
+                                    <span
+                                      key={tag}
+                                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700"
+                                    >
+                                      <Tag className="w-3 h-3 mr-1" />
+                                      {tag}
+                                    </span>
+                                  ))}
+                                  {item.tags.length > 3 && (
+                                    <span className="text-xs text-gray-500">
+                                      +{item.tags.length - 3} more
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Meta Information Grid */}
+                              <div className="grid grid-cols-1 gap-3 mb-4">
+                                {item.user && (
+                                  <div className="flex items-center gap-3">
+                                    <UserAvatar user={item.user} size="xs" />
+                                    <div className="min-w-0 flex-1">
+                                      <div className="font-medium text-gray-900 text-sm">
+                                        {item.user.name ||
+                                          item.user.email.split("@")[0]}
+                                      </div>
+                                      <div className="text-xs text-gray-500 truncate">
+                                        {item.user.email}
+                                      </div>
+                                    </div>
+                                  </div>
                                 )}
-                              </div>
-                            )}
 
-                            {/* Meta Information Grid */}
-                            <div className="grid grid-cols-1 gap-3 mb-4">
-                              {item.user && (
-                                <div className="flex items-center gap-3">
-                                  <UserAvatar user={item.user} size="xs" />
-                                  <div className="min-w-0 flex-1">
-                                    <div className="font-medium text-gray-900 text-sm">
-                                      {item.user.name ||
-                                        item.user.email.split("@")[0]}
+                                <div className="grid grid-cols-2 gap-3 text-sm">
+                                  {item.department && (
+                                    <div className="flex items-center gap-2 text-gray-600">
+                                      <Building2 className="w-4 h-4 text-gray-400" />
+                                      <span className="truncate">
+                                        {item.department.name}
+                                      </span>
                                     </div>
-                                    <div className="text-xs text-gray-500 truncate">
-                                      {item.user.email}
+                                  )}
+                                  {item.dueDate && (
+                                    <div className="flex items-center gap-2">
+                                      <Calendar className="w-4 h-4 text-gray-400" />
+                                      <span
+                                        className={`text-sm ${
+                                          isOverdue(item.dueDate)
+                                            ? "text-red-600 font-medium"
+                                            : "text-gray-600"
+                                        }`}
+                                      >
+                                        {formatDate(item.dueDate)}
+                                      </span>
                                     </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Overdue Warning */}
+                              {item.dueDate && isOverdue(item.dueDate) && (
+                                <div className="mb-4">
+                                  <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-red-50 border border-red-200">
+                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                                    <span className="text-sm font-medium text-red-700">
+                                      This item is overdue
+                                    </span>
                                   </div>
                                 </div>
                               )}
 
-                              <div className="grid grid-cols-2 gap-3 text-sm">
-                                {item.department && (
-                                  <div className="flex items-center gap-2 text-gray-600">
-                                    <Building2 className="w-4 h-4 text-gray-400" />
-                                    <span className="truncate">
-                                      {item.department.name}
-                                    </span>
-                                  </div>
-                                )}
-                                {item.dueDate && (
-                                  <div className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4 text-gray-400" />
-                                    <span
-                                      className={`text-sm ${
-                                        isOverdue(item.dueDate)
-                                          ? "text-red-600 font-medium"
-                                          : "text-gray-600"
-                                      }`}
-                                    >
-                                      {formatDate(item.dueDate)}
-                                    </span>
-                                  </div>
-                                )}
+                              {/* Action Buttons */}
+                              <div className="flex gap-2 pt-3 border-t border-gray-100">
+                                <Link
+                                  href={`/governance/${item.id}`}
+                                  className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Details
+                                </Link>
+                                <Link
+                                  href={`/governance/${item.id}/edit`}
+                                  className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                  Edit
+                                </Link>
                               </div>
                             </div>
-
-                            {/* Overdue Warning */}
-                            {item.dueDate && isOverdue(item.dueDate) && (
-                              <div className="mb-4">
-                                <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-red-50 border border-red-200">
-                                  <AlertCircle className="w-4 h-4 text-red-500" />
-                                  <span className="text-sm font-medium text-red-700">
-                                    This item is overdue
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-2 pt-3 border-t border-gray-100">
-                              <Link
-                                href={`/governance/${item.id}`}
-                                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors"
-                              >
-                                <Eye className="w-4 h-4" />
-                                Details
-                              </Link>
-                              <Link
-                                href={`/governance/${item.id}/edit`}
-                                className="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                                Edit
-                              </Link>
-                            </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     </div>
                   </div>
                 ) : (
                   /* Grid View */
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    {sortedItems.map((item) => (
+                    {sortedItems.map((item: GovernanceResponse["items"][0]) => (
                       <div
                         key={item.id}
                         className={`bg-white rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-200 ${

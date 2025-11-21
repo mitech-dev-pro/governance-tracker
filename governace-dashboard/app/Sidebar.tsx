@@ -113,7 +113,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       hasSubmenu: true,
       submenu: [
         { name: "Findings", href: "/audit/findings", icon: FileBarChart },
-        { name: "Schedule", href: "/audit/schedule", icon: Calendar },
+        { name: "Schedule", href: "/audit/schedules", icon: Calendar },
       ],
     },
     {
