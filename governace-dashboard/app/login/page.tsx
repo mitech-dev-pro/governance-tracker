@@ -62,7 +62,7 @@ export default function LoginPage() {
 
         <div className="relative z-10 text-white px-12 text-center">
           <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 mb-6">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 mb-6">
               <Shield className="w-14 h-14 text-white" />
             </div>
           </div>

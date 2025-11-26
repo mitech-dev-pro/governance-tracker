@@ -206,7 +206,7 @@ export default function RiskManagementPage() {
                     placeholder="Search risks..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
@@ -216,7 +216,7 @@ export default function RiskManagementPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 >
                   <option value="">All Statuses</option>
                   {RISK_STATUSES.map((status) => (
@@ -232,7 +232,7 @@ export default function RiskManagementPage() {
                 <select
                   value={departmentFilter}
                   onChange={(e) => setDepartmentFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 >
                   <option value="">All Departments</option>
                   {departments.map((dept) => (
@@ -248,7 +248,7 @@ export default function RiskManagementPage() {
                 <select
                   value={riskLevelFilter}
                   onChange={(e) => setRiskLevelFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 >
                   <option value="">All Risk Levels</option>
                   <option value="Critical">Critical (20-25)</option>

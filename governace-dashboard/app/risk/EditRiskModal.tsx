@@ -169,7 +169,7 @@ export default function EditRiskModal({
   if (!isOpen || !risk) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -234,7 +234,7 @@ export default function EditRiskModal({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
           </div>
 
@@ -250,7 +250,7 @@ export default function EditRiskModal({
                 onChange={(e) =>
                   setFormData({ ...formData, impact: parseInt(e.target.value) })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 {IMPACT_LEVELS.map((level) => (
                   <option key={level.value} value={level.value}>
@@ -273,7 +273,7 @@ export default function EditRiskModal({
                     likelihood: parseInt(e.target.value),
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 {LIKELIHOOD_LEVELS.map((level) => (
                   <option key={level.value} value={level.value}>
@@ -300,7 +300,7 @@ export default function EditRiskModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">Select owner</option>
                 {users.map((user) => (
@@ -325,7 +325,7 @@ export default function EditRiskModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">Select department</option>
                 {departments.map((dept) => (
@@ -350,7 +350,7 @@ export default function EditRiskModal({
                   status: e.target.value as UpdateRiskInput["status"],
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             >
               {RISK_STATUSES.map((status) => (
                 <option key={status.value} value={status.value}>
@@ -375,7 +375,7 @@ export default function EditRiskModal({
                     : undefined,
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             >
               <option value="">Select governance item</option>
               {governanceItems.map((item) => (
@@ -398,7 +398,7 @@ export default function EditRiskModal({
                 setFormData({ ...formData, notes: e.target.value })
               }
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
           </div>
 
@@ -458,7 +458,7 @@ export default function EditRiskModal({
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-[60]">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-[60]">
           <div className="bg-white rounded-lg shadow-xl p-6 max-w-md">
             <h3 className="text-lg font-bold text-gray-800 mb-4">
               Confirm Deletion

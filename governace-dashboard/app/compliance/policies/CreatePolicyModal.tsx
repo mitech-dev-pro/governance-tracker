@@ -118,7 +118,7 @@ export default function CreatePolicyModal({
   if (!isOpen) return null;
 
   return (
-    <div className="/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="/70 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -157,7 +157,7 @@ export default function CreatePolicyModal({
                 onChange={(e) =>
                   setFormData({ ...formData, code: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 placeholder="e.g., POL-001"
               />
             </div>
@@ -174,7 +174,7 @@ export default function CreatePolicyModal({
                 onChange={(e) =>
                   setFormData({ ...formData, version: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 placeholder="e.g., 1.0"
               />
             </div>
@@ -192,7 +192,7 @@ export default function CreatePolicyModal({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="Enter policy title"
             />
           </div>
@@ -209,7 +209,7 @@ export default function CreatePolicyModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="Describe the policy and its purpose"
             />
           </div>
@@ -226,7 +226,7 @@ export default function CreatePolicyModal({
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 {POLICY_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -249,7 +249,7 @@ export default function CreatePolicyModal({
                     status: e.target.value as CreatePolicyInput["status"],
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 {POLICY_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -276,7 +276,7 @@ export default function CreatePolicyModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">Select owner (optional)</option>
                 {users.map((user) => (
@@ -302,7 +302,7 @@ export default function CreatePolicyModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">Select department (optional)</option>
                 {departments.map((dept) => (
@@ -330,7 +330,7 @@ export default function CreatePolicyModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">Select approver (optional)</option>
                 {users.map((user) => (
@@ -355,7 +355,7 @@ export default function CreatePolicyModal({
                     effectiveDate: e.target.value || undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
           </div>
@@ -374,7 +374,7 @@ export default function CreatePolicyModal({
                   attachmentUrl: e.target.value || undefined,
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="https://example.com/document.pdf"
             />
           </div>

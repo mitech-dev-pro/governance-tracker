@@ -440,7 +440,7 @@ export default function DepartmentsPage() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedDepartment && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200 max-w-md w-full p-6">
             <div className="flex items-center mb-4">
               <div className="p-3 bg-red-100 rounded-full mr-4">

@@ -115,7 +115,7 @@ export default function CreateAssessmentModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -153,7 +153,7 @@ export default function CreateAssessmentModal({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="Enter assessment title"
             />
           </div>
@@ -170,7 +170,7 @@ export default function CreateAssessmentModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="Describe the assessment scope and objectives"
             />
           </div>
@@ -191,7 +191,7 @@ export default function CreateAssessmentModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">Select control (optional)</option>
                 {controls.map((control) => (
@@ -217,7 +217,7 @@ export default function CreateAssessmentModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">Select assessor (optional)</option>
                 {users.map((user) => (
@@ -243,7 +243,7 @@ export default function CreateAssessmentModal({
                     status: e.target.value as CreateAssessmentInput["status"],
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 {ASSESSMENT_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -268,7 +268,7 @@ export default function CreateAssessmentModal({
                       undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">No result yet</option>
                 {ASSESSMENT_RESULTS.map((result) => (
@@ -293,7 +293,7 @@ export default function CreateAssessmentModal({
                 onChange={(e) =>
                   setFormData({ ...formData, scheduledDate: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
 
@@ -311,7 +311,7 @@ export default function CreateAssessmentModal({
                     completedDate: e.target.value || undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
           </div>
@@ -332,7 +332,7 @@ export default function CreateAssessmentModal({
                   score: e.target.value ? parseInt(e.target.value) : undefined,
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="0-100"
             />
           </div>
@@ -351,7 +351,7 @@ export default function CreateAssessmentModal({
                 })
               }
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="Document assessment findings"
             />
           </div>
@@ -370,7 +370,7 @@ export default function CreateAssessmentModal({
                 })
               }
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               placeholder="Document recommendations for improvement"
             />
           </div>

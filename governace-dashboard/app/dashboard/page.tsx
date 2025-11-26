@@ -1151,28 +1151,28 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Link
               href="/governance"
-              className="bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all rounded-lg p-4 text-center group"
+              className="bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all rounded-lg p-4 text-center group"
             >
               <FileText className="h-8 w-8 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-medium">New Governance</p>
             </Link>
             <Link
               href="/reports/audit"
-              className="bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all rounded-lg p-4 text-center group"
+              className="bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all rounded-lg p-4 text-center group"
             >
               <CheckCircle2 className="h-8 w-8 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-medium">Schedule Audit</p>
             </Link>
             <Link
               href="/assets"
-              className="bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all rounded-lg p-4 text-center group"
+              className="bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all rounded-lg p-4 text-center group"
             >
               <Package className="h-8 w-8 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-medium">Add Asset</p>
             </Link>
             <Link
               href="/reports"
-              className="bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all rounded-lg p-4 text-center group"
+              className="bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all rounded-lg p-4 text-center group"
             >
               <Target className="h-8 w-8 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-medium">View Reports</p>

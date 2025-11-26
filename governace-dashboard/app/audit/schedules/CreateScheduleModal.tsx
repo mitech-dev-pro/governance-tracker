@@ -115,7 +115,7 @@ export default function CreateScheduleModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -155,7 +155,7 @@ export default function CreateScheduleModal({
                   auditId: parseInt(e.target.value),
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
             >
               <option value="">Select audit...</option>
               {audits.map((audit) => (
@@ -178,7 +178,7 @@ export default function CreateScheduleModal({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               placeholder="Kickoff Meeting"
             />
           </div>
@@ -195,7 +195,7 @@ export default function CreateScheduleModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               placeholder="Initial meeting to discuss audit scope and approach..."
             />
           </div>
@@ -213,7 +213,7 @@ export default function CreateScheduleModal({
                 onChange={(e) =>
                   setFormData({ ...formData, scheduledDate: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               />
             </div>
 
@@ -234,7 +234,7 @@ export default function CreateScheduleModal({
                     duration: parseFloat(e.target.value),
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               />
             </div>
 
@@ -252,7 +252,7 @@ export default function CreateScheduleModal({
                     status: e.target.value as any,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               >
                 {SCHEDULE_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -277,7 +277,7 @@ export default function CreateScheduleModal({
                   location: e.target.value || undefined,
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               placeholder="Conference Room A, Building 1"
             />
           </div>
@@ -291,7 +291,7 @@ export default function CreateScheduleModal({
               type="text"
               value={attendeesInput}
               onChange={(e) => setAttendeesInput(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               placeholder="John Doe, Jane Smith, Bob Johnson (comma-separated)"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -313,7 +313,7 @@ export default function CreateScheduleModal({
                 })
               }
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
               placeholder="Additional notes..."
             />
           </div>

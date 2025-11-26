@@ -354,7 +354,7 @@ export default function UserRolePage() {
               <select
                 value={selectedUser}
                 onChange={(e) => setSelectedUser(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">All Users</option>
                 {users.map((user) => (
@@ -371,7 +371,7 @@ export default function UserRolePage() {
               <select
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">All Roles</option>
                 {roles.map((role) => (
@@ -542,7 +542,7 @@ export default function UserRolePage() {
                         userId: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                     required
                   >
                     <option value="">Choose a user...</option>
@@ -566,7 +566,7 @@ export default function UserRolePage() {
                         roleId: e.target.value,
                       }))
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                     required
                   >
                     <option value="">Choose a role...</option>

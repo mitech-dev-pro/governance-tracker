@@ -682,7 +682,7 @@ export default function EnhancedEditGovernancePage() {
 
           {/* Section Navigation */}
           <div className="mt-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-2 border border-gray-200 shadow-sm">
+            <div className="bg-white/80 backdrop-blur-md rounded-2xl p-2 border border-gray-200 shadow-sm">
               <nav className="flex space-x-1 overflow-x-auto">
                 {sections.map((section) => {
                   const SectionIcon = section.icon;

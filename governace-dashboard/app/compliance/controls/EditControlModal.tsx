@@ -155,7 +155,7 @@ export default function EditControlModal({
   if (!isOpen || !control) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -221,7 +221,7 @@ export default function EditControlModal({
                 onChange={(e) =>
                   setFormData({ ...formData, code: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               />
             </div>
 
@@ -236,7 +236,7 @@ export default function EditControlModal({
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 {CONTROL_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>
@@ -259,7 +259,7 @@ export default function EditControlModal({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
           </div>
 
@@ -275,7 +275,7 @@ export default function EditControlModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
           </div>
 
@@ -293,7 +293,7 @@ export default function EditControlModal({
                     status: e.target.value as UpdateControlInput["status"],
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 {CONTROL_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
@@ -317,7 +317,7 @@ export default function EditControlModal({
                       .value as UpdateControlInput["frequency"],
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 {CONTROL_FREQUENCIES.map((freq) => (
                   <option key={freq.value} value={freq.value}>
@@ -344,7 +344,7 @@ export default function EditControlModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">No owner</option>
                 {users.map((user) => (
@@ -370,7 +370,7 @@ export default function EditControlModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">No department</option>
                 {departments.map((dept) => (
@@ -398,7 +398,7 @@ export default function EditControlModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">No policy</option>
                 {policies.map((policy) => (
@@ -424,7 +424,7 @@ export default function EditControlModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
               >
                 <option value="">No risk</option>
                 {risks.map((risk) => (
@@ -454,7 +454,7 @@ export default function EditControlModal({
                     : undefined,
                 })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             />
           </div>
 

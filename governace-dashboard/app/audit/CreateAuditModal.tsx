@@ -119,7 +119,7 @@ export default function CreateAuditModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -158,7 +158,7 @@ export default function CreateAuditModal({
                 onChange={(e) =>
                   setFormData({ ...formData, code: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
                 placeholder="AUD-2024-001"
               />
             </div>
@@ -174,7 +174,7 @@ export default function CreateAuditModal({
                 onChange={(e) =>
                   setFormData({ ...formData, type: e.target.value as any })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               >
                 {AUDIT_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -197,7 +197,7 @@ export default function CreateAuditModal({
               onChange={(e) =>
                 setFormData({ ...formData, title: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               placeholder="Annual Financial Audit"
             />
           </div>
@@ -214,7 +214,7 @@ export default function CreateAuditModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               placeholder="Describe the audit objectives and approach..."
             />
           </div>
@@ -231,7 +231,7 @@ export default function CreateAuditModal({
                 setFormData({ ...formData, scope: e.target.value })
               }
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               placeholder="Define the audit scope and boundaries..."
             />
           </div>
@@ -252,7 +252,7 @@ export default function CreateAuditModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               >
                 <option value="">Select lead auditor...</option>
                 {users.map((user) => (
@@ -278,7 +278,7 @@ export default function CreateAuditModal({
                       : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               >
                 <option value="">Select department...</option>
                 {departments.map((dept) => (
@@ -303,7 +303,7 @@ export default function CreateAuditModal({
                 onChange={(e) =>
                   setFormData({ ...formData, startDate: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               />
             </div>
 
@@ -319,7 +319,7 @@ export default function CreateAuditModal({
                 onChange={(e) =>
                   setFormData({ ...formData, endDate: e.target.value })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               />
             </div>
 
@@ -334,7 +334,7 @@ export default function CreateAuditModal({
                 onChange={(e) =>
                   setFormData({ ...formData, status: e.target.value as any })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
               >
                 {AUDIT_STATUSES.map((status) => (
                   <option key={status.value} value={status.value}>
