@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 async function seedPermissionsAndRoles() {
   console.log('🌱 Seeding permissions and roles...');
 
-  // Create permissions
+  // Create permissions (from seed-permissions.sql)
   const permissions = [
     { key: 'users.create', label: 'Create Users' },
     { key: 'users.read', label: 'View Users' },
@@ -44,7 +44,7 @@ async function seedPermissionsAndRoles() {
 
   console.log(`✅ Created ${permissions.length} permissions`);
 
-  // Create roles
+  // Create roles (from seed-permissions.sql)
   const roles = [
     { name: 'Administrator' },
     { name: 'Manager' },
@@ -65,7 +65,7 @@ async function seedPermissionsAndRoles() {
 
   console.log(`✅ Created ${createdRoles.length} roles`);
 
-  // Assign permissions to roles
+  // Assign permissions to roles (from seed-permissions.sql)
   const rolePermissions = {
     'Administrator': permissions.map(p => p.key), // All permissions
     'Manager': [
@@ -86,9 +86,7 @@ async function seedPermissionsAndRoles() {
       'risk.read'
     ],
     'Viewer': [
-      'governance.read',
-      'reports.view',
-      'risk.read'
+      'governance.read', 'reports.view', 'risk.read'
     ],
     'Auditor': [
       'governance.read',

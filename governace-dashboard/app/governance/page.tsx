@@ -81,10 +81,13 @@ const UserAvatar = ({
     user.image !== "undefined"
   ) {
     return (
-      <img
+      <Image
         className={`${sizeClasses[size]} rounded-full object-cover border-2 border-gray-200`}
         src={user.image}
         alt={user.name || user.email}
+        width={32}
+        height={32}
+        style={{ objectFit: "cover" }}
       />
     );
   }
@@ -109,6 +112,7 @@ const UserAvatar = ({
     </div>
   );
 };
+import Image from "next/image";
 
 // Status configuration
 const STATUS_CONFIG = {
@@ -558,6 +562,7 @@ const TableRow = ({
 export default function GovernancePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [assignedToMe, setAssignedToMe] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
@@ -573,6 +578,11 @@ export default function GovernancePage() {
   const [departments, setDepartments] = useState<
     { id: number; name: string; code: string | null; createdAt: Date }[]
   >([]);
+  // Get current user ID from context or session (replace with your actual logic)
+  const currentUserId =
+    typeof window !== "undefined"
+      ? Number(localStorage.getItem("userId"))
+      : undefined;
 
   // Build query string for SWR key
   const params = new URLSearchParams({
@@ -580,6 +590,9 @@ export default function GovernancePage() {
     limit: itemsPerPage.toString(),
     ...(searchTerm && { search: searchTerm }),
     ...(statusFilter && { status: statusFilter }),
+    ...(assignedToMe && currentUserId
+      ? { ownerId: currentUserId.toString() }
+      : {}),
   });
   const swrKey = `/api/governance?${params.toString()}`;
 
@@ -680,6 +693,11 @@ export default function GovernancePage() {
 
   const handleStatusFilter = (status: string) => {
     setStatusFilter(status === statusFilter ? "" : status);
+    setCurrentPage(1);
+  };
+
+  const handleAssignedToMe = () => {
+    setAssignedToMe((prev) => !prev);
     setCurrentPage(1);
   };
 
@@ -882,6 +900,18 @@ export default function GovernancePage() {
                     {config.label}
                   </button>
                 ))}
+                {/* Assigned to Me Filter Button */}
+                <button
+                  onClick={handleAssignedToMe}
+                  className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                    assignedToMe
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                  style={{ marginLeft: "8px" }}
+                >
+                  Assigned to Me
+                </button>
               </div>
 
               {/* View Toggle */}

@@ -340,7 +340,7 @@ export default function GovernanceDetailPage({
 
     const fetchData = async () => {
       try {
-        const response = await fetch(`/api/governance/${itemId}`, {
+        const response = await fetch(`/api/governance?id=${itemId}`, {
           headers: { "Cache-Control": "no-cache" },
         });
 
