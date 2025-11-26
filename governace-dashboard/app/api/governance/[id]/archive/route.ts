@@ -1,18 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/prisma/client";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
-    
+    const { id: idString } = await params;
+    const id = parseInt(idString);
+
     // Update the governance item to archived status
     await prisma.governanceItem.update({
-      where: { id: parseInt(id) },
+      where: { id: id },
       data: {
-        status: 'DEFERRED', // Using DEFERRED as archived status
+        status: "DEFERRED", // Using DEFERRED as archived status
         updatedAt: new Date(),
       },
     });
@@ -20,18 +21,18 @@ export async function POST(
     // Create an audit event
     await prisma.auditevent.create({
       data: {
-        itemId: parseInt(id),
-        kind: 'archived',
-        message: 'Governance item archived',
+        itemId: id,
+        kind: "archived",
+        message: "Governance item archived",
         createdAt: new Date(),
       },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Archive error:', error);
+    console.error("Archive error:", error);
     return NextResponse.json(
-      { error: 'Failed to archive governance item' },
+      { error: "Failed to archive governance item" },
       { status: 500 }
     );
   }

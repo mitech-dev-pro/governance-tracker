@@ -6,10 +6,11 @@ const prisma = new PrismaClient();
 // GET /api/audit/findings/[id] - Get a single finding
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
 
     const finding = await prisma.audit_finding.findUnique({
       where: { id },
@@ -48,10 +49,11 @@ export async function GET(
 // PUT /api/audit/findings/[id] - Update a finding
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
     const body = await request.json();
 
     const {
@@ -129,10 +131,11 @@ export async function PUT(
 // DELETE /api/audit/findings/[id] - Delete a finding
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
 
     // Check if finding exists
     const existingFinding = await prisma.audit_finding.findUnique({

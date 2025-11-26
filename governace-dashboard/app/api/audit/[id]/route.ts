@@ -6,10 +6,11 @@ const prisma = new PrismaClient();
 // GET /api/audit/[id] - Get a single audit
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
 
     const audit = await prisma.audit.findUnique({
       where: { id },
@@ -60,10 +61,11 @@ export async function GET(
 // PUT /api/audit/[id] - Update an audit
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
     const body = await request.json();
 
     const {
@@ -153,10 +155,11 @@ export async function PUT(
 // DELETE /api/audit/[id] - Delete an audit
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
 
     // Check if audit exists
     const existingAudit = await prisma.audit.findUnique({
