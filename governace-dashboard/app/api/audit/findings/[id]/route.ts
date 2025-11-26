@@ -4,14 +4,13 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // GET /api/audit/findings/[id] - Get a single finding
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const idParam = searchParams.get("id");
-  const id = idParam ? parseInt(idParam) : undefined;
-  if (!id) {
-    return NextResponse.json({ error: "Missing or invalid finding id" }, { status: 400 });
-  }
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id: idString } = await params;
+    const id = parseInt(idString);
 
     const finding = await prisma.audit_finding.findUnique({
       where: { id },
@@ -48,14 +47,13 @@ export async function GET(request: NextRequest) {
 }
 
 // PUT /api/audit/findings/[id] - Update a finding
-export async function PUT(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const idParam = searchParams.get("id");
-  const id = idParam ? parseInt(idParam) : undefined;
-  if (!id) {
-    return NextResponse.json({ error: "Missing or invalid finding id" }, { status: 400 });
-  }
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id: idString } = await params;
+    const id = parseInt(idString);
     const body = await request.json();
 
     const {
@@ -131,14 +129,13 @@ export async function PUT(request: NextRequest) {
 }
 
 // DELETE /api/audit/findings/[id] - Delete a finding
-export async function DELETE(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const idParam = searchParams.get("id");
-  const id = idParam ? parseInt(idParam) : undefined;
-  if (!id) {
-    return NextResponse.json({ error: "Missing or invalid finding id" }, { status: 400 });
-  }
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
+    const { id: idString } = await params;
+    const id = parseInt(idString);
 
     // Check if finding exists
     const existingFinding = await prisma.audit_finding.findUnique({
