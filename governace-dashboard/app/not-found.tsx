@@ -59,9 +59,9 @@ export default function NotFound() {
 
         {/* Decorative element */}
         <div className="mt-12 flex justify-center gap-2">
-          <div className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-          <div className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
-          <div className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+          <div className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700 animate-pulse" />
+          <div className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700 animate-pulse [animation-delay:200ms]" />
+          <div className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-700 animate-pulse [animation-delay:400ms]" />
         </div>
       </div>
     </main>
