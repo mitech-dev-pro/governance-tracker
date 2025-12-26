@@ -1,6 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../prisma/client";
 
+type CountType = {
+  governanceItem: number;
+  actionItem: number;
+  assignment: number;
+};
+
+type DepartmentType = {
+  id: number;
+  departmentId: number;
+  createdAt: string;
+  department: {
+    id: number;
+    name: string;
+    code: string;
+  };
+};
+
+type RoleType = {
+  id: string;
+  roleId: number;
+  createdAt: string;
+  role: {
+    id: number;
+    name: string;
+  };
+};
+
+interface UserType {
+  id: number;
+  name: string;
+  email: string;
+  image: ImageData;
+  createdAt: string;
+  updatedAt: string;
+  _count_: CountType;
+  userdepartment: DepartmentType[];
+  userrole: RoleType[];
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -14,11 +53,14 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: {
-      OR?: Array<{ name?: { contains: string; mode: string } } | { email?: { contains: string; mode: string } }>;
+      OR?: Array<
+        | { name?: { contains: string; mode: string } }
+        | { email?: { contains: string; mode: string } }
+      >;
       userdepartment?: { some: { departmentId: number } };
       userrole?: { some: { roleId: number } };
     } = {};
-    
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: "insensitive" } },
@@ -88,10 +130,7 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        orderBy: [
-          { name: "asc" },
-          { email: "asc" },
-        ],
+        orderBy: [{ name: "asc" }, { email: "asc" }],
         take: limit,
         skip: offset,
       }),
@@ -99,7 +138,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Transform the data to match our interface
-    const transformedUsers = users.map((user) => ({
+    const transformedUsers = users.map((user: UserType) => ({
       ...user,
       departments: user.userdepartment,
       roles: user.userrole,

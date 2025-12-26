@@ -228,6 +228,25 @@ model subtask {
   @@index([itemId], map: "Subtask_itemId_fkey")
 }
 
+model twofactorcode {
+  id         Int       @id @default(autoincrement())
+  userId     Int       @map("user_id")
+  code       String    @db.VarChar(6)
+  magicToken String?   @unique @map("magic_token") @db.VarChar(64)
+  expiresAt  DateTime  @map("expires_at")
+  usedAt     DateTime? @map("used_at")
+  ipAddress  String?   @map("ip_address") @db.VarChar(45)
+  userAgent  String?   @map("user_agent") @db.Text
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user user @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([code])
+  @@index([magicToken])
+  @@map("two_factor_codes")
+}
+
 model user {
   id               Int              @id @default(autoincrement())
   email            String           @unique(map: "User_email_key")
@@ -255,6 +274,9 @@ model user {
   ledAudits        audit[]          @relation("AuditLead")
   auditFindings    audit_finding[]
   assignedAssets   asset[]
+  twoFactorEnabled Boolean          @default(true) @map("two_factor_enabled")
+  twoFactorMethod  String?          @map("two_factor_method") @db.VarChar(20)
+  twoFactorCodes   twofactorcode[]
 }
 
 model userdepartment {
