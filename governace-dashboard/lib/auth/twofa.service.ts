@@ -2,12 +2,14 @@
 import crypto from "crypto";
 import prisma from "@/prisma/client";
 import { SignJWT } from "jose";
+import { env } from "process";
+import nodemailer from "nodemailer";
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "your-secret-key-change-this-in-production"
 );
 
-const TWO_FACTOR_CODE_EXPIRY_MINUTES = 10;
+const TWO_FACTOR_CODE_EXPIRY_MINUTES = 1;
 const TWO_FACTOR_CODE_EXPIRY_MS = TWO_FACTOR_CODE_EXPIRY_MINUTES * 60 * 1000;
 const TWO_FACTOR_MAX_CODES_PER_HOUR = 50;
 const TWO_FACTOR_CLEANUP_DAYS = 7;
@@ -73,37 +75,224 @@ async function cleanupOldCodes(userId: number) {
   });
 }
 
-async function sendTwoFactorCodeEmail(params: {
-  to: string;
-  code: string;
-  userName: string;
-  magicLinkUrl?: string;
-}) {
-  // TODO: Implement with your email service (Resend, SendGrid, etc.)
-  console.log(`Sending 2FA code ${params.code} to ${params.to}`);
-  console.log(`Magic link: ${params.magicLinkUrl}`);
+const fetchFn: any = (globalThis as any).fetch;
 
-  // Example with Resend:
-  // const { Resend } = require('resend');
-  // const resend = new Resend(process.env.RESEND_API_KEY);
-  // await resend.emails.send({
-  //   from: 'noreply@yourdomain.com',
-  //   to: params.to,
-  //   subject: 'Your 2FA Code',
-  //   html: `<p>Your code is: <strong>${params.code}</strong></p>`
-  // });
+export interface SendEmailParams {
+  to: string;
+  subject: string;
+  html: string;
 }
 
+async function sendDevEmail(params: SendEmailParams) {
+  console.log("[DEV EMAIL]", {
+    to: params.to,
+    subject: params.subject,
+    html: params.html,
+  });
+}
+
+async function sendResendEmail(params: SendEmailParams) {
+  if (!env.RESEND_API_KEY) {
+    throw Object.assign(new Error("RESEND_API_KEY is not configured"), {
+      code: "EMAIL_PROVIDER_MISCONFIGURED",
+    });
+  }
+
+  if (!fetchFn) {
+    throw Object.assign(new Error("fetch is not available in this runtime"), {
+      code: "EMAIL_PROVIDER_UNAVAILABLE",
+    });
+  }
+
+  const res = await fetchFn("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: `${env.EMAIL_FROM_NAME} <${env.EMAIL_FROM_ADDRESS}>`,
+      to: [params.to],
+      subject: params.subject,
+      html: params.html,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    console.error("Resend email error:", body);
+    throw Object.assign(new Error("Failed to send email via Resend"), {
+      code: "EMAIL_SEND_FAILED",
+    });
+  }
+}
+
+async function sendSmtpEmail(params: SendEmailParams) {
+  if (!env.SMTP_HOST || !env.SMTP_PORT || !env.SMTP_USER || !env.SMTP_PASS) {
+    throw Object.assign(new Error("SMTP is not fully configured"), {
+      code: "EMAIL_PROVIDER_MISCONFIGURED",
+    });
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: env.SMTP_HOST,
+    port: Number(env.SMTP_PORT),
+    secure: env.SMTP_SECURE === "true",
+    auth: {
+      user: env.SMTP_USER,
+      pass: env.SMTP_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: `${env.EMAIL_FROM_NAME} <${env.EMAIL_FROM_ADDRESS}>`,
+    to: params.to,
+    subject: params.subject,
+    html: params.html,
+  });
+}
+
+/**
+ * Low-level email sender which dispatches based on EMAIL_PROVIDER.
+ */
+export async function sendEmail(params: SendEmailParams) {
+  switch (env.EMAIL_PROVIDER) {
+    case "DEV":
+      return sendDevEmail(params);
+    case "RESEND":
+      return sendResendEmail(params);
+    case "SMTP":
+      return sendSmtpEmail(params);
+    default:
+      console.warn(
+        `Unknown EMAIL_PROVIDER=${env.EMAIL_PROVIDER}, falling back to DEV`
+      );
+      return sendDevEmail(params);
+  }
+}
+
+export interface TwoFactorEmailParams {
+  to: string;
+  code: string;
+  magicLinkUrl?: string;
+  userName?: string | null;
+}
+
+export async function sendTwoFactorCodeEmail({
+  to,
+  code,
+  magicLinkUrl,
+  userName,
+}: TwoFactorEmailParams) {
+  const appName = env.SWAGGER_TITLE ?? "Approvals";
+  const safeName = userName || "there";
+
+  const subject = `Your ${appName} login code`;
+
+  const html = `
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>${subject}</title>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:24px 0;">
+      <tr>
+        <td align="center">
+          <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:12px;padding:24px;box-shadow:0 10px 25px rgba(15,23,42,0.08);">
+            <tr>
+              <td style="text-align:center;padding-bottom:16px;">
+                <div style="font-size:20px;font-weight:600;color:#111827;">${appName}</div>
+                <div style="font-size:13px;color:#6b7280;margin-top:4px;">Secure sign-in</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:14px;color:#111827;padding-bottom:12px;">
+                Hi ${safeName},
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:14px;color:#374151;padding-bottom:16px;line-height:1.5;">
+                Use the following verification code to finish signing in:
+              </td>
+            </tr>
+            <tr>
+              <td style="text-align:center;padding-bottom:16px;">
+                <div style="display:inline-block;font-size:28px;letter-spacing:0.3em;font-weight:700;color:#111827;background:#f3f4f6;border-radius:999px;padding:12px 24px;">
+                  ${code.split("").join(" ")}
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:12px;color:#6b7280;padding-bottom:20px;text-align:center;">
+                This code will expire in <strong>1 minute</strong> and can only be used once.
+              </td>
+            </tr>
+            ${
+              magicLinkUrl
+                ? `
+            <tr>
+              <td style="text-align:center;padding-bottom:20px;">
+                <a href="${magicLinkUrl}"
+                  style="display:inline-block;background:#16a34a;color:#ffffff;font-weight:600;font-size:14px;padding:10px 20px;border-radius:999px;text-decoration:none;">
+                  Or click here to sign in
+                </a>
+              </td>
+            </tr>
+            `
+                : ""
+            }
+            <tr>
+              <td style="font-size:12px;color:#9ca3af;padding-top:12px;border-top:1px solid #e5e7eb;">
+                If you didn’t request this code, you can safely ignore this email.
+              </td>
+            </tr>
+          </table>
+          <div style="font-size:11px;color:#9ca3af;margin-top:12px;">
+            &copy; ${new Date().getFullYear()} ${
+    env.EMAIL_FROM_NAME
+  }. All rights reserved.
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`.trim();
+
+  await sendEmail({ to, subject, html });
+}
 // SMS sending function (implement with your SMS service)
-async function sendTwoFactorCodeSms(params: {
+export async function sendTwoFactorCodeSms({
+  phoneNumber,
+  code,
+  name,
+}: {
   phoneNumber: string;
   code: string;
   name: string;
-}) {
-  // TODO: Implement with your SMS service (Twilio, etc.)
-  console.log(
-    `Sending 2FA code ${params.code} via SMS to ${params.phoneNumber}`
-  );
+}): Promise<void> {
+  if (!env.SMS_ENABLED) return;
+
+  try {
+    console.log(
+      `[SMS 2FA] Sending code ${code} to ${phoneNumber} (user: ${name})`
+    );
+
+    const params = new URLSearchParams({
+      username: env.DEYWURO_USERNAME || "",
+      password: env.DEYWURO_PASSWORD || "",
+      destination: phoneNumber,
+      source: env.DEYWURO_SOURCE || "Approvals Authentication",
+      message: `Hello ${name}, your login verification code is ${code}. This code will expire in 1 minute.`,
+    });
+
+    await fetch(`https://deywuro.com/api/sms?${params.toString()}`, {
+      method: "POST",
+    });
+  } catch (err) {
+    console.warn("Failed to send SMS 2FA code via Deywuro:", err);
+  }
 }
 
 export async function generateAndSendTwoFactorCode(
