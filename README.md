@@ -39,25 +39,19 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 To set up the project locally:
 
-1. Navigate to the project directory:
-
-   ```bash
-   cd governance-dashboard
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-3. Navigate to the Prisma folder:
+2. Navigate to the Prisma folder:
 
    ```bash
    cd prisma
    ```
 
-4. Run the initial migration:
+3. Run the initial migration:
    ```bash
    npx prisma migrate dev --name init
    ```

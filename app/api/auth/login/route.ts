@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         email: user.email,
         phoneNumber: user.phoneNumber || undefined,
-        name: user.name,
+        name: user.name || "",
         ipAddress: request.headers.get("x-forwarded-for") || null,
         userAgent: request.headers.get("user-agent") || null,
       });

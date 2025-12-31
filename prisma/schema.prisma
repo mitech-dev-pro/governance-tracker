@@ -255,6 +255,7 @@ model user {
   updatedAt        DateTime
   image            String?          @db.VarChar(512)
   name             String?
+  phoneNumber      String?
   actionitem       actionitem[]
   assignment       assignment[]
   attachment       attachment[]
