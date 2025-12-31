@@ -16,8 +16,6 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  // 2FA state
   const [step, setStep] = useState<Step>("CREDENTIALS");
   const [pendingUser, setPendingUser] = useState<{
     userId: number;
@@ -64,10 +62,11 @@ export default function LoginPage() {
           }
           router.push("/dashboard");
           router.refresh();
-        } catch (err: any) {
+        } catch (err: unknown) {
           const message =
-            err.message ||
-            "Magic link is invalid or has expired. Please try logging in with your email and password.";
+            err instanceof Error
+              ? err.message
+              : "Magic link is invalid or has expired. Please try logging in with your email and password.";
           setMagicError(message);
         } finally {
           setMagicVerifying(false);
@@ -107,7 +106,7 @@ export default function LoginPage() {
         });
         setStep("TWO_FACTOR");
       } else {
-        // Normal login - redirect to dashboard
+        // Normal login if not 2FA...also acts as default i guess
         router.push("/dashboard");
         router.refresh();
       }
