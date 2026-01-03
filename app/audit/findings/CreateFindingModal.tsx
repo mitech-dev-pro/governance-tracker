@@ -150,7 +150,7 @@ export default function CreateFindingModal({
 
   return (
     <div
-      className={`fixed inset-0 bg-black/70 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50 p-4 transform transition-opacity duration-300 opacity-100 scale-100`}
+      className={`fixed inset-0 bg-black/30 backdrop-blur-md bg-opacity-50 flex items-center justify-center z-50 p-4 transform transition-opacity duration-300 opacity-100 scale-100`}
     >
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}

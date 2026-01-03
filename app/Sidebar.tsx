@@ -142,7 +142,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Mobile overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 z-20 md:hidden backdrop-blur-md transition-opacity duration-300"
+          className="fixed inset-0 bg-black/30 z-20 md:hidden backdrop-blur-md transition-opacity duration-300"
           onClick={onClose}
         />
       )}
