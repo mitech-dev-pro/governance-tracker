@@ -198,7 +198,7 @@ export default function UserDetailPage({
 
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex items-start space-x-4">
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 {/* {user.image ? (
                   <img
                     className="h-20 w-20 rounded-full border-4 border-white shadow-lg"

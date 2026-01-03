@@ -106,7 +106,7 @@ export default function FileManager() {
               className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
             >
               <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   {file.type.startsWith("image/") ? (
                     <Image
                       src={file.url}

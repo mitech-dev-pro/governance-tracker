@@ -117,7 +117,7 @@ export default function RegisterPage() {
           {/* Success Message */}
           {success && (
             <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-3">
-              <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+              <CheckCircle2 className="w-5 h-5 shrink-0" />
               <div>
                 <p className="font-medium">Account created successfully!</p>
                 <p className="text-sm">Redirecting to login...</p>

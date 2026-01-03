@@ -346,7 +346,7 @@ export default function RoleDetailPage({
                     key={user.id}
                     className="flex items-center p-3 bg-gray-50 rounded-lg"
                   >
-                    <div className="flex-shrink-0 mr-4">
+                    <div className="shrink-0 mr-4">
                       {user.image ? (
                         <img
                           src={user.image}

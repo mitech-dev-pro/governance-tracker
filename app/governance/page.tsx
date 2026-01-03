@@ -96,7 +96,7 @@ const UserAvatar = ({
   if (user.name && user.name.trim() !== "") {
     return (
       <div
-        className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium border-2 border-gray-200`}
+        className={`${sizeClasses[size]} rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-medium border-2 border-gray-200`}
       >
         {getInitials(user.name)}
       </div>
@@ -230,7 +230,7 @@ const TableSkeleton = () => (
 const EmptyState = ({ onCreateClick }: { onCreateClick: () => void }) => (
   <div className="bg-white rounded-xl border border-gray-200 py-16">
     <div className="text-center">
-      <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
+      <div className="w-16 h-16 mx-auto mb-4 bg-linear-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
         <Building2 className="w-8 h-8 text-blue-600" />
       </div>
       <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -242,7 +242,7 @@ const EmptyState = ({ onCreateClick }: { onCreateClick: () => void }) => (
       </p>
       <button
         onClick={onCreateClick}
-        className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+        className="inline-flex items-center px-6 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
       >
         <Plus className="w-5 h-5 mr-2" />
         Create Governance Item
@@ -821,20 +821,20 @@ export default function GovernancePage() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-4 lg:p-6 pb-8 min-h-full">
+    <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-4 lg:p-6 pb-8 min-h-full">
       <div className="mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="min-w-0 flex-1">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">
                 Governance Tracker
               </h1>
               <p className="text-gray-600 text-sm sm:text-base lg:text-lg">
                 Manage and track governance items across your organization
               </p>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <button
                 onClick={handleRefresh}
                 className="inline-flex items-center px-3 sm:px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 shadow-sm text-sm"
@@ -875,7 +875,7 @@ export default function GovernancePage() {
               {/* Create Button - Always visible */}
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-sm sm:text-base whitespace-nowrap"
+                className="inline-flex items-center justify-center px-4 sm:px-6 py-2.5 sm:py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium text-sm sm:text-base whitespace-nowrap"
               >
                 <Plus className="w-4 sm:w-5 h-4 sm:h-5 mr-2" />
                 <span className="hidden sm:inline">Create Item</span>

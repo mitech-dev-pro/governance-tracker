@@ -221,7 +221,7 @@ export default function ImageUpload({
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start">
-          <AlertCircle className="w-4 h-4 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+          <AlertCircle className="w-4 h-4 text-red-500 mr-2 mt-0.5 shrink-0" />
           <span className="text-red-700 text-sm">{error}</span>
         </div>
       )}

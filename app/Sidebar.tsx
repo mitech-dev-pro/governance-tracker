@@ -224,7 +224,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     }}
                   >
                     <Icon
-                      className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
+                      className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                         isActive ? "scale-110" : "group-hover:scale-105"
                       }`}
                     />
@@ -291,7 +291,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             }}
                           >
                             <SubIcon
-                              className={`w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 ${
+                              className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
                                 isSubActive ? "scale-110" : ""
                               }`}
                             />

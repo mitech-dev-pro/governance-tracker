@@ -36,14 +36,14 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     <UserProvider>
       <div className="flex flex-col h-screen">
         {/* Fixed Navbar */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Navbar onToggleSidebar={toggleSidebar} />
         </div>
 
         {/* Main content area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Fixed Sidebar */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
           </div>
 

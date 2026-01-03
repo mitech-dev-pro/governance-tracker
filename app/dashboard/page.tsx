@@ -179,7 +179,7 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 font-medium">Loading dashboard...</p>
@@ -190,7 +190,7 @@ export default function DashboardPage() {
 
   if (error || !stats) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <AlertTriangle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
           <p className="text-gray-600 font-medium">
@@ -202,12 +202,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Dashboard Overview
             </h1>
             <button
@@ -389,15 +389,18 @@ export default function DashboardPage() {
                       borderRadius: "8px",
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                     }}
-                    formatter={(value: number) => [value, "Items"]}
+                    formatter={(value: number | undefined) => [
+                      value ?? 0,
+                      "Items",
+                    ]}
                   />
                 </RechartsPieChart>
               </ResponsiveContainer>
             </div>
             <div className="mt-6 space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between p-3 bg-linear-to-r from-green-50 to-green-100 rounded-lg hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-sm"></div>
+                  <div className="w-4 h-4 rounded-full bg-linear-to-br from-green-500 to-green-600 shadow-sm"></div>
                   <div>
                     <p className="text-sm font-semibold text-green-900">
                       Active
@@ -418,9 +421,9 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between p-3 bg-linear-to-r from-yellow-50 to-yellow-100 rounded-lg hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-sm"></div>
+                  <div className="w-4 h-4 rounded-full bg-linear-to-br from-yellow-500 to-yellow-600 shadow-sm"></div>
                   <div>
                     <p className="text-sm font-semibold text-yellow-900">
                       Draft
@@ -441,9 +444,9 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-between p-3 bg-linear-to-r from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm"></div>
+                  <div className="w-4 h-4 rounded-full bg-linear-to-br from-blue-500 to-blue-600 shadow-sm"></div>
                   <div>
                     <p className="text-sm font-semibold text-blue-900">
                       Archived
@@ -467,7 +470,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/governance"
-              className="mt-4 block text-center py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-medium text-sm shadow-sm hover:shadow-md"
+              className="mt-4 block text-center py-2 bg-linear-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all font-medium text-sm shadow-sm hover:shadow-md"
             >
               View All Items
             </Link>
@@ -583,15 +586,18 @@ export default function DashboardPage() {
                       borderRadius: "8px",
                       boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                     }}
-                    formatter={(value: number) => [value, "Risks"]}
+                    formatter={(value: number | undefined) => [
+                      value ?? 0,
+                      "Risks",
+                    ]}
                   />
                 </RechartsPieChart>
               </ResponsiveContainer>
             </div>
             <div className="mt-6 space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-red-50 to-red-100 rounded-lg hover:shadow-md transition-shadow border border-red-200">
+              <div className="flex items-center justify-between p-3 bg-linear-to-r from-red-50 to-red-100 rounded-lg hover:shadow-md transition-shadow border border-red-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-sm"></div>
+                  <div className="w-4 h-4 rounded-full bg-linear-to-br from-red-500 to-red-600 shadow-sm"></div>
                   <div>
                     <p className="text-sm font-semibold text-red-900">
                       Critical
@@ -613,9 +619,9 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg hover:shadow-md transition-shadow border border-orange-200">
+              <div className="flex items-center justify-between p-3 bg-linear-to-r from-orange-50 to-orange-100 rounded-lg hover:shadow-md transition-shadow border border-orange-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm"></div>
+                  <div className="w-4 h-4 rounded-full bg-linear-to-br from-orange-500 to-orange-600 shadow-sm"></div>
                   <div>
                     <p className="text-sm font-semibold text-orange-900">
                       High
@@ -634,9 +640,9 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-shadow border border-blue-200">
+              <div className="flex items-center justify-between p-3 bg-linear-to-r from-blue-50 to-blue-100 rounded-lg hover:shadow-md transition-shadow border border-blue-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm"></div>
+                  <div className="w-4 h-4 rounded-full bg-linear-to-br from-blue-500 to-blue-600 shadow-sm"></div>
                   <div>
                     <p className="text-sm font-semibold text-blue-900">
                       Medium
@@ -653,9 +659,9 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg hover:shadow-md transition-shadow border border-green-200">
+              <div className="flex items-center justify-between p-3 bg-linear-to-r from-green-50 to-green-100 rounded-lg hover:shadow-md transition-shadow border border-green-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-sm"></div>
+                  <div className="w-4 h-4 rounded-full bg-linear-to-br from-green-500 to-green-600 shadow-sm"></div>
                   <div>
                     <p className="text-sm font-semibold text-green-900">Low</p>
                     <p className="text-xs text-green-600">Minimal impact</p>
@@ -673,7 +679,7 @@ export default function DashboardPage() {
             </div>
             <Link
               href="/reports/risk"
-              className="mt-4 block text-center py-2 bg-gradient-to-r from-red-500 to-orange-600 text-white rounded-lg hover:from-red-600 hover:to-orange-700 transition-all font-medium text-sm shadow-sm hover:shadow-md"
+              className="mt-4 block text-center py-2 bg-linear-to-r from-red-500 to-orange-600 text-white rounded-lg hover:from-red-600 hover:to-orange-700 transition-all font-medium text-sm shadow-sm hover:shadow-md"
             >
               View Risk Report
             </Link>
@@ -737,7 +743,9 @@ export default function DashboardPage() {
                     borderRadius: "8px",
                     boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                   }}
-                  formatter={(value: number) => `${value.toFixed(1)}%`}
+                  formatter={(value: number | undefined) =>
+                    `${value?.toFixed(1)}%`
+                  }
                 />
               </RadialBarChart>
             </ResponsiveContainer>
@@ -823,7 +831,7 @@ export default function DashboardPage() {
                 />
               </AreaChart>
             </ResponsiveContainer>
-            <div className="mt-4 bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+            <div className="mt-4 bg-linear-to-r from-green-50 to-blue-50 p-4 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Compliance Rate</p>
@@ -1021,7 +1029,7 @@ export default function DashboardPage() {
               <Package className="h-5 w-5 text-indigo-600" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
+              <div className="p-4 bg-linear-to-br from-blue-50 to-blue-100 rounded-lg">
                 <div className="flex items-center gap-3 mb-2">
                   <Laptop className="h-5 w-5 text-blue-600" />
                   <span className="text-sm font-medium text-gray-700">
@@ -1033,7 +1041,7 @@ export default function DashboardPage() {
                 </p>
                 <p className="text-xs text-gray-600 mt-1">Desktop & Laptops</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg">
+              <div className="p-4 bg-linear-to-br from-purple-50 to-purple-100 rounded-lg">
                 <div className="flex items-center gap-3 mb-2">
                   <AppWindow className="h-5 w-5 text-purple-600" />
                   <span className="text-sm font-medium text-gray-700">
@@ -1045,7 +1053,7 @@ export default function DashboardPage() {
                 </p>
                 <p className="text-xs text-gray-600 mt-1">Licenses & Apps</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg">
+              <div className="p-4 bg-linear-to-br from-green-50 to-green-100 rounded-lg">
                 <div className="flex items-center gap-3 mb-2">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
                   <span className="text-sm font-medium text-gray-700">
@@ -1057,7 +1065,7 @@ export default function DashboardPage() {
                 </p>
                 <p className="text-xs text-gray-600 mt-1">Ready to deploy</p>
               </div>
-              <div className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg">
+              <div className="p-4 bg-linear-to-br from-yellow-50 to-yellow-100 rounded-lg">
                 <div className="flex items-center gap-3 mb-2">
                   <Server className="h-5 w-5 text-yellow-600" />
                   <span className="text-sm font-medium text-gray-700">
@@ -1143,7 +1151,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
+        <div className="bg-linear-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
           <div className="flex items-center gap-3 mb-4">
             <Zap className="h-6 w-6" />
             <h3 className="text-xl font-bold">Quick Actions</h3>

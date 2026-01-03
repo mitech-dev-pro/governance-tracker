@@ -141,7 +141,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen">
       {/* Left Side - IT Governance Branding Panel */}
-      <div className="hidden lg:flex lg:w-[40%] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 items-center justify-center relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[40%] bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 items-center justify-center relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-20 left-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
@@ -158,7 +158,7 @@ export default function LoginPage() {
             <br />
             Governance
           </h1>
-          <div className="h-1 w-32 bg-gradient-to-r from-cyan-400 to-blue-500 mx-auto mb-6"></div>
+          <div className="h-1 w-32 bg-linear-to-r from-cyan-400 to-blue-500 mx-auto mb-6"></div>
           <p className="text-blue-100 text-lg max-w-sm mx-auto">
             Streamline your governance, compliance, and risk management
           </p>
