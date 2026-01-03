@@ -19,6 +19,7 @@ import {
   Activity,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface Department {
   id: number;
@@ -190,8 +191,8 @@ export default function UserDetailPage() {
               <div className="text-center mb-6">
                 <div className="relative inline-block mb-4">
                   {user.image && !imageError ? (
-                    <div className="w-[120px] h-[120px] rounded-full overflow-hidden border-4 border-blue-100">
-                      <img
+                    <div className="w-30 h-30 rounded-full overflow-hidden border-4 border-blue-100">
+                      <Image
                         src={user.image}
                         alt={user.name || "User"}
                         className="w-full h-full object-cover"
@@ -199,7 +200,7 @@ export default function UserDetailPage() {
                       />
                     </div>
                   ) : (
-                    <div className="w-[120px] h-[120px] rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-4 border-blue-100">
+                    <div className="w-30 h-30 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-4 border-blue-100">
                       <User className="w-16 h-16 text-white" />
                     </div>
                   )}
