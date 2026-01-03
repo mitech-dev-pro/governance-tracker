@@ -236,7 +236,7 @@ export default function UserAccountPage() {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
                 My Account
               </h1>
               <p className="text-gray-600 mt-1">
@@ -274,7 +274,7 @@ export default function UserAccountPage() {
 
         {/* Profile Card */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div className="bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-4">
             <h2 className="text-xl font-semibold text-white">
               Profile Information
             </h2>

@@ -645,7 +645,7 @@ export default function EnhancedEditGovernancePage() {
                   </span>
                   <div className="w-32 bg-gray-200 rounded-full h-3 relative overflow-hidden">
                     <div
-                      className={`bg-gradient-to-r ${currentStatus.gradient} h-3 rounded-full transition-all duration-500 ease-out relative`}
+                      className={`bg-linear-to-r ${currentStatus.gradient} h-3 rounded-full transition-all duration-500 ease-out relative`}
                       style={{ width: `${formData.progress}%` }}
                     >
                       <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
@@ -663,7 +663,7 @@ export default function EnhancedEditGovernancePage() {
                   </span>
                   <div className="w-32 bg-gray-200 rounded-full h-3 relative overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-emerald-500 to-green-600 h-3 rounded-full transition-all duration-500 ease-out relative"
+                      className="bg-linear-to-r from-emerald-500 to-green-600 h-3 rounded-full transition-all duration-500 ease-out relative"
                       style={{ width: `${getFormCompletion()}%` }}
                     >
                       <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
@@ -693,7 +693,7 @@ export default function EnhancedEditGovernancePage() {
                       onClick={() => setActiveSection(section.id)}
                       className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl whitespace-nowrap transition-all duration-200 ${
                         isActive
-                          ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md transform scale-[1.02]"
+                          ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-md transform scale-[1.02]"
                           : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/80"
                       }`}
                     >
@@ -737,7 +737,7 @@ export default function EnhancedEditGovernancePage() {
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Error Display */}
           {errors.general && (
-            <div className="bg-gradient-to-r from-red-50 to-red-50/50 border-2 border-red-200 p-6 rounded-2xl shadow-sm">
+            <div className="bg-linear-to-r from-red-50 to-red-50/50 border-2 border-red-200 p-6 rounded-2xl shadow-sm">
               <div className="flex items-start">
                 <div className="shrink-0">
                   <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -763,7 +763,7 @@ export default function EnhancedEditGovernancePage() {
           {/* Basic Information Section */}
           {activeSection === "basic" && (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-lg animate-in slide-in-from-right-4 duration-300">
-              <div className="border-b border-gray-200 px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+              <div className="border-b border-gray-200 px-6 py-4 bg-linear-to-r from-blue-50 to-indigo-50">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
                   <FileText className="w-6 h-6 mr-3 text-blue-600" />
                   Basic Information
@@ -887,7 +887,7 @@ export default function EnhancedEditGovernancePage() {
           {/* Details Section */}
           {activeSection === "details" && (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-lg animate-in slide-in-from-right-4 duration-300">
-              <div className="border-b border-gray-200 px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50">
+              <div className="border-b border-gray-200 px-6 py-4 bg-linear-to-r from-indigo-50 to-purple-50">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
                   <Settings className="w-6 h-6 mr-3 text-indigo-600" />
                   Additional Details
@@ -957,7 +957,7 @@ export default function EnhancedEditGovernancePage() {
           {/* Assignment Section */}
           {activeSection === "assignment" && (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-lg animate-in slide-in-from-right-4 duration-300">
-              <div className="border-b border-gray-200 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50">
+              <div className="border-b border-gray-200 px-6 py-4 bg-linear-to-r from-green-50 to-emerald-50">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
                   <Users className="w-6 h-6 mr-3 text-green-600" />
                   Assignment & Timeline
@@ -1036,7 +1036,7 @@ export default function EnhancedEditGovernancePage() {
           {/* Subtasks Section */}
           {activeSection === "subtasks" && (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-lg animate-in slide-in-from-right-4 duration-300">
-              <div className="border-b border-gray-200 px-6 py-4 bg-gradient-to-r from-purple-50 to-pink-50">
+              <div className="border-b border-gray-200 px-6 py-4 bg-linear-to-r from-purple-50 to-pink-50">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
                   <CheckCircle2 className="w-6 h-6 mr-3 text-purple-600" />
                   Subtasks ({subtasks.length})
@@ -1101,7 +1101,7 @@ export default function EnhancedEditGovernancePage() {
                     type="button"
                     onClick={addSubtask}
                     disabled={!newSubtask.trim()}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-6 py-3 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-5 h-5" />
                   </button>
@@ -1113,7 +1113,7 @@ export default function EnhancedEditGovernancePage() {
           {/* RACI Section */}
           {activeSection === "raci" && (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-lg animate-in slide-in-from-right-4 duration-300">
-              <div className="border-b border-gray-200 px-6 py-4 bg-gradient-to-r from-orange-50 to-red-50">
+              <div className="border-b border-gray-200 px-6 py-4 bg-linear-to-r from-orange-50 to-red-50">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
                   <Target className="w-6 h-6 mr-3 text-orange-600" />
                   RACI Matrix
@@ -1223,7 +1223,7 @@ export default function EnhancedEditGovernancePage() {
           {/* Metadata Section */}
           {activeSection === "metadata" && (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-lg animate-in slide-in-from-right-4 duration-300">
-              <div className="border-b border-gray-200 px-6 py-4 bg-gradient-to-r from-cyan-50 to-blue-50">
+              <div className="border-b border-gray-200 px-6 py-4 bg-linear-to-r from-cyan-50 to-blue-50">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
                   <Tag className="w-6 h-6 mr-3 text-cyan-600" />
                   Tags & Metadata
@@ -1242,7 +1242,7 @@ export default function EnhancedEditGovernancePage() {
                     {formData.tags?.map((tag: string) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border border-blue-200"
+                        className="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-linear-to-r from-blue-100 to-cyan-100 text-blue-800 border border-blue-200"
                       >
                         <Tag className="w-3 h-3 mr-1" />
                         {tag}
@@ -1274,7 +1274,7 @@ export default function EnhancedEditGovernancePage() {
                         !tagInput.trim() ||
                         formData.tags?.includes(tagInput.trim())
                       }
-                      className="px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-3 bg-linear-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Plus className="w-5 h-5" />
                     </button>
@@ -1291,7 +1291,7 @@ export default function EnhancedEditGovernancePage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
                 >
                   {saving ? (
                     <>

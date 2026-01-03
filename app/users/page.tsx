@@ -21,7 +21,7 @@ export default function UsersPage() {
   return (
     <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-4 lg:p-6 pb-8 min-h-full">
       <div className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6">
+        <h1 className="text-3xl font-bold bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6">
           Users
         </h1>
         {isLoading && (

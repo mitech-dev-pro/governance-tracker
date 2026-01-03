@@ -81,7 +81,7 @@ export default function RegisterPage() {
             <br />
             Governance
           </h1>
-          <div className="h-1 w-32 bg-gradient-to-r from-cyan-400 to-blue-500 mx-auto mb-6"></div>
+          <div className="h-1 w-32 bg-linear-to-r from-cyan-400 to-blue-500 mx-auto mb-6"></div>
           <p className="text-blue-100 text-lg max-w-sm mx-auto">
             Join us to streamline your governance, compliance, and risk
             management

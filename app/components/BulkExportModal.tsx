@@ -388,7 +388,7 @@ export default function BulkExportModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-lg">
+        <div className="bg-linear-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-lg">
           <div className="flex items-center space-x-3">
             <FileArchive className="w-8 h-8" />
             <div>
@@ -528,7 +528,7 @@ export default function BulkExportModal({
             <button
               onClick={handleBulkExport}
               disabled={isExporting || selectedReports.length === 0}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
+              className="px-6 py-2 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
             >
               {isExporting ? (
                 <>

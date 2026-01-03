@@ -518,7 +518,7 @@ export default function RiskReportsPage() {
         )}
 
         {/* Summary Card */}
-        <div className="mt-6 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg shadow p-6">
+        <div className="mt-6 bg-linear-to-r from-orange-50 to-red-50 rounded-lg shadow p-6">
           <h3 className="text-lg font-bold text-gray-800 mb-3">
             Risk Assessment Summary
           </h3>
