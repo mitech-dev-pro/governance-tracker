@@ -194,7 +194,7 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                 onError={() => setImageError(true)}
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-xs shadow-lg transition-transform duration-200 group-hover:scale-105">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-xs shadow-lg transition-transform duration-200 group-hover:scale-105">
                 {displayName
                   .split(" ")
                   .map((n) => n[0])

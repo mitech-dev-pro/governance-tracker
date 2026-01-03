@@ -64,7 +64,7 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen">
       {/* Left Side - IT Governance Branding Panel */}
-      <div className="hidden lg:flex lg:w-[40%] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 items-center justify-center relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[40%] bg-linear-to-br from-blue-600 via-indigo-600 to-purple-700 items-center justify-center relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-20 left-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>

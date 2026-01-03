@@ -169,7 +169,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           } transition-colors duration-200`}
         >
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center">
               <Shield className="w-5 h-5 text-white" />
             </div>
             <span

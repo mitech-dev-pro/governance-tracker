@@ -7,7 +7,7 @@ export default function NotFound() {
     <main className="flex min-h-screen items-center justify-center bg-white">
       <div className="w-full max-w-2xl px-6 py-16 text-center">
         {/* Large 404 */}
-        <h1 className="text-[10rem] font-black leading-none bg-gradient-to-br from-blue-100 via-blue-800 to-slate-700 bg-clip-text text-transparent dark:from-slate-100 dark:via-blue-400 dark:to-slate-300 select-none">
+        <h1 className="text-[10rem] font-black leading-none bg-linear-to-br from-blue-100 via-blue-800 to-slate-700 bg-clip-text text-transparent dark:from-slate-100 dark:via-blue-400 dark:to-slate-300 select-none">
           404
         </h1>
 

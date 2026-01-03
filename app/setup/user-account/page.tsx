@@ -220,7 +220,7 @@ export default function UserAccountPage() {
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 min-h-screen flex items-center justify-center">
+      <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading profile...</p>
@@ -230,7 +230,7 @@ export default function UserAccountPage() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-6 pb-8 min-h-screen">
+    <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-6 pb-8 min-h-screen">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -306,7 +306,7 @@ export default function UserAccountPage() {
                             className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
                           />
                         ) : (
-                          <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
+                          <div className="w-32 h-32 rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
                             {profile?.name?.charAt(0)?.toUpperCase() ||
                               profile?.email?.charAt(0)?.toUpperCase() ||
                               "U"}

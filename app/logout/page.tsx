@@ -37,7 +37,7 @@ export default function LogoutPage() {
   }, [router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-indigo-600 via-purple-600 to-indigo-700">
       <div className="bg-white rounded-2xl shadow-2xl p-12 max-w-md w-full text-center">
         <div className="mb-6">
           {isLoggingOut ? (

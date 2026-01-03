@@ -202,7 +202,7 @@ export default function ApplicationsPage() {
                       {/* Header */}
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center space-x-3 flex-1">
-                          <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
+                          <div className="p-3 bg-linear-to-br from-blue-500 to-indigo-600 rounded-lg">
                             <AppWindow className="w-8 h-8 text-white" />
                           </div>
                           <div className="flex-1">
