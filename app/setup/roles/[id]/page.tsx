@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   Shield,
@@ -176,7 +177,7 @@ export default function RoleDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+    <div className="min-h-screen bg-black/30 backdrop-blur-md from-slate-50 via-blue-50 to-indigo-50 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -348,10 +349,12 @@ export default function RoleDetailPage({
                   >
                     <div className="shrink-0 mr-4">
                       {user.image ? (
-                        <img
+                        <Image
                           src={user.image}
                           alt={user.name || user.email}
                           className="h-10 w-10 rounded-full object-cover"
+                          height={40}
+                          width={40}
                         />
                       ) : (
                         <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">

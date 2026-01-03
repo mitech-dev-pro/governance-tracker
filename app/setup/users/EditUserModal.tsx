@@ -183,7 +183,7 @@ export default function EditUserModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/30 bg-opacity-20 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 shrink-0">
@@ -231,7 +231,7 @@ export default function EditUserModal({
                       onChange={(e) =>
                         handleInputChange("name", e.target.value)
                       }
-                      className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
                         errors.name ? "border-red-500" : "border-gray-300"
                       }`}
                       placeholder="Enter full name"
@@ -254,7 +254,7 @@ export default function EditUserModal({
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
-                      className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
                         errors.email ? "border-red-500" : "border-gray-300"
                       }`}
                       placeholder="Enter email address"
@@ -281,7 +281,7 @@ export default function EditUserModal({
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
                     }
-                    className={`w-full pl-10 pr-12 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    className={`w-full pl-10 pr-12 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
                       errors.password ? "border-red-500" : "border-gray-300"
                     }`}
                     placeholder="Enter new password (optional)"

@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import Image from "next/image";
 import {
   ArrowLeft,
   Edit,
@@ -267,7 +267,7 @@ const UserAvatar = ({
     user.image !== "undefined"
   ) {
     return (
-      <img
+      <Image
         className={`${sizeClasses[size]} rounded-full object-cover border-2 border-gray-200`}
         src={user.image}
         alt={user.name || user.email}
@@ -911,7 +911,7 @@ export default function GovernanceDetailPage({
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Description
                     </label>
-                    <div className="p-3 bg-gray-50 rounded-lg border min-h-[100px]">
+                    <div className="p-3 bg-gray-50 rounded-lg border min-h-25">
                       <p className="whitespace-pre-wrap">{item.description}</p>
                     </div>
                   </div>

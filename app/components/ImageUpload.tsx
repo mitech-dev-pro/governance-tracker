@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState, useRef } from "react";
 import { X, Camera, AlertCircle, Loader2 } from "lucide-react";
 
@@ -142,7 +143,7 @@ export default function ImageUpload({
           <div
             className={`relative ${sizeClasses[size]} rounded-full overflow-hidden border-4 border-white shadow-lg`}
           >
-            <img
+            <Image
               src={displayImage}
               alt="Profile preview"
               className="w-full h-full object-cover"
