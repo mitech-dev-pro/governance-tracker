@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Users,
   Search,
@@ -169,7 +170,7 @@ export default function UsersPage() {
 
   if (loading && users.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 min-h-screen flex items-center justify-center">
+      <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading users...</p>
@@ -179,13 +180,13 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-6 pb-8 min-h-screen">
+    <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-6 pb-8 min-h-screen">
       <div className="mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
                 User Management
               </h1>
               <p className="text-gray-600 mt-1">
@@ -194,7 +195,7 @@ export default function UsersPage() {
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
+              className="inline-flex items-center px-4 py-2 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
             >
               <UserPlus className="w-5 h-5 mr-2" />
               Add User
@@ -366,10 +367,12 @@ export default function UsersPage() {
                       <div className="flex items-center">
                         <div className="shrink-0 h-10 w-10">
                           {user.image ? (
-                            <img
+                            <Image
                               className="h-10 w-10 rounded-full"
                               src={user.image}
                               alt={user.name || user.email}
+                              width={40}
+                              height={40}
                             />
                           ) : (
                             <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">

@@ -71,8 +71,6 @@ export default function EditUserPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-
-      // Fetch user data
       const userResponse = await fetch(`/api/users/${userId}`);
       const userData = await userResponse.json();
 
@@ -82,8 +80,6 @@ export default function EditUserPage() {
 
       const fetchedUser = userData.user;
       setUser(fetchedUser);
-
-      // Set form data
       setFormData({
         name: fetchedUser.name || "",
         email: fetchedUser.email || "",
@@ -195,7 +191,7 @@ export default function EditUserPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-16 w-16 text-blue-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Loading user data...</p>
@@ -206,7 +202,7 @@ export default function EditUserPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">User not found</p>
           <Link
@@ -222,7 +218,7 @@ export default function EditUserPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -233,7 +229,7 @@ export default function EditUserPage() {
             <ArrowLeft className="w-4 h-4" />
             Back to Profile
           </Link>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Edit User
           </h1>
           <p className="text-gray-600 mt-2">
