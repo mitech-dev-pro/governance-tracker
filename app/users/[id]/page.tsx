@@ -115,7 +115,7 @@ export default function UserDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 font-medium">Loading user details...</p>
@@ -126,7 +126,7 @@ export default function UserDetailPage() {
 
   if (error || !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <UserCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -148,7 +148,7 @@ export default function UserDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -160,7 +160,7 @@ export default function UserDetailPage() {
             Back to Users
           </Link>
           <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               User Profile
             </h1>
             <div className="flex gap-3">
@@ -199,7 +199,7 @@ export default function UserDetailPage() {
                       />
                     </div>
                   ) : (
-                    <div className="w-[120px] h-[120px] rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-4 border-blue-100">
+                    <div className="w-[120px] h-[120px] rounded-full bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center border-4 border-blue-100">
                       <User className="w-16 h-16 text-white" />
                     </div>
                   )}
@@ -276,7 +276,7 @@ export default function UserDetailPage() {
                   {user.roles.map((userRole) => (
                     <div
                       key={userRole.id}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-sm"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-linear-to-r from-blue-500 to-indigo-600 text-white rounded-lg shadow-sm"
                     >
                       <Shield className="w-4 h-4" />
                       <span className="font-medium">{userRole.role.name}</span>
@@ -309,9 +309,9 @@ export default function UserDetailPage() {
                   {user.departments.map((dept) => (
                     <div
                       key={dept.id}
-                      className="flex items-center gap-3 p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200"
+                      className="flex items-center gap-3 p-4 bg-linear-to-br from-green-50 to-green-100 rounded-lg border border-green-200"
                     >
-                      <Briefcase className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      <Briefcase className="w-5 h-5 text-green-600 shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-900">
                           {dept.department.name}
@@ -347,7 +347,7 @@ export default function UserDetailPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                <div className="p-4 bg-linear-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                   <div className="flex items-center gap-3 mb-2">
                     <FileText className="w-5 h-5 text-blue-600" />
                     <p className="text-sm font-medium text-blue-900">
@@ -360,7 +360,7 @@ export default function UserDetailPage() {
                   <p className="text-xs text-blue-700 mt-1">Items owned</p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
+                <div className="p-4 bg-linear-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
                   <div className="flex items-center gap-3 mb-2">
                     <CheckSquare className="w-5 h-5 text-green-600" />
                     <p className="text-sm font-medium text-green-900">
@@ -373,7 +373,7 @@ export default function UserDetailPage() {
                   <p className="text-xs text-green-700 mt-1">Active tasks</p>
                 </div>
 
-                <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                <div className="p-4 bg-linear-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
                   <div className="flex items-center gap-3 mb-2">
                     <User className="w-5 h-5 text-purple-600" />
                     <p className="text-sm font-medium text-purple-900">
