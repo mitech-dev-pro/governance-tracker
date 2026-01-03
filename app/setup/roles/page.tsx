@@ -163,12 +163,12 @@ export default function RolesPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Shield className="h-8 w-8 text-blue-600" />
+            <h1 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              {/* <Shield className="h-8 w-8 text-blue-600" /> */}
               Role Management
             </h1>
             <p className="text-gray-600 mt-1">

@@ -60,13 +60,12 @@ export default function DepartmentsPage() {
     useState<DepartmentWithStats | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  // Fetch departments with stats
   const fetchDepartments = async () => {
     try {
       setLoading(true);
       const params: DepartmentQueryParams = {
         page: currentPage,
-        limit: 12, // Show more cards per page
+        limit: 12,
       };
 
       if (searchTerm) params.search = searchTerm;
@@ -175,7 +174,7 @@ export default function DepartmentsPage() {
 
   return (
     <div className="bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 p-3 sm:p-6 pb-8 min-h-screen">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">

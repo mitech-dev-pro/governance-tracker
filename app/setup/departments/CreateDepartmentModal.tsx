@@ -176,7 +176,7 @@ export default function CreateDepartmentModal({
                 value={formData.name}
                 onChange={handleInputChange}
                 placeholder="e.g., Information Technology"
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all ${
                   errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
                 }`}
                 disabled={isLoading}
@@ -206,7 +206,7 @@ export default function CreateDepartmentModal({
                 value={formData.code}
                 onChange={handleInputChange}
                 placeholder="e.g., IT, HR, FIN"
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none ${
                   errors.code ? "border-red-300 bg-red-50" : "border-gray-300"
                 }`}
                 maxLength={10}
@@ -245,10 +245,7 @@ export default function CreateDepartmentModal({
                   Creating...
                 </>
               ) : (
-                <>
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Create Department
-                </>
+                <p>Create Department</p>
               )}
             </button>
           </div>

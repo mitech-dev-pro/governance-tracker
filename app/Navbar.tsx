@@ -206,7 +206,7 @@ const Navbar = ({ onToggleSidebar }: NavbarProps) => {
             <span
               className={`hidden lg:block font-medium text-sm ${
                 isDarkMode ? "text-slate-300" : "text-slate-700"
-              } max-w-[120px] truncate transition-colors duration-200`}
+              } max-w-30 truncate transition-colors duration-200`}
             >
               {displayName}
             </span>
