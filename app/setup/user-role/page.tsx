@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import {
   Users,
   Shield,
@@ -428,7 +429,7 @@ export default function UserRolePage() {
                       <div className="flex items-center">
                         <div className="shrink-0 h-10 w-10">
                           {userRole.user.image ? (
-                            <img
+                            <Image
                               className="h-10 w-10 rounded-full"
                               src={userRole.user.image}
                               alt={userRole.user.name || userRole.user.email}
