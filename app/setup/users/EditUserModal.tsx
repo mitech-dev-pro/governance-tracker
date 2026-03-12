@@ -11,6 +11,7 @@ import {
   Save,
   AlertCircle,
   Eye,
+  CircleCheckBig,
   EyeOff,
   User as UserIcon,
 } from "lucide-react";
@@ -43,6 +44,7 @@ export default function EditUserModal({
     email: user.email,
     password: "", // Leave empty - user can choose to update
     image: user.image || "",
+    twoFactorEnabled: user.twoFactorEnabled,
     departmentIds: user.departments?.map((d) => d.departmentId) || [],
     roleIds: user.roles?.map((r) => r.roleId) || [],
   });
@@ -79,6 +81,13 @@ export default function EditUserModal({
         departmentIds: currentIds.filter((id) => id !== departmentId),
       }));
     }
+  };
+
+  const twoFactorUpdate = (checked: boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      twoFactorEnabled: checked,
+    }));
   };
 
   const handleRoleChange = (roleId: number, checked: boolean) => {
@@ -134,6 +143,7 @@ export default function EditUserModal({
         name: formData.name,
         email: formData.email,
         image: formData.image || undefined,
+        twoFactorEnabled: formData.twoFactorEnabled,
         departmentIds: formData.departmentIds,
         roleIds: formData.roleIds,
       };
@@ -169,7 +179,7 @@ export default function EditUserModal({
         window.dispatchEvent(
           new CustomEvent("userProfileUpdated", {
             detail: { userId: user.id },
-          })
+          }),
         );
       }
 
@@ -350,6 +360,22 @@ export default function EditUserModal({
                     )}
                   </label>
                 ))}
+              </div>
+            </div>
+
+            {/* Departments */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 flex items-center">
+                <CircleCheckBig className="w-5 h-5 mr-2 text-blue-600" />
+                2FA Status {user.twoFactorEnabled ? "true" : "false"}
+              </h3>
+              <div className="max-h-40 min-w-full overflow-y-auto border border-gray-200 rounded-lg py-1 px-3.5 focus:ring-blue-500 outline-none flex gap-3">
+                <input
+                  type="checkbox"
+                  checked={formData.twoFactorEnabled ?? false}
+                  onChange={(e) => twoFactorUpdate(e.target.checked)}
+                />
+                <p>Toggle to activate or deactivate 2FA for users</p>
               </div>
             </div>
 

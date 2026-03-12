@@ -1,5 +1,5 @@
 // Enhanced User Types
-import { Department, PaginationInfo } from './governance';
+import { Department, PaginationInfo } from "./governance";
 
 export interface User {
   id: number;
@@ -10,6 +10,7 @@ export interface User {
   updatedAt: Date;
   departments?: UserDepartment[];
   roles?: UserRole[];
+  twoFactorEnabled: boolean;
   _count?: {
     governanceitem: number;
     actionitem: number;
@@ -62,6 +63,7 @@ export interface CreateUserData {
   image?: string;
   departmentIds?: number[];
   roleIds?: number[];
+  twoFactorEnabled: boolean;
 }
 
 export interface UpdateUserData {
@@ -69,6 +71,7 @@ export interface UpdateUserData {
   email?: string;
   password?: string;
   image?: string;
+  twoFactorEnabled: boolean;
   departmentIds?: number[];
   roleIds?: number[];
 }
@@ -87,4 +90,4 @@ export interface UserResponse {
 }
 
 // Re-export existing types for convenience
-export * from './governance';
+export * from "./governance";

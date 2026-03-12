@@ -63,12 +63,15 @@ export default function UsersPage() {
       if (selectedRole) params.roleId = parseInt(selectedRole);
 
       const queryString = new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== "") {
-            acc[key] = value.toString();
-          }
-          return acc;
-        }, {} as Record<string, string>)
+        Object.entries(params).reduce(
+          (acc, [key, value]) => {
+            if (value !== undefined && value !== "") {
+              acc[key] = value.toString();
+            }
+            return acc;
+          },
+          {} as Record<string, string>,
+        ),
       ).toString();
 
       const response = await fetch(`/api/users?${queryString}`);

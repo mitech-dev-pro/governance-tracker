@@ -33,9 +33,10 @@ interface UserType {
   name: string;
   email: string;
   image: ImageData;
+  twoFactorEnabled: boolean;
   createdAt: string;
   updatedAt: string;
-  _count_: CountType;
+  _count: CountType;
   userdepartment: DepartmentType[];
   userrole: RoleType[];
 }
@@ -95,6 +96,7 @@ export async function GET(request: NextRequest) {
           image: true,
           createdAt: true,
           updatedAt: true,
+          twoFactorEnabled: true,
           userdepartment: {
             select: {
               id: true,
@@ -138,7 +140,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Transform the data to match our interface
-    const transformedUsers = users.map((user: UserType) => ({
+    const transformedUsers = users.map((user) => ({
       ...user,
       departments: user.userdepartment,
       roles: user.userrole,
@@ -163,7 +165,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching users:", error);
     return NextResponse.json(
       { error: "Failed to fetch users" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -171,13 +173,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password, image, departmentIds, roleIds } = body;
+    const {
+      name,
+      email,
+      password,
+      image,
+      departmentIds,
+      roleIds,
+      twoFactorEnabled,
+    } = body;
 
     // Validate required fields
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "Name, email, and password are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -189,7 +199,7 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -207,6 +217,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         ...userData,
+        twoFactorEnabled: twoFactorEnabled ?? false,
         userdepartment: departmentIds?.length
           ? {
               create: departmentIds.map((deptId: number) => ({
@@ -269,7 +280,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating user:", error);
     return NextResponse.json(
       { error: "Failed to create user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -6,10 +6,7 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const userId = parseInt(id);
@@ -61,10 +58,7 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Transform the response
@@ -81,43 +75,47 @@ export async function GET(
     console.error("Error fetching user:", error);
     return NextResponse.json(
       { error: "Failed to fetch user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const userId = parseInt(id);
     const body = await request.json();
-    const { name, email, password, image, departmentIds, roleIds } = body;
+    const {
+      name,
+      email,
+      password,
+      image,
+      departmentIds,
+      roleIds,
+      twoFactorEnabled,
+    } = body;
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
       where: { id: userId },
+      select: { id: true, email: true },
     });
 
     if (!existingUser) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if email is being changed and if it already exists
     if (email && email !== existingUser.email) {
       const emailExists = await prisma.user.findUnique({
         where: { email },
+        select: { id: true },
       });
 
       if (emailExists) {
         return NextResponse.json(
           { error: "User with this email already exists" },
-          { status: 409 }
+          { status: 409 },
         );
       }
     }
@@ -129,14 +127,17 @@ export async function PUT(
       password?: string;
       image?: string;
       updatedAt: Date;
+      twoFactorEnabled?: boolean;
     } = { updatedAt: new Date() };
+
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
     if (password !== undefined && password.trim() !== "") {
-      // Hash the password before storing
       updateData.password = await bcrypt.hash(password, 10);
     }
     if (image !== undefined) updateData.image = image;
+    if (twoFactorEnabled !== undefined)
+      updateData.twoFactorEnabled = twoFactorEnabled;
 
     // Update user in transaction to handle relationships
     const updatedUser = await prisma.$transaction(async (tx) => {
@@ -148,12 +149,8 @@ export async function PUT(
 
       // Update departments if provided
       if (departmentIds !== undefined) {
-        // Delete existing department relationships
-        await tx.userdepartment.deleteMany({
-          where: { userId },
-        });
+        await tx.userdepartment.deleteMany({ where: { userId } });
 
-        // Create new department relationships
         if (departmentIds.length > 0) {
           await tx.userdepartment.createMany({
             data: departmentIds.map((deptId: number) => ({
@@ -166,12 +163,8 @@ export async function PUT(
 
       // Update roles if provided
       if (roleIds !== undefined) {
-        // Delete existing role relationships
-        await tx.userrole.deleteMany({
-          where: { userId },
-        });
+        await tx.userrole.deleteMany({ where: { userId } });
 
-        // Create new role relationships
         if (roleIds.length > 0) {
           await tx.userrole.createMany({
             data: roleIds.map((roleId: number) => ({
@@ -219,13 +212,16 @@ export async function PUT(
     });
 
     // Transform the response
+    const {
+      password: _password,
+      userdepartment,
+      userrole,
+      ...rest
+    } = updatedUser!;
     const transformedUser = {
-      ...updatedUser,
-      departments: updatedUser?.userdepartment,
-      roles: updatedUser?.userrole,
-      password: undefined, // Don't return password
-      userdepartment: undefined,
-      userrole: undefined,
+      ...rest,
+      departments: userdepartment.map((ud) => ud.department),
+      roles: userrole.map((ur) => ur.role),
     };
 
     return NextResponse.json(transformedUser);
@@ -233,15 +229,12 @@ export async function PUT(
     console.error("Error updating user:", error);
     return NextResponse.json(
       { error: "Failed to update user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: RouteParams
-) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const userId = parseInt(id);
@@ -261,24 +254,22 @@ export async function DELETE(
     });
 
     if (!existingUser) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if user has associated records
-    const hasRecords = 
+    const hasRecords =
       existingUser._count.governanceitem > 0 ||
       existingUser._count.actionitem > 0 ||
       existingUser._count.assignment > 0;
 
     if (hasRecords) {
       return NextResponse.json(
-        { 
-          error: "Cannot delete user with associated governance items, action items, or assignments. Please reassign or delete these records first." 
+        {
+          error:
+            "Cannot delete user with associated governance items, action items, or assignments. Please reassign or delete these records first.",
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -302,13 +293,13 @@ export async function DELETE(
 
     return NextResponse.json(
       { message: "User deleted successfully" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error deleting user:", error);
     return NextResponse.json(
       { error: "Failed to delete user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
